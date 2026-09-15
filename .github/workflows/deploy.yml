@@ -1,0 +1,49 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# never let two deploys race each other onto the live site
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # Only the files the site actually needs are published — the README,
+      # workflow and any local tooling stay out of the public artifact.
+      - name: Assemble site
+        run: |
+          mkdir -p _site
+          cp -r index.html css js assets _site/
+          touch _site/.nojekyll
+
+      # Stamp the CSS and JS links with this commit's hash so every deploy
+      # busts the browser cache automatically. No manual ?v= bumping.
+      - name: Cache-bust assets
+        run: sed -i -E "s/\?v=[0-9a-zA-Z]+/?v=${GITHUB_SHA::7}/g" _site/index.html
+
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4
