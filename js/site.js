@@ -322,6 +322,26 @@ function initNav() {
 
 /* ══ 5. MENU ═══════════════════════════════════════════════════════════ */
 let closeMenu = () => {};
+let openCase = null;      /* assigned by initCases, used by the search */
+
+/* Two overlays can be stacked — the search palette opens over a case study —
+   so hiding the page behind them is reference counted. Blanket-removing the
+   attributes when the top layer closed would have woken the background up
+   while the one underneath was still open. */
+const pageInert = (() => {
+  const TARGETS = ['main', '#nav', '.footer'];
+  let depth = 0;
+  return on => {
+    depth = Math.max(0, depth + (on ? 1 : -1));
+    const lock = depth > 0;
+    TARGETS.forEach(sel => {
+      const el = $(sel);
+      if (!el) return;
+      if (lock) { el.setAttribute('inert', ''); el.setAttribute('aria-hidden', 'true'); }
+      else { el.removeAttribute('inert'); el.removeAttribute('aria-hidden'); }
+    });
+  };
+})();
 function initMenu() {
   const btn = $('#menu-btn'), menu = $('#menu');
   if (!btn || !menu) return;
@@ -339,35 +359,34 @@ function initMenu() {
   addEventListener('keydown', e => { if (e.key === 'Escape') set(false); });
 }
 
-/* ══ 6. THEME ══════════════════════════════════════════════════════════ */
+/* ══ 6. THEME ════════════════════════════════════════════════════════════
+   There is no manual switch: the site follows the operating system, and
+   keeps following it if the visitor changes it mid-visit. */
 function initTheme() {
-  const btn = $('#theme-toggle');
-  if (!btn) return;
-  let stored = null;
-  try { stored = localStorage.getItem('te-theme'); } catch {}
-  const prefersDark = matchMedia('(prefers-color-scheme: dark)').matches;
-  let night = stored ? stored === 'night' : prefersDark;
+  const mq = matchMedia('(prefers-color-scheme: dark)');
+
+  /* a value left over from when a toggle existed would silently override the
+     system preference for ever, so clear it on the way past */
+  try { localStorage.removeItem('te-theme'); } catch {}
 
   const apply = () => {
+    const night = mq.matches;
     document.body.classList.toggle('night', night);
-    btn.setAttribute('aria-pressed', String(night));
-    btn.setAttribute('aria-label', night ? 'Switch to day' : 'Switch to night');
     const meta = document.querySelector('meta[name="theme-color"]');
-    if (meta) meta.setAttribute('content', night ? '#100d14' : '#F6EEE3');
+    if (meta) meta.setAttribute('content', night ? '#0b0b0c' : '#F6EEE3');
     const hint = $('.footer-hint');
     if (hint) hint.textContent = night ? 'CLICK THE SKY TO HANG A STAR'
                                        : 'CLICK TO CONNECT THE DOTS';
   };
   apply();
 
-  btn.addEventListener('click', () => {
-    night = !night;
-    try { localStorage.setItem('te-theme', night ? 'night' : 'day'); } catch {}
-    /* View Transitions turn a token swap into a single cross-dissolve of the
-       whole page, which beats fifty independent colour transitions racing. */
-    if (document.startViewTransition && !reduce) document.startViewTransition(apply);
-    else apply();
-  });
+  /* View Transitions turn a token swap into one cross-dissolve of the whole
+     page, which beats fifty independent colour transitions racing. */
+  const onChange = () => (document.startViewTransition && !reduce)
+    ? document.startViewTransition(apply)
+    : apply();
+  if (mq.addEventListener) mq.addEventListener('change', onChange);
+  else if (mq.addListener) mq.addListener(onChange);
 }
 
 /* ══ 7. HERO ═══════════════════════════════════════════════════════════ */
@@ -1202,15 +1221,6 @@ function initCases() {
     if (tile && slot) slot.appendChild(tile.cloneNode(true));
   };
 
-  const inertise = on => {
-    ['main', '#nav', '.footer'].forEach(sel => {
-      const el = $(sel);
-      if (!el) return;
-      if (on) { el.setAttribute('inert', ''); el.setAttribute('aria-hidden', 'true'); }
-      else { el.removeAttribute('inert'); el.removeAttribute('aria-hidden'); }
-    });
-  };
-
   const open = (slug, from) => {
     if (!CASES[slug] || openSlug === slug) return;
     openSlug = slug;
@@ -1219,7 +1229,7 @@ function initCases() {
     root.setAttribute('aria-hidden', 'false');
     root.classList.add('open');
     document.body.classList.add('case-open');
-    inertise(true);
+    pageInert(true);
     scroll.scrollTop = 0;
     if (bar) bar.style.transform = 'scaleX(0)';
 
@@ -1248,13 +1258,21 @@ function initCases() {
     root.classList.remove('open');
     root.setAttribute('aria-hidden', 'true');
     document.body.classList.remove('case-open');
-    inertise(false);
+    pageInert(false);
     setTimeout(() => { if (!openSlug) scroll.innerHTML = ''; }, 460);
     lastFocus?.focus?.({ preventScroll: true });
   };
 
   const slugFromHash = () =>
     (location.hash.match(/^#work\/([a-z0-9-]+)$/) || [])[1] || null;
+
+  /* the search palette opens case studies through here */
+  openCase = slug => {
+    if (!CASES[slug]) return;
+    if (openSlug) { history.replaceState({ case: slug }, '', '#work/' + slug); openSlug = null; }
+    else { history.pushState({ case: slug }, '', '#work/' + slug); pushed = true; }
+    open(slug);
+  };
 
   /* open from a tile, or from the next-project link inside an open case */
   document.addEventListener('click', e => {
@@ -1279,7 +1297,7 @@ function initCases() {
   }));
 
   addEventListener('keydown', e => {
-    if (!openSlug) return;
+    if (!openSlug || document.body.classList.contains('spot-open')) return;
     if (e.key === 'Escape') { e.preventDefault(); $('.case-close', root)?.click(); return; }
     if (e.key !== 'Tab') return;
     /* focus trap */
@@ -1409,7 +1427,354 @@ function initWalkers() {
   addEventListener('resize', () => { measure(); if (!running) crew.forEach(w => place(w, (dist + w.off + 1) % 1)); }, { passive: true });
 }
 
-/* ══ 21. BOOT ══════════════════════════════════════════════════════════ */
+
+/* ══ 22. SEARCH + ACCOUNT ══════════════════════════════════════════════ */
+
+const MAIL = 'hello@tolulope.design';
+
+const IC = {
+  hash:    '<svg viewBox="0 0 24 24" fill="none"><path d="M5 9h14M5 15h14M10 4 8 20M16 4l-2 16" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  project: '<svg viewBox="0 0 24 24" fill="none"><rect x="3.5" y="3.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="3.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.7"/><rect x="3.5" y="13.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.7"/><rect x="13.5" y="13.5" width="7" height="7" rx="2" stroke="currentColor" stroke-width="1.7"/></svg>',
+  mail:    '<svg viewBox="0 0 24 24" fill="none"><rect x="2.5" y="5" width="19" height="14" rx="3" stroke="currentColor" stroke-width="1.7"/><path d="m3.5 7 8.5 6 8.5-6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  copy:    '<svg viewBox="0 0 24 24" fill="none"><rect x="9" y="9" width="11" height="11" rx="2.5" stroke="currentColor" stroke-width="1.7"/><path d="M15 6.5A2.5 2.5 0 0 0 12.5 4H6.5A2.5 2.5 0 0 0 4 6.5v6A2.5 2.5 0 0 0 6.5 15" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  top:     '<svg viewBox="0 0 24 24" fill="none"><path d="M12 19V5M6 11l6-6 6 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  link:    '<svg viewBox="0 0 24 24" fill="none"><path d="M6 18 18 6M9 6h9v9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  user:    '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8.5" r="4" stroke="currentColor" stroke-width="1.7"/><path d="M4.5 20a7.5 7.5 0 0 1 15 0" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  bookmark:'<svg viewBox="0 0 24 24" fill="none"><path d="M6 4.5h12v16l-6-4.5-6 4.5z" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"/></svg>',
+  cog:     '<svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="3.2" stroke="currentColor" stroke-width="1.7"/><path d="M12 3v2.5M12 18.5V21M21 12h-2.5M5.5 12H3m14.4-6.4-1.8 1.8M8.4 15.6l-1.8 1.8m11.8 0-1.8-1.8M8.4 8.4 6.6 6.6" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/></svg>',
+  out:     '<svg viewBox="0 0 24 24" fill="none"><path d="M15 17v2.5A1.5 1.5 0 0 1 13.5 21h-8A1.5 1.5 0 0 1 4 19.5v-15A1.5 1.5 0 0 1 5.5 3h8A1.5 1.5 0 0 1 15 4.5V7" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"/><path d="M10 12h10m0 0-3-3m3 3-3 3" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>'
+};
+
+const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;' }[c]));
+
+/* announce things that happen without a visible change of their own */
+function announce(msg) {
+  const el = $('#sr-status');
+  if (!el) return;
+  el.textContent = '';
+  setTimeout(() => { el.textContent = msg; }, 60);
+}
+
+/* Subsequence match with a bias toward word starts and runs of adjacent
+   characters, so "loom" beats a scattered l-o-o-m across a sentence and
+   "kora" ranks the project above any prose that happens to contain it. */
+function fuzzy(query, text) {
+  const q = query.toLowerCase(), t = text.toLowerCase();
+  if (!q) return { score: 0, hits: [] };
+
+  const exact = t.indexOf(q);
+  if (exact > -1) {
+    const hits = [];
+    for (let i = 0; i < q.length; i++) hits.push(exact + i);
+    return { score: 1000 - exact * 2 + (exact === 0 ? 120 : 0) + (/\s/.test(t[exact - 1] || ' ') ? 60 : 0), hits };
+  }
+
+  const hits = [];
+  let qi = 0, streak = 0, score = 0;
+  for (let ti = 0; ti < t.length && qi < q.length; ti++) {
+    if (t[ti] !== q[qi]) { streak = 0; continue; }
+    const wordStart = ti === 0 || /[\s\-·—/]/.test(t[ti - 1]);
+    score += 12 + streak * 9 + (wordStart ? 24 : 0);
+    streak++; hits.push(ti); qi++;
+  }
+  return qi === q.length ? { score, hits } : null;
+}
+
+const mark = (text, hits) => {
+  if (!hits.length) return esc(text);
+  const set = new Set(hits);
+  let out = '', open = false;
+  for (let i = 0; i < text.length; i++) {
+    const on = set.has(i);
+    if (on && !open) { out += '<mark>'; open = true; }
+    if (!on && open) { out += '</mark>'; open = false; }
+    out += esc(text[i]);
+  }
+  return out + (open ? '</mark>' : '');
+};
+
+function initSpotlight() {
+  const root = $('#spotlight'), input = $('#spot-input'), list = $('#spot-list'), btn = $('#search-btn');
+  if (!root || !input || !list) return;
+
+  let items = [], view = [], sel = 0, lastFocus = null, isOpen = false;
+
+  const goTo = sel => () => {
+    const target = sel === '#top' ? document.body : $(sel);
+    if (!target) return;
+    const top = sel === '#top' ? 0 : target.getBoundingClientRect().top + scrollY - 96;
+    scrollTo({ top, behavior: reduce ? 'auto' : 'smooth' });
+  };
+
+  const copyMail = async () => {
+    try {
+      await navigator.clipboard.writeText(MAIL);
+      announce('Email address copied');
+    } catch {
+      location.href = 'mailto:' + MAIL;          /* clipboard blocked, just open it */
+    }
+  };
+
+  const build = () => {
+    const out = [
+      { g: 'Sections', t: 'Work',         s: 'Selected projects',                      i: IC.hash, run: goTo('#work') },
+      { g: 'Sections', t: 'About',        s: 'Six years across fintech, health and commerce', i: IC.hash, run: goTo('#story') },
+      { g: 'Sections', t: 'Process',      s: 'Four moves, in this order',               i: IC.hash, run: goTo('#process') },
+      { g: 'Sections', t: 'Testimonials', s: 'In their words',                          i: IC.hash, run: goTo('#testimonials') },
+      { g: 'Sections', t: 'Contact',      s: 'Let’s build something worth keeping', i: IC.hash, run: goTo('#contact') }
+    ];
+    if (typeof CASES === 'object') {
+      Object.keys(CASES).forEach(slug => {
+        const c = CASES[slug];
+        out.push({
+          g: 'Case studies', t: c.name, s: `${c.tag} · ${c.year} — ${c.title}`,
+          i: IC.project, run: () => openCase && openCase(slug)
+        });
+      });
+    }
+    out.push(
+      { g: 'Actions', t: 'Email Tolulope',      s: MAIL,                  i: IC.mail, run: () => { location.href = 'mailto:' + MAIL; } },
+      { g: 'Actions', t: 'Copy email address',  s: MAIL,                  i: IC.copy, run: copyMail },
+      { g: 'Actions', t: 'Back to top',         s: 'Return to the hero',  i: IC.top,  run: goTo('#top') }
+    );
+    $$('.footer-social a').forEach(a => out.push({
+      g: 'Elsewhere', t: a.textContent.trim(), s: 'Opens in a new tab', i: IC.link,
+      run: () => window.open(a.href, '_blank', 'noopener')
+    }));
+    return out;
+  };
+
+  const filter = q => {
+    if (!q.trim()) return items.map(it => ({ it, hits: [] }));
+    return items
+      .map(it => {
+        const onTitle = fuzzy(q, it.t);
+        const onSub = onTitle ? null : fuzzy(q, it.s);
+        if (!onTitle && !onSub) return null;
+        /* a title match always outranks a match buried in the description */
+        return { it, hits: onTitle ? onTitle.hits : [], score: onTitle ? onTitle.score + 400 : onSub.score };
+      })
+      .filter(Boolean)
+      .sort((a, b) => b.score - a.score);
+  };
+
+  const render = () => {
+    if (!view.length) {
+      list.innerHTML = `<p class="spot-empty"><b>Nothing matches that</b>Try a project name, or a section like Process.</p>`;
+      input.setAttribute('aria-expanded', 'false');
+      input.removeAttribute('aria-activedescendant');
+      return;
+    }
+    input.setAttribute('aria-expanded', 'true');
+    let html = '', group = null, n = 0;
+    view.forEach(({ it, hits }) => {
+      if (it.g !== group) {
+        if (group !== null) html += '</div>';
+        group = it.g;
+        html += `<div role="group" aria-label="${esc(group)}"><p class="spot-group" aria-hidden="true">${esc(group)}</p>`;
+      }
+      html += `<div class="spot-opt" id="spot-opt-${n}" role="option" aria-selected="${n === sel}" data-n="${n}">
+          <span class="spot-opt-ic" aria-hidden="true">${it.i}</span>
+          <span class="spot-opt-txt"><b>${mark(it.t, hits)}</b><span>${esc(it.s)}</span></span>
+          <span class="spot-opt-go" aria-hidden="true">&#8629;</span>
+        </div>`;
+      n++;
+    });
+    list.innerHTML = html + (group !== null ? '</div>' : '');
+    input.setAttribute('aria-activedescendant', `spot-opt-${sel}`);
+  };
+
+  const move = delta => {
+    if (!view.length) return;
+    sel = (sel + delta + view.length) % view.length;
+    render();
+    $(`#spot-opt-${sel}`)?.scrollIntoView({ block: 'nearest' });
+  };
+
+  const run = n => {
+    const chosen = view[n]?.it;
+    close();
+    /* let the panel start closing before the page moves under it */
+    if (chosen) setTimeout(() => chosen.run(), reduce ? 0 : 90);
+  };
+
+  /* aria-hidden on #case belongs to the case overlay itself — clearing it here
+     would announce a closed dialog — so only its inertness is borrowed. */
+  const inert = on => {
+    pageInert(on);
+    const c = $('#case');
+    if (c) on ? c.setAttribute('inert', '') : c.removeAttribute('inert');
+  };
+
+  function open(prefill) {
+    if (isOpen) return;
+    isOpen = true;
+    lastFocus = document.activeElement;
+    items = build();
+    input.value = prefill || '';
+    view = filter(input.value); sel = 0;
+    render();
+    root.classList.add('open');
+    root.setAttribute('aria-hidden', 'false');
+    document.body.classList.add('spot-open');
+    inert(true);
+    input.focus({ preventScroll: true });
+  }
+
+  function close() {
+    if (!isOpen) return;
+    isOpen = false;
+    root.classList.remove('open');
+    root.setAttribute('aria-hidden', 'true');
+    document.body.classList.remove('spot-open');
+    inert(false);
+    lastFocus?.focus?.({ preventScroll: true });
+  }
+
+  btn?.addEventListener('click', () => open());
+  $$('[data-spot-close]', root).forEach(el => el.addEventListener('click', close));
+
+  input.addEventListener('input', () => { view = filter(input.value); sel = 0; render(); });
+
+  list.addEventListener('click', e => {
+    const opt = e.target.closest('.spot-opt');
+    if (opt) run(+opt.dataset.n);
+  });
+  list.addEventListener('pointermove', e => {
+    const opt = e.target.closest('.spot-opt');
+    if (opt && +opt.dataset.n !== sel) { sel = +opt.dataset.n; render(); }
+  });
+
+  root.addEventListener('keydown', e => {
+    switch (e.key) {
+      case 'Escape':    e.preventDefault(); close(); break;
+      case 'ArrowDown': e.preventDefault(); move(1); break;
+      case 'ArrowUp':   e.preventDefault(); move(-1); break;
+      case 'Home':      e.preventDefault(); sel = 0; render(); break;
+      case 'End':       e.preventDefault(); sel = view.length - 1; render(); break;
+      case 'Enter':     e.preventDefault(); run(sel); break;
+      case 'Tab':       e.preventDefault(); break;   /* one field, nothing to tab to */
+    }
+  });
+
+  /* global shortcuts */
+  addEventListener('keydown', e => {
+    const typing = /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement?.tagName || '')
+      || document.activeElement?.isContentEditable;
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+      e.preventDefault();
+      isOpen ? close() : open();
+      return;
+    }
+    if (e.key === '/' && !typing && !isOpen && !e.metaKey && !e.ctrlKey && !e.altKey) {
+      e.preventDefault(); open();
+    }
+  });
+}
+
+/* ══ 23. ACCOUNT ═══════════════════════════════════════════════════════
+   This site is static: nothing here authenticates anybody, and it cannot.
+   readSession() is the single seam. Point it at whatever your auth provider
+   exposes — Clerk, Auth0, Supabase, Netlify Identity, a cookie read by a
+   server that renders this page — and the nav lights up. Until then it
+   returns null and the nav renders nothing at all. */
+function readSession() {
+  if (window.__session && window.__session.email) return window.__session;
+  try {
+    const q = new URLSearchParams(location.search).get('session');
+    if (q === 'demo') localStorage.setItem('te-demo-session', '1');
+    if (q === 'out') localStorage.removeItem('te-demo-session');
+    if (localStorage.getItem('te-demo-session')) {
+      /* presentation only — never a credential, and never trusted for access */
+      return { name: 'Demo Visitor', email: 'demo@example.com' };
+    }
+  } catch {}
+  return null;
+}
+
+/* Extend rather than editing the markup. Each item dispatches an event a
+   host application can listen for; standalone they simply close the menu. */
+const ACCOUNT_ITEMS = [
+  { label: 'Saved projects',   icon: IC.bookmark, event: 'te:saved' },
+  { label: 'Account settings', icon: IC.cog,      event: 'te:settings' }
+];
+
+function initAccount() {
+  const host = $('#account');
+  if (!host) return;
+
+  const session = readSession();
+  if (!session) { host.classList.remove('is-in'); host.innerHTML = ''; return; }
+
+  const initials = (session.name || session.email || '?')
+    .split(/[\s@._-]+/).filter(Boolean).slice(0, 2).map(w => w[0]).join('').toUpperCase();
+
+  host.classList.add('is-in');
+  host.innerHTML = `
+    <button class="account-btn" id="account-btn" aria-haspopup="menu" aria-expanded="false"
+            aria-label="Account menu for ${esc(session.name || session.email)}">
+      ${session.avatar ? `<img src="${esc(session.avatar)}" alt="">` : esc(initials)}
+    </button>
+    <div class="account-menu" id="account-menu" role="menu" aria-labelledby="account-btn">
+      <div class="account-id">
+        <b>${esc(session.name || 'Signed in')}</b>
+        <span>${esc(session.email)}</span>
+      </div>
+      ${ACCOUNT_ITEMS.map((it, n) => `
+        <button class="account-item" role="menuitem" tabindex="-1" data-n="${n}">
+          ${it.icon}<span>${esc(it.label)}</span>
+        </button>`).join('')}
+      <div class="account-sep" role="separator"></div>
+      <button class="account-item danger" role="menuitem" tabindex="-1" data-signout>
+        ${IC.out}<span>Sign out</span>
+      </button>
+    </div>`;
+
+  const btn = $('#account-btn', host), menu = $('#account-menu', host);
+  const itemsOf = () => $$('[role="menuitem"]', menu);
+  let open = false;
+
+  const setOpen = next => {
+    open = next;
+    host.classList.toggle('open', open);
+    btn.setAttribute('aria-expanded', String(open));
+    if (open) itemsOf()[0]?.focus();
+  };
+
+  btn.addEventListener('click', e => { e.stopPropagation(); setOpen(!open); });
+
+  menu.addEventListener('click', e => {
+    const item = e.target.closest('[role="menuitem"]');
+    if (!item) return;
+    setOpen(false);
+    btn.focus();
+    if (item.hasAttribute('data-signout')) {
+      try { localStorage.removeItem('te-demo-session'); } catch {}
+      window.__session = null;
+      host.classList.remove('is-in');
+      host.innerHTML = '';
+      announce('Signed out');
+      return;
+    }
+    const spec = ACCOUNT_ITEMS[+item.dataset.n];
+    if (spec?.event) document.dispatchEvent(new CustomEvent(spec.event, { detail: { session } }));
+  });
+
+  menu.addEventListener('keydown', e => {
+    const list = itemsOf();
+    const at = list.indexOf(document.activeElement);
+    if (e.key === 'Escape')      { e.preventDefault(); setOpen(false); btn.focus(); }
+    else if (e.key === 'ArrowDown') { e.preventDefault(); list[(at + 1) % list.length]?.focus(); }
+    else if (e.key === 'ArrowUp')   { e.preventDefault(); list[(at - 1 + list.length) % list.length]?.focus(); }
+    else if (e.key === 'Home')      { e.preventDefault(); list[0]?.focus(); }
+    else if (e.key === 'End')       { e.preventDefault(); list[list.length - 1]?.focus(); }
+    else if (e.key === 'Tab')       { setOpen(false); }
+  });
+
+  document.addEventListener('click', e => { if (open && !host.contains(e.target)) setOpen(false); });
+}
+
+/* ══ 24. BOOT ══════════════════════════════════════════════════════════ */
 function boot() {
   initLoader();
   initCursor();
@@ -1426,6 +1791,8 @@ function boot() {
   initSmoothScroll();
   initCases();
   initWalkers();
+  initSpotlight();
+  initAccount();
 
   /* Anything that measures type waits for the fonts. The loader is holding
      the page shut until then anyway, so nothing is visibly late. */

@@ -21,8 +21,10 @@ through dusk, into a night you can hang stars in:
 | Contact | The light drains out; hills go dark. |
 | Footer | The ground the page settles on. At night, a sky you hang stars in; by day, warm sand you connect ink dots on. Same mechanic, two palettes. |
 
-A day/night toggle in the nav re-points a single set of role tokens, so both
-palettes share one stylesheet. Day is warm — sand, clay, amber. Night is
+Both palettes share one stylesheet by re-pointing a single set of role
+tokens. There is no manual switch: the site follows the operating system's
+appearance setting and keeps following it if the visitor changes it
+mid-visit. Day is warm — sand, clay, amber. Night is
 deliberately neutral: near-black through greys to off-white, with the amber
 accent kept so the brand survives the switch. The choice persists in `localStorage` and
 defaults to the visitor's system preference.
@@ -94,6 +96,46 @@ else should need touching.
 - **Momentum scrolling** — interpolates the real scroll position (rather than
   transforming a wrapper) so `position: fixed` and the footer canvas keep
   working. Off for touch and reduced motion.
+
+## Search
+
+A command palette covers the whole site. It opens on **Cmd/Ctrl + K**, on
+**`/`**, or from the search button in the nav, and is built for the keyboard:
+arrows move, Enter opens, Escape closes.
+
+The index is assembled at open time from the page itself — sections, every
+entry in `CASES`, the social links in the footer, plus actions like copying
+the email address. Choosing a project opens its case study directly rather
+than just scrolling to the tile.
+
+Matching is a subsequence search weighted toward word starts and runs of
+adjacent characters, so `loom` finds LOOMFOLK and `proc` finds Process. A
+match in a title always outranks one buried in a description. Matched
+characters are highlighted, and all interpolated text is escaped.
+
+## Accounts
+
+**This is a static site. Nothing here authenticates anybody, and nothing here
+can.** There is no server, no session and no access control. Anything gated
+behind "signed in" is presentational only.
+
+What exists is the UI and its wiring point. `readSession()` in `js/site.js`
+is the single seam: point it at whatever your auth provider exposes — Clerk,
+Auth0, Supabase, Netlify Identity, or a cookie read by a server that renders
+this page — and the avatar and its menu appear. Until then it returns `null`
+and the nav renders nothing at all, which is the correct behaviour for a
+portfolio with no accounts.
+
+To see the signed-in state locally, load `?session=demo` (and `?session=out`
+to clear it). That flag is presentation only and must never be treated as a
+credential.
+
+Menu contents live in `ACCOUNT_ITEMS`. Each entry dispatches a `CustomEvent`
+on `document` that a host application can listen for; standalone they just
+close the menu. Sign out clears the demo flag and removes the avatar.
+
+Real gating has to happen on a server. If private case studies are ever
+wanted, this site would need to move somewhere that can run one.
 
 ## Case studies
 

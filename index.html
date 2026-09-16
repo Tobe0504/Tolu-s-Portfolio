@@ -28,6 +28,9 @@
 
 <a class="skip-link" href="#story">Skip to content</a>
 
+<!-- things that happen with no visible change of their own are announced here -->
+<p id="sr-status" class="sr-only" role="status" aria-live="polite"></p>
+
 <!-- ══════════════ LOADER — aperture iris that opens onto the page ══════════════ -->
 <div id="loader" class="loader" aria-hidden="true">
   <div class="loader-iris">
@@ -72,9 +75,15 @@
   </nav>
 
   <div class="nav-side right">
-    <button id="theme-toggle" class="theme-toggle" aria-label="Switch to night" aria-pressed="false">
-      <span class="tt-track"><span class="tt-knob"></span></span>
+    <button id="search-btn" class="icon-btn" aria-label="Search this site" aria-haspopup="dialog" data-cursor="Search">
+      <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <kbd class="icon-btn-key" aria-hidden="true">&#8984;K</kbd>
     </button>
+
+    <!-- Account lives here. Nothing is rendered unless a session exists;
+         see initAccount() in js/site.js for where real auth plugs in. -->
+    <div id="account" class="account"></div>
+
     <button id="menu-btn" class="menu-btn" aria-label="Open menu" aria-expanded="false">
       <span></span><span></span>
     </button>
@@ -463,6 +472,29 @@
 </section>
 
 </main>
+
+<!-- ══════════════ SPOTLIGHT SEARCH ══════════════
+     Command palette over the whole site: sections, case studies and links.
+     Opens on Cmd/Ctrl+K or "/" and is driven entirely by the keyboard. -->
+<div id="spotlight" class="spot" role="dialog" aria-modal="true" aria-labelledby="spot-label" aria-hidden="true">
+  <div class="spot-scrim" data-spot-close></div>
+  <div class="spot-panel">
+    <h2 id="spot-label" class="sr-only">Search this site</h2>
+    <div class="spot-field">
+      <svg class="spot-icon" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="6.5" stroke="currentColor" stroke-width="1.8"/><path d="m16 16 4.5 4.5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <input id="spot-input" type="text" role="combobox" aria-expanded="false"
+             aria-controls="spot-list" aria-autocomplete="list" autocomplete="off"
+             spellcheck="false" placeholder="Search projects, sections and links">
+      <button class="spot-esc" data-spot-close aria-label="Close search"><kbd>Esc</kbd></button>
+    </div>
+    <div id="spot-list" class="spot-list" role="listbox" aria-label="Search results" data-native-scroll></div>
+    <p class="spot-foot" aria-hidden="true">
+      <span><kbd>&#8593;</kbd><kbd>&#8595;</kbd> to move</span>
+      <span><kbd>&#8629;</kbd> to open</span>
+      <span><kbd>esc</kbd> to close</span>
+    </p>
+  </div>
+</div>
 
 <!-- ══════════════ CASE STUDY OVERLAY ══════════════
      One panel, filled from CASES in site.js. It is a real dialog: the page

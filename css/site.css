@@ -340,29 +340,6 @@ button { font: inherit; color: inherit; background: none; border: 0; cursor: poi
 }
 .nav-cta:active { transform: scale(.97); }
 
-/* theme toggle */
-.theme-toggle { display: grid; place-items: center; padding: 4px; }
-.tt-track {
-  position: relative; display: block;
-  width: 46px; height: 25px; border-radius: 999px;
-  background: color-mix(in srgb, var(--surface) 80%, transparent);
-  border: 1px solid var(--line-strong);
-  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
-  transition: background-color .5s var(--e-in-out);
-}
-.tt-knob {
-  position: absolute; top: 2px; left: 2px;
-  width: 19px; height: 19px; border-radius: 50%;
-  background: var(--c-amber);
-  box-shadow: 0 0 12px rgba(242,179,61,.65), inset 0 -2px 4px rgba(0,0,0,.12);
-  transition: transform .5s var(--e-spring), background .5s var(--e-in-out), box-shadow .5s ease;
-}
-body.night .tt-knob {
-  transform: translateX(21px);
-  background: #ebebe9;
-  box-shadow: 0 0 14px rgba(235,235,233,.45), inset -5px -2px 0 0 #16161a;
-}
-
 /* burger */
 .menu-btn { display: none; width: 40px; height: 40px; place-items: center; gap: 5px; }
 .menu-btn span {
@@ -1299,10 +1276,10 @@ body.night .t-ridge { fill: #141416; opacity: .9; }
    CTA, the toggle, the reel lever). Rather than inflate them visually,
    give each a centred 44px hit area it can be missed into. */
 @media (hover: none), (pointer: coarse) {
-  .theme-toggle, .menu-btn, .nav-cta, .to-top,
+  .icon-btn, .account-btn, .menu-btn, .nav-cta, .to-top,
   .footer-social a, .footer-mail, .reel-lever { position: relative; }
 
-  .theme-toggle::after, .menu-btn::after, .nav-cta::after, .to-top::after,
+  .icon-btn::after, .account-btn::after, .menu-btn::after, .nav-cta::after, .to-top::after,
   .footer-social a::after, .footer-mail::after, .reel-lever::after {
     content: ''; z-index: -1;
     position: absolute; left: 50%; top: 50%;
@@ -1624,4 +1601,175 @@ body.night { --walker: #e6e6e4; }
 @media (prefers-reduced-motion: reduce) {
   .wk-leg, .wk-arm, .wk-bob, .wk-stereo, .wk-carry, .wk-note { animation: none; }
   .wk-note { opacity: 0; }
+}
+
+/* ── 20. NAV ICON BUTTON, ACCOUNT MENU, SPOTLIGHT ─────────────────────── */
+
+.icon-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  height: 34px; padding: 0 10px; border-radius: 999px;
+  color: var(--nav-ink);
+  border: 1px solid transparent;
+  transition: background-color .3s ease, border-color .3s ease, color .5s var(--e-in-out);
+}
+.icon-btn svg { width: 17px; height: 17px; }
+#nav.on-light .icon-btn { color: var(--text); }
+.icon-btn-key {
+  font-family: var(--f-ui); font-size: 10.5px; font-weight: 600;
+  letter-spacing: .04em; opacity: .7;
+  padding: 2px 5px; border-radius: 5px;
+  border: 1px solid currentColor;
+}
+@media (hover: hover) and (pointer: fine) {
+  .icon-btn:hover {
+    background: color-mix(in srgb, var(--surface) 70%, transparent);
+    border-color: var(--line);
+    backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    color: var(--text);
+  }
+}
+@media (max-width: 860px) { .icon-btn-key { display: none; } }
+
+/* ── account ── */
+.account { position: relative; display: none; }
+.account.is-in { display: block; }
+
+.account-btn {
+  display: grid; place-items: center;
+  width: 34px; height: 34px; border-radius: 50%;
+  background: var(--accent); color: var(--on-accent);
+  font-size: 12.5px; font-weight: 700; letter-spacing: .02em;
+  border: 1px solid color-mix(in srgb, var(--line-strong) 70%, transparent);
+  overflow: hidden;
+  transition: transform .3s var(--e-spring), box-shadow .3s ease;
+}
+.account-btn img { width: 100%; height: 100%; object-fit: cover; }
+@media (hover: hover) and (pointer: fine) {
+  .account-btn:hover { transform: scale(1.06); box-shadow: var(--shadow-1); }
+}
+.account-btn[aria-expanded="true"] { box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent); }
+
+.account-menu {
+  position: absolute; top: calc(100% + 10px); right: 0;
+  width: 248px; padding: 7px;
+  border-radius: 16px;
+  background: color-mix(in srgb, var(--surface) 94%, transparent);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-2);
+  backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3);
+  transform-origin: top right;
+  opacity: 0; transform: translateY(-6px) scale(.97);
+  pointer-events: none;
+  transition: opacity .2s var(--e-out), transform .28s var(--e-out-quart);
+  z-index: 10;
+}
+.account.open .account-menu { opacity: 1; transform: none; pointer-events: auto; }
+
+.account-id { padding: 11px 12px 12px; border-bottom: 1px solid var(--line); margin-bottom: 6px; }
+.account-id b { display: block; font-size: 14px; font-weight: 600; }
+.account-id span {
+  display: block; margin-top: 3px; font-size: 12px; color: var(--text-mute);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.account-item {
+  display: flex; align-items: center; gap: 10px; width: 100%;
+  padding: 10px 12px; border-radius: 10px;
+  font-size: 14px; color: var(--text); text-align: left;
+  transition: background-color .18s ease;
+}
+.account-item svg { width: 16px; height: 16px; flex: none; opacity: .65; }
+.account-item:hover, .account-item:focus-visible { background: color-mix(in srgb, var(--text) 7%, transparent); }
+.account-sep { height: 1px; margin: 6px 4px; background: var(--line); }
+.account-item.danger { color: var(--accent); }
+
+/* ── spotlight ── */
+body.spot-open { overflow: hidden; }
+.spot {
+  position: fixed; inset: 0; z-index: 900;
+  visibility: hidden; pointer-events: none;
+}
+.spot.open { visibility: visible; pointer-events: auto; }
+.spot-scrim {
+  position: absolute; inset: 0;
+  background: color-mix(in srgb, var(--c-ink) 52%, transparent);
+  backdrop-filter: blur(5px); -webkit-backdrop-filter: blur(5px);
+  opacity: 0; transition: opacity .28s var(--e-out);
+}
+.spot.open .spot-scrim { opacity: 1; }
+
+.spot-panel {
+  position: absolute; left: 50%; top: 12vh;
+  width: min(92vw, 580px);
+  transform: translate(-50%, -10px) scale(.985);
+  opacity: 0;
+  display: flex; flex-direction: column;
+  max-height: min(64vh, 520px);
+  border-radius: 18px; overflow: hidden;
+  background: color-mix(in srgb, var(--surface) 96%, transparent);
+  border: 1px solid var(--line);
+  box-shadow: var(--shadow-3), var(--shadow-2);
+  transition: opacity .24s var(--e-out), transform .36s var(--e-out-quart);
+}
+.spot.open .spot-panel { opacity: 1; transform: translate(-50%, 0) scale(1); }
+
+.spot-field { display: flex; align-items: center; gap: 11px; padding: 15px 15px 15px 17px; border-bottom: 1px solid var(--line); }
+.spot-icon { width: 19px; height: 19px; flex: none; color: var(--text-mute); }
+#spot-input {
+  flex: 1; min-width: 0; border: 0; background: none; outline: none;
+  font-family: var(--f-ui); font-size: 16.5px; font-weight: 500; color: var(--text);
+}
+#spot-input::placeholder { color: var(--text-mute); font-weight: 400; }
+.spot-esc { display: grid; place-items: center; }
+
+kbd {
+  font-family: var(--f-ui); font-size: 10.5px; font-weight: 600;
+  padding: 3px 6px; border-radius: 6px;
+  border: 1px solid var(--line-strong); color: var(--text-mute);
+  line-height: 1;
+}
+
+.spot-list { flex: 1; overflow-y: auto; overscroll-behavior: contain; padding: 7px; }
+.spot-group {
+  padding: 12px 10px 6px;
+  font-size: 11px; font-weight: 600; letter-spacing: .13em; text-transform: uppercase;
+  color: var(--text-mute);
+}
+.spot-opt {
+  display: flex; align-items: center; gap: 12px;
+  padding: 10px 11px; border-radius: 11px; cursor: pointer;
+  scroll-margin: 8px;
+}
+.spot-opt[aria-selected="true"] { background: color-mix(in srgb, var(--accent) 13%, transparent); }
+.spot-opt-ic {
+  display: grid; place-items: center; flex: none;
+  width: 30px; height: 30px; border-radius: 9px;
+  background: color-mix(in srgb, var(--text) 8%, transparent);
+  color: var(--text-soft);
+}
+.spot-opt-ic svg { width: 15px; height: 15px; }
+.spot-opt-txt { min-width: 0; flex: 1; }
+.spot-opt-txt b { display: block; font-size: 14.5px; font-weight: 600; }
+.spot-opt-txt b mark { background: none; color: var(--accent); font-weight: 700; }
+.spot-opt-txt span {
+  display: block; margin-top: 2px; font-size: 12.5px; color: var(--text-mute);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.spot-opt-go { flex: none; opacity: 0; font-size: 11px; color: var(--text-mute); }
+.spot-opt[aria-selected="true"] .spot-opt-go { opacity: 1; }
+.spot-empty { padding: 34px 16px; text-align: center; color: var(--text-mute); font-size: 14px; }
+.spot-empty b { display: block; margin-bottom: 5px; color: var(--text); font-size: 15px; font-weight: 600; }
+
+.spot-foot {
+  display: flex; gap: 18px; flex-wrap: wrap;
+  padding: 11px 15px; border-top: 1px solid var(--line);
+  font-size: 11.5px; color: var(--text-mute);
+}
+.spot-foot span { display: inline-flex; align-items: center; gap: 5px; }
+@media (max-width: 560px) {
+  .spot-panel { top: 7vh; max-height: 78vh; }
+  .spot-foot { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .spot-panel, .spot-scrim, .account-menu { transition: none; }
 }
