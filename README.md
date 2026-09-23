@@ -22,7 +22,11 @@ uses no A24 branding, and none of that site's artwork, copy or code.
 - **Scroll**, **← / →**, or **swipe** to move one disc at a time. The discs
   roll as they travel, and each returns to its own resting angle in front.
 - **Hover** the front disc and a hand-drawn marker loop circles it. Every loop
-  is drawn fresh, so no two are identical.
+  is drawn fresh, so no two are identical. The disc also trembles very
+  slightly while you point at it, so it reads as held rather than mounted.
+- One disc per scroll gesture. A trackpad flick arrives as dozens of small
+  deltas, so the carousel steps once and then refuses to step again until the
+  events stop, rather than running through three projects per flick.
 - **Space** flips the disc to its data side: silver, with the rainbow bands
   real discs throw.
 - **Click** the front disc, or press **Enter**, to open it. Click a neighbour
@@ -44,8 +48,11 @@ uses no A24 branding, and none of that site's artwork, copy or code.
   steps, a **gallery** of three generated screens with captions, **the
   outcome** as three metrics, and a pull quote.
 - A *View live* link and a signature.
-- It ends on a ruled grid with the next project's title, its disc rising into
-  view. Clicking it opens that project.
+- It ends on a tall sticky grid carrying the next project's title, split
+  across ruled rows. Scrolling through it lifts that project's spinning disc
+  from below the fold, up and off the top of the screen; once it has left,
+  the handover happens on its own and the next project animates in. Clicking
+  anywhere in the section jumps straight there instead.
 
 ## Routes
 

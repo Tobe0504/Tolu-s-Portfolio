@@ -6,9 +6,9 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from './data.js?v=8';
-import { whenFonts, heroImage, galleryImage } from './art.js?v=8';
-import { createCarousel, createDiscStage } from './discs.js?v=8';
+import { COLLECTIONS, byCollection, bySlug } from './data.js?v=10';
+import { whenFonts, heroImage, galleryImage } from './art.js?v=10';
+import { createCarousel, createDiscStage } from './discs.js?v=10';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -233,9 +233,13 @@ function projectMarkup(p, next) {
     </div>
 
     <a class="p-next" href="#/p/${next.slug}" aria-label="Next project: ${esc(next.name)}">
-      <div class="p-next-lines" aria-hidden="true">${'<span></span>'.repeat(6)}</div>
-      <h2 class="p-next-title heading-l">${esc(next.name)}</h2>
-      <div class="p-next-disc" id="p-next-disc"></div>
+      <div class="p-next-inner">
+        <div class="p-next-lines" aria-hidden="true">${'<span></span>'.repeat(6)}</div>
+        <h2 class="p-next-title heading-l">
+          ${next.name.split(' ').map((w, i, arr) => `<span class="p-next-word" style="grid-row:${3 + i}; justify-self:${arr.length === 1 ? 'center' : (i % 2 ? 'end' : 'start')}">${esc(w)}</span>`).join('')}
+        </h2>
+        <div class="p-next-disc" id="p-next-disc"></div>
+      </div>
     </a>
   </div>`;
 }
@@ -276,13 +280,21 @@ function mountProject(p) {
   }, { rootMargin: '40% 0px' });
   io.observe(nextEl);
 
+  /* The ending is a tall sticky section. Scrolling through it lifts the next
+     project's disc from below the fold up and off the top of the screen; once
+     it has left, the handover happens on its own and the next page animates
+     in. Clicking anywhere in the section still jumps straight there. */
+  let handedOver = false;
   const onScroll = () => {
     const r = nextEl.getBoundingClientRect();
-    const t = Math.min(1, Math.max(0, 1 - r.top / innerHeight));
-    /* it rises to peek up beneath the title, and no further, the way the
-       reference leaves the next disc half out of frame */
-    discEl.style.setProperty('--rise', `${(1 - t) * 40 + 42}%`);
+    const travel = Math.max(1, nextEl.offsetHeight - innerHeight);
+    const t = Math.min(1, Math.max(0, -r.top / travel));
+    discEl.style.setProperty('--rise', `${58 - t * 96}%`);
     nextStage && nextStage.setProgress(t);
+    if (t > 0.94 && !handedOver) {
+      handedOver = true;
+      location.hash = '#/p/' + next.slug;
+    }
   };
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();

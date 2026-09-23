@@ -242,12 +242,19 @@ body[data-view="project"] .index-btn { visibility: hidden; }
 
 .p-next {
   position: relative; display: block; background: var(--tint, #d7d5d2);
-  height: 100vh; height: 100dvh; overflow: hidden; cursor: pointer;
+  /* taller than the screen: the extra travel is what lifts the disc */
+  height: 200vh; cursor: pointer;
 }
+.p-next-inner { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; }
 .p-next-lines { position: absolute; inset: 0; display: grid; grid-template-rows: repeat(6, 1fr); padding: 0 var(--pad); }
 .p-next-lines span { border-top: 1px solid var(--rule); }
-.p-next-title { position: absolute; left: 0; right: 0; top: 48%; text-align: center; transform: translateY(-50%); }
-.p-next-disc { position: absolute; left: 0; right: 0; bottom: 0; height: 70vh; transform: translateY(var(--rise, 40%)); }
+.p-next-title {
+  position: absolute; inset: 0; z-index: 2;
+  display: grid; grid-template-rows: repeat(6, 1fr); align-items: center;
+  padding: 0 var(--pad);
+}
+.p-next-word { display: block; }
+.p-next-disc { position: absolute; left: 0; right: 0; bottom: 0; height: 78vh; transform: translateY(var(--rise, 58%)); }
 .p-next-disc canvas { width: 100% !important; height: 100% !important; }
 
 .noscript { position: fixed; inset: 0; display: grid; place-items: center; padding: 2em; text-align: center; }

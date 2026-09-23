@@ -10,7 +10,7 @@
    object read as physical instead of as a flat texture on a circle.
    ═══════════════════════════════════════════════════════════════════════════ */
 import * as THREE from 'three';
-import { discLabel, dataSide } from './art.js?v=8';
+import { discLabel, dataSide } from './art.js?v=10';
 
 /* proportions of a 120mm disc, normalised to radius 1 */
 const R = 1, HOLE = 0.125, HUB = 0.305, BAND = 0.335, LABEL_OUT = 0.985, T = 0.018;
@@ -265,8 +265,19 @@ export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = 
       /* the centre disc lies back and turns toward the light; neighbours
          stand closer to face-on */
       const tiltX = -0.78 + near * 0.3, tiltY = 0.22 - sd * near * 0.2, tiltZ = 0.46 - near * 0.18;
-      const px = ad < 0.5 && pointer.inside ? pointer.y * 0.12 : 0;
-      const py = ad < 0.5 && pointer.inside ? pointer.x * 0.16 : 0;
+      let px = ad < 0.5 && pointer.inside ? pointer.y * 0.12 : 0;
+      let py = ad < 0.5 && pointer.inside ? pointer.x * 0.16 : 0;
+
+      /* Held, not mounted: while you point at it the disc trembles very
+         slightly. Three detuned sines rather than random noise, so it reads
+         as a held object rather than as jitter. */
+      if (hovering && ad < 0.5 && !reduce) {
+        const f = now * 24;
+        px += Math.sin(f) * 0.0055 + Math.sin(f * 0.61) * 0.0035;
+        py += Math.cos(f * 0.83) * 0.0055 + Math.sin(f * 1.27) * 0.003;
+        disc.position.x += Math.sin(f * 0.91) * 0.0016 * unit;
+        disc.position.y += Math.cos(f * 1.13) * 0.0016 * unit;
+      }
       disc.rotation.x = snap ? tiltX : damp(disc.rotation.x, tiltX + px, 8, dt);
       disc.rotation.y = snap ? tiltY : damp(disc.rotation.y, tiltY + py, 8, dt);
       disc.rotation.z = tiltZ;
@@ -335,18 +346,32 @@ export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = 
   }
 
   /* ── input ─────────────────────────────────────────────────────────── */
-  let wheelAcc = 0, wheelLock = 0, lastWheel = 0;
+  /* A trackpad flick arrives as dozens of small deltas over ~400ms. Stepping
+     whenever an accumulator crosses a threshold therefore fired three or four
+     times per flick. Instead: step once, then refuse to step again until the
+     gesture has actually ended, which is when the events stop arriving. */
+  let wheelAcc = 0, lastWheel = 0, quietTimer = 0, armed = true;
   function onWheel(e) {
     if (!active || openTarget) return;
     e.preventDefault();
     const now = performance.now();
     const d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    if (now - lastWheel > 220) wheelAcc = 0;          /* a fresh gesture */
+    const delta = d * (e.deltaMode === 1 ? 16 : 1);
+
+    if (now - lastWheel > 180) { wheelAcc = 0; armed = true; }   /* a fresh gesture */
     lastWheel = now;
-    wheelAcc += d * (e.deltaMode === 1 ? 16 : 1);
-    if (now < wheelLock || Math.abs(wheelAcc) < 42) return;
+
+    /* the gesture is over once nothing has arrived for a moment, including
+       the tail of the trackpad's own inertia */
+    clearTimeout(quietTimer);
+    quietTimer = setTimeout(() => { armed = true; wheelAcc = 0; }, 140);
+
+    if (!armed) return;
+    wheelAcc += delta;
+    if (Math.abs(wheelAcc) < 24) return;
     step(Math.sign(wheelAcc));
-    wheelAcc = 0; wheelLock = now + 420;               /* one disc per flick */
+    wheelAcc = 0;
+    armed = false;                       /* one disc per flick, no matter how long it is */
   }
 
   let drag = null;
@@ -427,7 +452,7 @@ export function createDiscStage(container, project) {
     raf = requestAnimationFrame(frame);
     const t = now / 1000;
     disc.rotation.set(-0.62 - progress * 0.3, 0.18, 0.4);
-    disc.userData.spin.rotation.z = reduce ? 0 : t * 0.15;
+    disc.userData.spin.rotation.z = reduce ? 0 : t * 0.5;
     renderer.render(scene, camera);
   };
   resize();
