@@ -6,11 +6,12 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from './data.js';
-import { whenFonts, heroImage } from './art.js';
-import { createCarousel, createDiscStage } from './discs.js';
+import { COLLECTIONS, byCollection, bySlug } from './data.js?v=8';
+import { whenFonts, heroImage, galleryImage } from './art.js?v=8';
+import { createCarousel, createDiscStage } from './discs.js?v=8';
 
 const $ = (s, r = document) => r.querySelector(s);
+const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -161,6 +162,8 @@ function tearPath(seed) {
 
 function projectMarkup(p, next) {
   const tint = `color-mix(in srgb, ${p.art.bg} 9%, #d6d4d1)`;
+  const meta = [['Client', p.client], ['Year', p.year], ['Industry', p.industry],
+                ['Platform', p.platform], ['Timeline', p.timeline], ['Status', p.status]];
   return `
   <div style="--tint:${tint}">
     <header class="p-head">
@@ -172,26 +175,62 @@ function projectMarkup(p, next) {
     </header>
 
     <section class="p-meta reveal" style="--d:.28" aria-label="Project details">
-      <div class="row"><p class="eyebrow">Year</p><p class="paragraph-m">${esc(p.year)}</p></div>
-      <div class="row"><p class="eyebrow">Industry</p><p class="paragraph-m">${esc(p.industry)}</p></div>
-      <div class="row"><p class="eyebrow">Platform</p><p class="paragraph-m">${esc(p.platform)}</p></div>
-      <div class="row"><p class="eyebrow">Timeline</p><p class="paragraph-m">${esc(p.timeline)}</p></div>
+      ${meta.map(([k, v]) => `<div class="row"><p class="eyebrow">${esc(k)}</p><p class="paragraph-m">${esc(v)}</p></div>`).join('')}
     </section>
 
     <section class="p-hero">
       <div class="p-hero-sticky" id="p-media"></div>
-      <svg class="p-tear" viewBox="0 0 1000 260" preserveAspectRatio="none" aria-hidden="true"><path d="${tearPath(p.slug.length + p.name.charCodeAt(0))}"/></svg>
+      <svg class="p-tear" viewBox="0 0 1000 160" preserveAspectRatio="none" aria-hidden="true"><path d="${tearPath(p.slug.length + p.name.charCodeAt(0))}"/></svg>
       <div class="p-words">
         <a class="p-cta heading-xs" href="${esc(p.links.prototype)}">View prototype</a>
         ${p.tagline.map(w => `<div class="p-word"><span class="heading-xl">${esc(w)}</span></div>`).join('')}
       </div>
     </section>
 
-    <section class="p-body">
-      <p class="p-summary paragraph-l">${esc(p.summary)}</p>
-      <a class="p-live heading-xs" href="${esc(p.links.live)}">View live</a>
-      <p class="p-sign">${esc(p.name)}.</p>
-    </section>
+    <div class="p-after">
+      <section class="p-opening"><p class="p-summary paragraph-l">${esc(p.summary)}</p></section>
+
+      <section class="p-chapter">
+        <p class="eyebrow">The problem</p>
+        <p class="p-prose paragraph-l">${esc(p.challenge)}</p>
+      </section>
+
+      <section class="p-chapter">
+        <p class="eyebrow">The work</p>
+        <ol class="p-steps">
+          ${p.approach.map((a, i) => `
+            <li>
+              <span class="p-step-n eyebrow">${String(i + 1).padStart(2, '0')}</span>
+              <div><h3 class="heading-xs">${esc(a.title)}</h3><p>${esc(a.text)}</p></div>
+            </li>`).join('')}
+        </ol>
+      </section>
+
+      <section class="p-gallery" aria-label="Selected screens">
+        ${p.gallery.map((g, i) => `
+          <figure class="p-shot-wrap${i === 0 ? ' wide' : ''}">
+            <div class="p-shot" data-variant="${esc(g.variant)}" data-i="${i}"></div>
+            <figcaption class="eyebrow">${esc(g.caption)}</figcaption>
+          </figure>`).join('')}
+      </section>
+
+      <section class="p-chapter">
+        <p class="eyebrow">The outcome</p>
+        <div class="p-metrics">
+          ${p.outcome.map(o => `<div><b class="heading-m">${esc(o.value)}</b><span class="eyebrow">${esc(o.label)}</span></div>`).join('')}
+        </div>
+      </section>
+
+      <blockquote class="p-quote">
+        <p class="heading-m">&ldquo;${esc(p.quote.text)}&rdquo;</p>
+        <cite class="eyebrow">${esc(p.quote.who)}</cite>
+      </blockquote>
+
+      <section class="p-foot">
+        <a class="p-live heading-xs" href="${esc(p.links.live)}">View live</a>
+        <p class="p-sign">${esc(p.name)}.</p>
+      </section>
+    </div>
 
     <a class="p-next" href="#/p/${next.slug}" aria-label="Next project: ${esc(next.name)}">
       <div class="p-next-lines" aria-hidden="true">${'<span></span>'.repeat(6)}</div>
@@ -216,6 +255,18 @@ function mountProject(p) {
     const c = heroImage(p); c.setAttribute('aria-hidden', 'true'); media.appendChild(c);
   }
 
+  /* gallery shots are painted as they approach, not all at once on load */
+  const shots = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      shots.unobserve(e.target);
+      const img = galleryImage(p, e.target.dataset.variant);
+      img.setAttribute('aria-hidden', 'true');
+      e.target.appendChild(img);
+    });
+  }, { rootMargin: '30% 0px' });
+  $$('.p-shot', root).forEach(el => shots.observe(el));
+
   /* the next disc only spins up when its section is near, and rises with scroll */
   const nextEl = $('.p-next', root), discEl = $('#p-next-disc', root);
   const io = new IntersectionObserver(([e]) => {
@@ -236,7 +287,7 @@ function mountProject(p) {
   addEventListener('scroll', onScroll, { passive: true });
   onScroll();
 
-  unbindProject = () => { io.disconnect(); removeEventListener('scroll', onScroll); };
+  unbindProject = () => { io.disconnect(); shots.disconnect(); removeEventListener('scroll', onScroll); };
   requestAnimationFrame(() => requestAnimationFrame(() => root.classList.add('in')));
 }
 

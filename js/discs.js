@@ -10,7 +10,7 @@
    object read as physical instead of as a flat texture on a circle.
    ═══════════════════════════════════════════════════════════════════════════ */
 import * as THREE from 'three';
-import { discLabel, dataSide } from './art.js';
+import { discLabel, dataSide } from './art.js?v=8';
 
 /* proportions of a 120mm disc, normalised to radius 1 */
 const R = 1, HOLE = 0.125, HUB = 0.305, BAND = 0.335, LABEL_OUT = 0.985, T = 0.018;
@@ -198,8 +198,10 @@ export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = 
     visH = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z;
     visW = visH * camera.aspect;
     /* the centre disc is bounded by whichever of width or height runs out
-       first, so it reads the same on a phone and on a wide monitor */
-    unit = Math.min(visW * 0.33, visH * 0.265);
+       first, so it reads the same on a phone and on a wide monitor. Sized to
+       fill most of the frame: the library should feel crowded with discs
+       rather than float in whitespace. */
+    unit = Math.min(visW * 0.44, visH * 0.40);
   }
 
   function setProjects(list, start = 0) {
@@ -242,12 +244,17 @@ export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = 
       const d = i - current, ad = Math.abs(d), sd = Math.sign(d);
       const near = clamp(ad, 0, 1);
 
-      /* neighbours sit at the edges of the screen, smaller and lower; the
-         ones beyond fall away out of frame */
-      const x = sd * (near * visW * 0.5 + Math.max(0, ad - 1) * visW * 0.34);
-      const y = -near * visH * 0.17 - Math.max(0, ad - 1) * visH * 0.06;
-      const z = -ad * 1.1;
-      const s = unit * (1 - near * 0.56) * (1 - Math.max(0, ad - 1) * 0.2);
+      /* The row runs on a diagonal: the disc ahead waits beyond the top
+         right corner and travels down across the frame to leave at the
+         bottom left, so scrolling reads as falling rather than sliding.
+         Neighbours stay nearly full size and crop into the corners, which
+         is what keeps the screen full. */
+      const x = d * visW * 0.62;
+      /* the row sits a little above centre so the reviews along the bottom
+         keep a clear band of paper to sit on */
+      const y = d * visH * 0.54 + visH * 0.07;
+      const z = -ad * 0.8;
+      const s = unit * (1 - near * 0.18) * (1 - Math.max(0, ad - 1) * 0.22);
 
       const u = disc.userData;
       const float = reduce ? 0 : Math.sin(now * 0.9 + i * 1.7) * 0.012 * unit;
@@ -257,7 +264,7 @@ export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = 
 
       /* the centre disc lies back and turns toward the light; neighbours
          stand closer to face-on */
-      const tiltX = -0.78 + near * 0.46, tiltY = 0.22 - sd * near * 0.35, tiltZ = 0.46 - near * 0.3;
+      const tiltX = -0.78 + near * 0.3, tiltY = 0.22 - sd * near * 0.2, tiltZ = 0.46 - near * 0.18;
       const px = ad < 0.5 && pointer.inside ? pointer.y * 0.12 : 0;
       const py = ad < 0.5 && pointer.inside ? pointer.x * 0.16 : 0;
       disc.rotation.x = snap ? tiltX : damp(disc.rotation.x, tiltX + px, 8, dt);
@@ -275,7 +282,7 @@ export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = 
         if (ad < 0.5) { disc.position.y += openT * visH * 0.12; disc.scale.multiplyScalar(1 + openT * 0.18); }
         else disc.scale.multiplyScalar(1 - openT);
       }
-      disc.visible = ad < 2.6 && disc.scale.x > 0.001;
+      disc.visible = ad < 2.2 && disc.scale.x > 0.001;
     });
 
     const idx = Math.round(current);

@@ -298,3 +298,71 @@ export function heroImage(p) {
   grain(ctx, w, h, 0.09);
   return c;
 }
+
+/* ── gallery images ──────────────────────────────────────────────────────
+   Three looks per project so a case study has real pictures in it: a close
+   crop of the interface, the system laid out flat, and the thing in use. */
+export function galleryImage(p, variant = 'detail', w = 1400, h = 950) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d'), a = p.art, r = rng(p.slug + variant);
+
+  if (variant === 'system') {
+    /* the component set, flat on a light ground */
+    ctx.fillStyle = '#efece7'; ctx.fillRect(0, 0, w, h);
+    ctx.strokeStyle = 'rgba(0,0,0,.08)'; ctx.lineWidth = 1;
+    for (let x = 0; x < w; x += w / 12) { ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke(); }
+    const cols = 4, rows = 3, pad = w * 0.06;
+    const cw = (w - pad * 2) / cols, ch = (h - pad * 2) / rows;
+    for (let i = 0; i < cols * rows; i++) {
+      const x = pad + (i % cols) * cw, y = pad + Math.floor(i / cols) * ch;
+      const inset = cw * 0.09;
+      ctx.fillStyle = [a.bg, a.bg2, a.accent, a.fg][i % 4];
+      ctx.globalAlpha = 0.25 + (i % 4) * 0.2;
+      roundRect(ctx, x + inset, y + inset, cw - inset * 2, ch - inset * 2, 14); ctx.fill();
+      ctx.globalAlpha = 1; ctx.fillStyle = a.bg2;
+      roundRect(ctx, x + inset * 1.8, y + inset * 1.8, (cw - inset * 3.6) * (0.4 + r() * 0.5), ch * 0.055, 6); ctx.fill();
+    }
+  } else if (variant === 'context') {
+    /* the thing in use, on the project's ground */
+    const g = ctx.createLinearGradient(0, 0, w, h);
+    g.addColorStop(0, a.bg); g.addColorStop(1, a.bg2);
+    ctx.fillStyle = g; ctx.fillRect(0, 0, w, h);
+    ctx.save();
+    ctx.translate(w * 0.5, h * 0.58); ctx.rotate(-0.04);
+    ctx.shadowColor = 'rgba(0,0,0,.4)'; ctx.shadowBlur = 70; ctx.shadowOffsetY = 30;
+    ctx.fillStyle = '#0d0d0d';
+    roundRect(ctx, -w * 0.17, -h * 0.4, w * 0.34, h * 0.78, w * 0.035); ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.fillStyle = a.fg;
+    roundRect(ctx, -w * 0.155, -h * 0.37, w * 0.31, h * 0.72, w * 0.028); ctx.fill();
+    ctx.fillStyle = a.bg2; ctx.globalAlpha = .16;
+    for (let i = 0; i < 5; i++) { roundRect(ctx, -w * 0.13, -h * 0.26 + i * h * 0.1, w * (0.12 + r() * 0.15), h * 0.035, 8); ctx.fill(); }
+    ctx.globalAlpha = 1; ctx.fillStyle = a.accent;
+    roundRect(ctx, -w * 0.13, h * 0.2, w * 0.26, h * 0.075, 12); ctx.fill();
+    ctx.restore();
+  } else {
+    /* a close crop of the interface itself */
+    ctx.fillStyle = a.bg2; ctx.fillRect(0, 0, w, h);
+    ctx.save(); ctx.globalAlpha = .4; ctx.globalCompositeOperation = 'soft-light';
+    (MOTIFS[a.motif] || MOTIFS.cards)(ctx, a, r, w, h, p);
+    ctx.restore();
+    ctx.fillStyle = a.fg;
+    ctx.shadowColor = 'rgba(0,0,0,.35)'; ctx.shadowBlur = 60; ctx.shadowOffsetY = 24;
+    roundRect(ctx, w * 0.1, h * 0.16, w * 0.8, h * 0.72, 20); ctx.fill();
+    ctx.shadowColor = 'transparent';
+    ctx.fillStyle = a.bg; ctx.globalAlpha = .9;
+    roundRect(ctx, w * 0.1, h * 0.16, w * 0.8, h * 0.11, 20); ctx.fill();
+    ctx.fillRect(w * 0.1, h * 0.23, w * 0.8, h * 0.04);
+    ctx.globalAlpha = 1;
+    ctx.font = `400 ${h * 0.055}px ${SERIF}`; ctx.fillStyle = a.fg; ctx.textBaseline = 'middle';
+    ctx.fillText(p.name, w * 0.14, h * 0.215);
+    ctx.fillStyle = a.bg2; ctx.globalAlpha = .17;
+    for (let i = 0; i < 5; i++) roundRect(ctx, w * 0.14, h * (0.35 + i * 0.1), w * (0.2 + r() * 0.45), h * 0.045, 9), ctx.fill();
+    ctx.globalAlpha = 1; ctx.fillStyle = a.accent;
+    roundRect(ctx, w * 0.62, h * 0.35, w * 0.24, h * 0.36, 16); ctx.fill();
+  }
+
+  grain(ctx, w, h, 0.07);
+  return c;
+}

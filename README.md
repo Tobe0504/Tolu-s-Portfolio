@@ -14,8 +14,11 @@ uses no A24 branding, and none of that site's artwork, copy or code.
 ## How it behaves
 
 **Home: the library**
-- A row of 3D discs. The one in front is large and tilted back; its
-  neighbours stand at the edges of the screen, smaller and lower.
+- A row of large 3D discs running on a diagonal. The disc ahead waits beyond
+  the top right corner and travels down across the frame to leave at the
+  bottom left, so scrolling reads as falling rather than sliding. Neighbours
+  stay nearly full size and crop into the corners, which keeps the screen
+  full instead of empty.
 - **Scroll**, **← / →**, or **swipe** to move one disc at a time. The discs
   roll as they travel, and each returns to its own resting angle in front.
 - **Hover** the front disc and a hand-drawn marker loop circles it. Every loop
@@ -30,13 +33,17 @@ uses no A24 branding, and none of that site's artwork, copy or code.
   opens a list above the bar with the current project inverted; pick any to
   jump to it.
 
-**Project page**
-- Centred title, credits line, and a ruled table of year, industry, platform
-  and timeline.
+**Project page** — a full case study
+- Centred title, credits line, and a ruled table: client, year, industry,
+  platform, timeline and status.
 - The hero image is revealed through a torn-paper edge, pinned while the
   project's tagline scrolls past word by word, alternating sides between
   hairlines.
-- Summary, a *View live* link, and a signature.
+- Then the case study proper, each chapter a ruled row with its label in the
+  margin: an opening summary, **the problem**, **the work** as numbered
+  steps, a **gallery** of three generated screens with captions, **the
+  outcome** as three metrics, and a pull quote.
+- A *View live* link and a signature.
 - It ends on a ruled grid with the next project's title, its disc rising into
   view. Clicking it opens that project.
 
@@ -72,9 +79,11 @@ Two decisions carry most of the realism:
 
 ## Swapping in real content
 
-Everything lives in `js/data.js`. Each project has a name, year, role, team,
-industry, platform, timeline, a tagline (one word per row on the project
-page), a summary, links and two reviews.
+Everything lives in `js/data.js`. Each project carries its library entry
+(name, year, role, team, two reviews) and its case study: client, status,
+industry, platform, timeline, a tagline (one word per row over the hero), a
+summary, the `challenge` paragraph, three `approach` steps, three `outcome`
+metrics, three `gallery` captions and a pull `quote`.
 
 **Artwork.** Each disc label and each hero image is generated from the
 project's `art` colours and motif, so the site looks finished with no image
@@ -84,6 +93,10 @@ files at all. To use real images, add to the project:
 discImage: 'assets/discs/kora.webp',   // square, printed on the disc
 heroImage: 'assets/heroes/kora.webp',  // landscape, the project page image
 ```
+
+Gallery shots come in three looks, set per image by its `variant`: `detail`
+(a close crop of the interface), `system` (the component set laid out flat)
+and `context` (the thing in use).
 
 Keep anything important on a disc label more than a third of the way out
 from the centre, where the hole and the clear hub are. Hero images should be
@@ -129,7 +142,9 @@ the page says so and the index still works.
 
 `.github/workflows/deploy.yml` publishes to GitHub Pages on every push to
 `main`. It copies `index.html`, `css/`, `js/` and `assets/`, and stamps the
-`?v=` cache buster with the commit hash. One-time setup: **Settings → Pages →
+`?v=` cache buster with the commit hash — including the `?v=` on the ES
+module imports inside `js/`, so a fresh `app.js` can never run against a
+cached `discs.js`. Bump those numbers by hand when working locally. One-time setup: **Settings → Pages →
 Source → GitHub Actions**.
 
 This version lives on the `v2` branch. Merge it into `main` to make it live.
