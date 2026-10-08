@@ -3,15 +3,15 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Tolulope Elijah — Work</title>
-<meta name="description" content="The design work of Tolulope Elijah, product designer in Lagos. Browse the library disc by disc.">
+<title>Tolulope Elijah — Product Designer</title>
+<meta name="description" content="Tolulope Elijah is a product designer in Lagos. Six years shaping fintech, health and commerce products people keep using.">
 <meta name="theme-color" content="#f2f2f2">
 <link rel="icon" href="assets/favicon.svg" type="image/svg+xml">
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter+Tight:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/site.css?v=9">
+<link rel="stylesheet" href="css/site.css?v=14">
 
 <script type="importmap">
 { "imports": {
@@ -23,29 +23,236 @@
 <body data-view="home">
 
 <div class="grain" aria-hidden="true"></div>
+<a class="skip-link" href="#work">Skip to the work</a>
 
-<!-- the 3D library. Everything below is DOM layered over it. -->
-<canvas id="stage" class="stage" aria-hidden="true"></canvas>
-
-<!-- the hand-drawn marker loop that circles the disc you're pointing at -->
-<svg class="loop" id="loop" aria-hidden="true"><path id="loop-path" pathLength="1"/></svg>
-
-<!-- ══════════════ HOME ══════════════ -->
 <main class="home" id="home">
-  <h1 class="sr-only">Discover the work of Tolulope Elijah</h1>
 
-  <section class="info" aria-hidden="true">
-    <h2 class="info-title heading-s"><span class="swap" id="info-title"></span></h2>
-    <div class="row"><p class="eyebrow">Role</p><p class="paragraph-m right"><span class="swap" id="info-role"></span></p></div>
-    <div class="row"><p class="eyebrow">Year</p><p class="paragraph-m right"><span class="swap" id="info-year"></span></p></div>
-    <div class="row"><p class="eyebrow">Team</p><p class="paragraph-m right"><span class="swap" id="info-team"></span></p></div>
+  <!-- ══════════════ HERO ══════════════ -->
+  <section class="hero" id="top">
+    <div class="hero-meta">
+      <p class="eyebrow">Tolulope Elijah</p>
+      <p class="eyebrow">Product design, Lagos</p>
+      <p class="eyebrow">Available from March</p>
+    </div>
+    <div class="hero-inner">
+      <h1 class="hero-title">
+        <span class="sr-only">Tolulope Elijah, product designer in Lagos, Nigeria.</span>
+        <span class="h-line heading-xl">Designer who</span>
+        <span class="h-line heading-xl h-rotate" id="rotator" aria-hidden="true">Listens</span>
+      </h1>
+    </div>
+
+    <!-- the procession walks the rule at the foot of the hero -->
+    <div class="hero-ground">
+      <div class="hero-walk">
+        <svg class="walk-svg" viewBox="0 0 1440 180" preserveAspectRatio="none" aria-hidden="true">
+          <path id="walkPath" fill="none" stroke="none" d="M0 178 H1440"/>
+        </svg>
+      <div class="walker w-lead" style="--i:0">
+        <div class="wk-bob">
+          <svg viewBox="0 0 66 84" fill="none">
+<g class="wk-walk">
+              <g class="wk-leg wk-leg-a"><path d="M20 56.2c-.9 6-1 11.5-.6 16.7"/><path d="M19.4 72.9c-3.5.6-4.7 2.2-1.2 3 3 .7 5.5.2 5.3-1.4"/></g>
+              <g class="wk-leg wk-leg-b"><path d="M28.4 56.2c.9 6 1 11.5.6 16.7"/><path d="M29 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4"/></g>
+              <path class="wk-coat" d="M17.4 23.6C15.6 32 14.6 44.4 15.2 56.8c4.2 1.9 13.6 1.9 17.8 0 .7-12.4-.3-24.8-2.1-33.2Z"/>
+              <path class="wk-seam" d="M20.6 27.4c-.7 8.7-.8 19.1-.4 27.5"/>
+              <path class="wk-seam" d="M27.6 27.4c.7 8.7.8 19.1.4 27.5"/>
+              <g class="wk-arm wk-arm-a"><path d="M17.6 27.6c-3.5 6-4.7 12.3-4.1 17.9"/></g><path class="wk-carry" d="M30.8 27.2c4.3-2.7 7.7-6.1 9.5-8.7"/>
+              <path class="wk-hood" d="M14.2 20.4C13.8 11.4 18.6 6 24 6c5.6 0 10.3 5.2 9.9 14.3-.1 2.4-2.2 3.5-9.9 3.5-7.6 0-9.7-1.2-9.8-3.4Z"/>
+              <g class="wk-stereo"><rect x="39" y="8.2" width="23" height="11.4" rx="3"/><path d="M44 8.2c2.6-2.7 7-2.7 9.6 0"/><circle cx="45.2" cy="13.9" r="2.5"/><circle cx="55.8" cy="13.9" r="2.5"/><path d="M50.5 11.5v4.8"/></g><g class="wk-notes"><path class="wk-note n1" d="M2 11V3.4l4.4-1.1V10"/><path class="wk-note n2" d="M2 11V3.4l4.4-1.1V10"/></g>
+            </g>
+<g class="wk-sit">
+              <path d="M22 63.6c5.1 1.4 9.6 1.8 13.1 1.2"/><path d="M35.3 64.9c.9 3.2 1.2 6.3.9 9"/>
+              <path d="M23.2 61.8c5.5 1.6 10.6 2 14.5 1.2"/><path d="M37.6 63c1 3.7 1.4 7.1 1 9.9"/>
+              <path d="M38.4 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4"/>
+              <path d="M17.4 44.6c-3.7 5.4-5.3 11.7-4.7 17.2"/>
+              <path d="M30.6 44.8c3.4 3.4 6.1 6.2 7.9 8.1"/>
+              <path class="wk-coat" d="M17.6 40.6C15.8 47 14.8 55.1 15.6 62.7c4.4 1.6 13.5 1.6 17.7 0 .6-7.6-.4-15.7-2.2-22.1Z"/>
+              <path class="wk-seam" d="M21 44c-.6 6-.7 12.5-.4 17.5"/>
+              <path class="wk-seam" d="M27.6 44c.6 6 .7 12.5.4 17.5"/>
+              <path class="wk-hood" d="M14.2 37.4C13.8 28.4 18.6 23 24 23c5.6 0 10.3 5.2 9.9 14.3-.1 2.4-2.2 3.5-9.9 3.5-7.6 0-9.8-1.2-9.8-3.4Z"/>
+              <g class="wk-stereo-sit"><rect x="41" y="62.4" width="21.5" height="10.6" rx="2.8"/><path d="M45.6 62.4c2.4-2.5 6.5-2.5 8.9 0"/><circle cx="46.8" cy="67.7" r="2.3"/><circle cx="56.6" cy="67.7" r="2.3"/><path d="M51.7 65.5v4.4"/></g><g class="wk-notes"><path class="wk-note n1" d="M2 11V3.4l4.4-1.1V10"/><path class="wk-note n2" d="M2 11V3.4l4.4-1.1V10"/></g>
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="walker w-2" style="--i:1">
+        <div class="wk-bob">
+          <svg viewBox="0 0 66 84" fill="none">
+<g class="wk-walk">
+              <g class="wk-leg wk-leg-a"><path d="M20 56.2c-.9 6-1 11.5-.6 16.7"/><path d="M19.4 72.9c-3.5.6-4.7 2.2-1.2 3 3 .7 5.5.2 5.3-1.4"/></g>
+              <g class="wk-leg wk-leg-b"><path d="M28.4 56.2c.9 6 1 11.5.6 16.7"/><path d="M29 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4"/></g>
+              <path class="wk-coat" d="M17.4 23.6C15.6 32 14.6 44.4 15.2 56.8c4.2 1.9 13.6 1.9 17.8 0 .7-12.4-.3-24.8-2.1-33.2Z"/>
+              <path class="wk-seam" d="M20.6 27.4c-.7 8.7-.8 19.1-.4 27.5"/>
+              <path class="wk-seam" d="M27.6 27.4c.7 8.7.8 19.1.4 27.5"/>
+              <g class="wk-arm wk-arm-a"><path d="M17.6 27.6c-3.5 6-4.7 12.3-4.1 17.9"/></g><g class="wk-arm wk-arm-b"><path d="M30.6 27.6c3.5 6 4.7 12.3 4.1 17.9"/></g>
+              <path class="wk-hood" d="M14.2 20.4C13.8 11.4 18.6 6 24 6c5.6 0 10.3 5.2 9.9 14.3-.1 2.4-2.2 3.5-9.9 3.5-7.6 0-9.7-1.2-9.8-3.4Z"/>
+              
+            </g>
+<g class="wk-sit">
+              <path d="M22 63.6c5.1 1.4 9.6 1.8 13.1 1.2"/><path d="M35.3 64.9c.9 3.2 1.2 6.3.9 9"/>
+              <path d="M23.2 61.8c5.5 1.6 10.6 2 14.5 1.2"/><path d="M37.6 63c1 3.7 1.4 7.1 1 9.9"/>
+              <path d="M38.4 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4"/>
+              <path d="M17.4 44.6c-3.7 5.4-5.3 11.7-4.7 17.2"/>
+              <path d="M30.6 44.8c3.2 3.6 5.6 6.8 7.1 9.2"/>
+              <path class="wk-coat" d="M17.6 40.6C15.8 47 14.8 55.1 15.6 62.7c4.4 1.6 13.5 1.6 17.7 0 .6-7.6-.4-15.7-2.2-22.1Z"/>
+              <path class="wk-seam" d="M21 44c-.6 6-.7 12.5-.4 17.5"/>
+              <path class="wk-seam" d="M27.6 44c.6 6 .7 12.5.4 17.5"/>
+              <path class="wk-hood" d="M14.2 37.4C13.8 28.4 18.6 23 24 23c5.6 0 10.3 5.2 9.9 14.3-.1 2.4-2.2 3.5-9.9 3.5-7.6 0-9.8-1.2-9.8-3.4Z"/>
+              
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="walker w-3" style="--i:2">
+        <div class="wk-bob">
+          <svg viewBox="0 0 66 84" fill="none">
+<g class="wk-walk">
+              <g class="wk-leg wk-leg-a"><path d="M20 56.2c-.9 6-1 11.5-.6 16.7"/><path d="M19.4 72.9c-3.5.6-4.7 2.2-1.2 3 3 .7 5.5.2 5.3-1.4"/></g>
+              <g class="wk-leg wk-leg-b"><path d="M28.4 56.2c.9 6 1 11.5.6 16.7"/><path d="M29 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4"/></g>
+              <path class="wk-coat" d="M17.4 23.6C15.6 32 14.6 44.4 15.2 56.8c4.2 1.9 13.6 1.9 17.8 0 .7-12.4-.3-24.8-2.1-33.2Z"/>
+              <path class="wk-seam" d="M20.6 27.4c-.7 8.7-.8 19.1-.4 27.5"/>
+              <path class="wk-seam" d="M27.6 27.4c.7 8.7.8 19.1.4 27.5"/>
+              <g class="wk-arm wk-arm-a"><path d="M17.6 27.6c-3.5 6-4.7 12.3-4.1 17.9"/></g><g class="wk-arm wk-arm-b"><path d="M30.6 27.6c3.5 6 4.7 12.3 4.1 17.9"/></g>
+              <path class="wk-hood" d="M14.2 20.4C13.8 11.4 18.6 6 24 6c5.6 0 10.3 5.2 9.9 14.3-.1 2.4-2.2 3.5-9.9 3.5-7.6 0-9.7-1.2-9.8-3.4Z"/>
+              
+            </g>
+<g class="wk-sit">
+              <path d="M22 63.6c5.1 1.4 9.6 1.8 13.1 1.2"/><path d="M35.3 64.9c.9 3.2 1.2 6.3.9 9"/>
+              <path d="M23.2 61.8c5.5 1.6 10.6 2 14.5 1.2"/><path d="M37.6 63c1 3.7 1.4 7.1 1 9.9"/>
+              <path d="M38.4 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4"/>
+              <path d="M17.4 44.6c-3.7 5.4-5.3 11.7-4.7 17.2"/>
+              <path d="M30.6 44.8c3.2 3.6 5.6 6.8 7.1 9.2"/>
+              <path class="wk-coat" d="M17.6 40.6C15.8 47 14.8 55.1 15.6 62.7c4.4 1.6 13.5 1.6 17.7 0 .6-7.6-.4-15.7-2.2-22.1Z"/>
+              <path class="wk-seam" d="M21 44c-.6 6-.7 12.5-.4 17.5"/>
+              <path class="wk-seam" d="M27.6 44c.6 6 .7 12.5.4 17.5"/>
+              <path class="wk-hood" d="M14.2 37.4C13.8 28.4 18.6 23 24 23c5.6 0 10.3 5.2 9.9 14.3-.1 2.4-2.2 3.5-9.9 3.5-7.6 0-9.8-1.2-9.8-3.4Z"/>
+              
+            </g>
+          </svg>
+        </div>
+      </div>
+      <div class="walker w-4" style="--i:3">
+        <div class="wk-bob">
+          <svg viewBox="0 0 66 84" fill="none">
+<g class="wk-walk">
+              <g class="wk-leg wk-leg-a"><path d="M20 56.2c-.9 6-1 11.5-.6 16.7"/><path d="M19.4 72.9c-3.5.6-4.7 2.2-1.2 3 3 .7 5.5.2 5.3-1.4"/></g>
+              <g class="wk-leg wk-leg-b"><path d="M28.4 56.2c.9 6 1 11.5.6 16.7"/><path d="M29 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4"/></g>
+              <path class="wk-coat" d="M17.4 23.6C15.6 32 14.6 44.4 15.2 56.8c4.2 1.9 13.6 1.9 17.8 0 .7-12.4-.3-24.8-2.1-33.2Z"/>
+              <path class="wk-seam" d="M20.6 27.4c-.7 8.7-.8 19.1-.4 27.5"/>
+              <path class="wk-seam" d="M27.6 27.4c.7 8.7.8 19.1.4 27.5"/>
+              <g class="wk-arm wk-arm-a"><path d="M17.6 27.6c-3.5 6-4.7 12.3-4.1 17.9"/></g><g class="wk-arm wk-arm-b"><path d="M30.6 27.6c3.5 6 4.7 12.3 4.1 17.9"/></g>
+              <path class="wk-hood" d="M14.2 20.4C13.8 11.4 18.6 6 24 6c5.6 0 10.3 5.2 9.9 14.3-.1 2.4-2.2 3.5-9.9 3.5-7.6 0-9.7-1.2-9.8-3.4Z"/>
+              
+            </g>
+<g class="wk-sit">
+              <path d="M22 63.6c5.1 1.4 9.6 1.8 13.1 1.2"/><path d="M35.3 64.9c.9 3.2 1.2 6.3.9 9"/>
+              <path d="M23.2 61.8c5.5 1.6 10.6 2 14.5 1.2"/><path d="M37.6 63c1 3.7 1.4 7.1 1 9.9"/>
+              <path d="M38.4 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4"/>
+              <path d="M17.4 44.6c-3.7 5.4-5.3 11.7-4.7 17.2"/>
+              <path d="M30.6 44.8c3.2 3.6 5.6 6.8 7.1 9.2"/>
+              <path class="wk-coat" d="M17.6 40.6C15.8 47 14.8 55.1 15.6 62.7c4.4 1.6 13.5 1.6 17.7 0 .6-7.6-.4-15.7-2.2-22.1Z"/>
+              <path class="wk-seam" d="M21 44c-.6 6-.7 12.5-.4 17.5"/>
+              <path class="wk-seam" d="M27.6 44c.6 6 .7 12.5.4 17.5"/>
+              <path class="wk-hood" d="M14.2 37.4C13.8 28.4 18.6 23 24 23c5.6 0 10.3 5.2 9.9 14.3-.1 2.4-2.2 3.5-9.9 3.5-7.6 0-9.8-1.2-9.8-3.4Z"/>
+              
+            </g>
+          </svg>
+        </div>
+      </div>
+      </div>
+    </div>
   </section>
 
-  <section class="reviews" id="reviews" aria-hidden="true"></section>
+  <!-- ══════════════ THE LIBRARY ══════════════
+       A tall section that pins: each screen of scroll advances one disc. -->
+  <section class="library" id="work">
+    <div class="library-inner">
+      <canvas id="stage" class="stage" aria-hidden="true"></canvas>
+      <svg class="loop" id="loop" aria-hidden="true"><path id="loop-path" pathLength="1"/></svg>
 
-  <p class="sr-only" id="status" role="status" aria-live="polite"></p>
-  <p class="sr-only">Use the left and right arrow keys to browse projects. Press Enter to open the project in front, or Space to flip the disc over.</p>
-  <ul class="sr-only" id="sr-list" aria-label="All projects"></ul>
+      <div class="info">
+        <h2 class="info-title heading-s"><span class="swap" id="info-title"></span></h2>
+        <div class="row"><p class="eyebrow">Role</p><p class="paragraph-m right"><span class="swap" id="info-role"></span></p></div>
+        <div class="row"><p class="eyebrow">Year</p><p class="paragraph-m right"><span class="swap" id="info-year"></span></p></div>
+        <div class="row"><p class="eyebrow">Team</p><p class="paragraph-m right"><span class="swap" id="info-team"></span></p></div>
+      </div>
+
+      <div class="reviews" id="reviews" aria-hidden="true"></div>
+      <p class="library-hint eyebrow" aria-hidden="true">Keep scrolling to browse &middot; click a disc to open it</p>
+
+      <p class="sr-only" id="status" role="status" aria-live="polite"></p>
+      <p class="sr-only">Use the left and right arrow keys to browse projects. Press Enter to open the project in front, or Space to flip the disc over.</p>
+      <ul class="sr-only" id="sr-list" aria-label="All projects"></ul>
+    </div>
+  </section>
+
+  <!-- ══════════════ ABOUT ══════════════ -->
+  <section class="band" id="story">
+    <p class="band-label eyebrow">01 / About</p>
+    <div class="band-body">
+      <p class="band-lead heading-m reveal">Six years across fintech, health and commerce, from a payments dashboard used by 40,000 Nigerian merchants to a maternal-health companion carried by mothers in Lagos and Ibadan.</p>
+      <p class="band-note paragraph-l reveal">I care about the boring parts. Empty states, error copy, the eight pixels nobody noticed. That&rsquo;s usually where trust is won.</p>
+      <dl class="stats">
+        <div class="stat reveal"><dt class="heading-m" data-count="6">0</dt><dd class="eyebrow">Years designing</dd></div>
+        <div class="stat reveal"><dt class="heading-m" data-count="21">0</dt><dd class="eyebrow">Products shipped</dd></div>
+        <div class="stat reveal"><dt class="heading-m" data-count="4">0</dt><dd class="eyebrow">Countries served</dd></div>
+        <div class="stat reveal"><dt class="heading-m" data-suffix="&infin;">0</dt><dd class="eyebrow">Details sweated</dd></div>
+      </dl>
+    </div>
+  </section>
+
+  <!-- ══════════════ PROCESS ══════════════ -->
+  <section class="band" id="process">
+    <p class="band-label eyebrow">02 / How I work</p>
+    <div class="band-body">
+      <ol class="steps">
+        <li class="reveal"><span class="eyebrow">01</span><div><h3 class="heading-s">Listen</h3><p class="paragraph-m">Interviews, support tickets, session replays. I start where the friction actually lives, not where the roadmap says it does.</p></div></li>
+        <li class="reveal"><span class="eyebrow">02</span><div><h3 class="heading-s">Frame</h3><p class="paragraph-m">A problem stated well is half solved. I write the one-sentence version and get everyone to argue with it.</p></div></li>
+        <li class="reveal"><span class="eyebrow">03</span><div><h3 class="heading-s">Build</h3><p class="paragraph-m">Real prototypes in real code. Opinions get cheap the moment you can click the thing.</p></div></li>
+        <li class="reveal"><span class="eyebrow">04</span><div><h3 class="heading-s">Ship</h3><p class="paragraph-m">Then watch it. The design isn&rsquo;t finished until the numbers and the humans both agree.</p></div></li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ══════════════ TESTIMONIALS ══════════════ -->
+  <section class="band" id="testimonials">
+    <p class="band-label eyebrow">03 / In their words</p>
+    <div class="band-body">
+      <figure class="said reveal">
+        <blockquote class="heading-s">Tolulope has the rarest thing a designer can have: she holds the whole system in her head and still cares about the eight pixels nobody else noticed.</blockquote>
+        <figcaption class="eyebrow">Ifeoma Nwosu &middot; Head of Product at Kora</figcaption>
+      </figure>
+      <figure class="said reveal">
+        <blockquote class="heading-s">We handed her a problem space, not a brief. She came back with the research, a working prototype, and the three questions we should have asked ourselves six months earlier.</blockquote>
+        <figcaption class="eyebrow">Daniel Achebe &middot; Founder at Loomfolk</figcaption>
+      </figure>
+      <figure class="said reveal">
+        <blockquote class="heading-s">She writes better product copy than most writers, prototypes faster than most engineers, and still makes room to teach the rest of us.</blockquote>
+        <figcaption class="eyebrow">Marta Silva &middot; Design Lead at Tidemark</figcaption>
+      </figure>
+    </div>
+  </section>
+
+  <!-- ══════════════ CONTACT ══════════════ -->
+  <section class="band" id="contact">
+    <p class="band-label eyebrow">04 / What&rsquo;s next</p>
+    <div class="band-body">
+      <p class="band-lead heading-m reveal">Let&rsquo;s build something worth keeping.</p>
+      <p class="band-note paragraph-l reveal">From first sketch to shipped surface, I help teams make products that earn trust, move quickly and hold up under real use.</p>
+      <a class="contact-link heading-s reveal" href="mailto:hello@tolulope.design">hello@tolulope.design</a>
+    </div>
+  </section>
+
+  <footer class="site-foot">
+    <p class="eyebrow">Tolulope Elijah &middot; Lagos, Nigeria</p>
+    <ul class="foot-links">
+      <li><a class="eyebrow" href="#">LinkedIn</a></li>
+      <li><a class="eyebrow" href="#">Dribbble</a></li>
+      <li><a class="eyebrow" href="#">Read.cv</a></li>
+    </ul>
+    <p class="eyebrow">&copy;2026</p>
+  </footer>
 </main>
 
 <!-- ══════════════ PROJECT ══════════════ -->
@@ -69,6 +276,6 @@
 
 <noscript><p class="noscript">This site needs JavaScript and WebGL to show its disc library.</p></noscript>
 
-<script type="module" src="js/app.js?v=10"></script>
+<script type="module" src="js/app.js?v=14"></script>
 </body>
 </html>

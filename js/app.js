@@ -6,13 +6,15 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from './data.js?v=10';
-import { whenFonts, heroImage, galleryImage } from './art.js?v=10';
-import { createCarousel, createDiscStage } from './discs.js?v=10';
+import { COLLECTIONS, byCollection, bySlug } from './data.js?v=14';
+import { whenFonts, heroImage, galleryImage } from './art.js?v=14';
+import { createCarousel, createDiscStage } from './discs.js?v=14';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
 const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -134,15 +136,46 @@ function drawLoop() {
   path.style.strokeDashoffset = String(1 - (1 - Math.pow(1 - p, 3)));
 }
 
-/* ── collections ──────────────────────────────────────────────────────── */
-async function setCollection(id, index = 0, animate = true) {
+/* ── the library ──────────────────────────────────────────────────────────
+   The section is taller than the screen and its face pins. Where the page is
+   scrolled inside it decides which disc is in front, so scroll position is
+   the single source of truth: arrows, the index and clicking a neighbour all
+   scroll the page rather than setting the carousel directly. */
+function libGeom() {
+  const el = $('.library');
+  const top = el.getBoundingClientRect().top + scrollY;
+  return { el, top, travel: Math.max(1, el.offsetHeight - innerHeight) };
+}
+
+function scrollToDisc(i, instant) {
+  const { top, travel } = libGeom();
+  const n = byCollection(state.collection).length;
+  const y = top + travel * (clamp(i, 0, n - 1) / Math.max(1, n - 1));
+  scrollTo({ top: y, behavior: instant || reduce ? 'auto' : 'smooth' });
+}
+
+function onPageScroll() {
+  if (!carousel || state.view !== 'home') return;
+  const { el, top, travel } = libGeom();
+  const n = byCollection(state.collection).length;
+  carousel.goTo(Math.round(clamp((scrollY - top) / travel, 0, 1) * (n - 1)));
+
+  /* only render while the library is actually on screen */
+  const r = el.getBoundingClientRect();
+  const onScreen = r.top < innerHeight && r.bottom > 0;
+  carousel.setActive(onScreen);
+  if (!onScreen) onHover(false);
+}
+
+function setCollection(id, { scroll = true } = {}) {
   const changed = id !== state.collection || !carousel.count();
   state.collection = id;
   renderTabs(); renderIndex();
-  if (!changed) { animate ? carousel.goTo(index) : carousel.jump(index); return; }
-  if (animate && !reduce) { carousel.open(true); await wait(280); }
-  carousel.setProjects(byCollection(id), index);
-  carousel.open(false);
+  const list = byCollection(id);
+  $('.library').style.setProperty('--n', list.length);
+  if (!changed) return;
+  carousel.setProjects(list, 0);
+  if (scroll && state.view === 'home') scrollToDisc(0, true);
 }
 
 /* ── project page ─────────────────────────────────────────────────────── */
@@ -318,9 +351,8 @@ async function openProject(slug) {
 
   /* bring the library to the right disc first, so going back lands on it */
   const i = byCollection(p.collection).indexOf(p);
-  if (p.collection !== state.collection) await setCollection(p.collection, i, false);
-  else if (fromHome) carousel.goTo(i);
-  else carousel.jump(i);
+  if (p.collection !== state.collection) setCollection(p.collection, { scroll: false });
+  carousel.jump(i);
 
   if (fromHome && !reduce) {
     carousel.open(true);
@@ -346,8 +378,11 @@ function goHome(collection) {
   carousel.setActive(true);
   carousel.open(false);
   const p = slug && bySlug(slug);
-  const index = p && p.collection === collection ? byCollection(collection).indexOf(p) : 0;
-  setCollection(collection, index, !wasProject);
+  const index = p && p.collection === collection ? byCollection(collection).indexOf(p) : -1;
+  setCollection(collection, { scroll: false });
+  if (index >= 0) { carousel.jump(index); scrollToDisc(index, true); }
+  else if (wasProject) scrollToDisc(0, true);
+  onPageScroll();
 }
 
 function route() {
@@ -360,19 +395,20 @@ function route() {
 
 /* ── input ────────────────────────────────────────────────────────────── */
 function bindInput() {
-  addEventListener('wheel', e => {
-    if (state.view !== 'home' || state.panel) return;
-    carousel.wheel(e);
-  }, { passive: false });
+  addEventListener('scroll', onPageScroll, { passive: true });
+  addEventListener('resize', onPageScroll, { passive: true });
 
   addEventListener('keydown', e => {
     if (e.key === 'Escape' && state.panel) { setPanel(false); $('#index-btn').focus(); return; }
     if (state.view !== 'home' || state.panel) return;
     if (/^(INPUT|TEXTAREA)$/.test(document.activeElement?.tagName)) return;
     const onLink = document.activeElement?.closest?.('a, button');
+    /* only take the keys while the library is the thing on screen */
+    const r = $('.library').getBoundingClientRect();
+    if (!(r.top < innerHeight * 0.5 && r.bottom > innerHeight * 0.5)) return;
     switch (e.key) {
-      case 'ArrowRight': case 'ArrowDown': e.preventDefault(); carousel.step(1); break;
-      case 'ArrowLeft':  case 'ArrowUp':   e.preventDefault(); carousel.step(-1); break;
+      case 'ArrowRight': e.preventDefault(); scrollToDisc(carousel.index() + 1); break;
+      case 'ArrowLeft':  e.preventDefault(); scrollToDisc(carousel.index() - 1); break;
       case 'Enter': if (!onLink) { e.preventDefault(); location.hash = '#/p/' + carousel.project().slug; } break;
       case ' ':     if (!onLink) { e.preventDefault(); carousel.flip(); } break;
     }
@@ -383,10 +419,186 @@ function bindInput() {
   $('#index-list').addEventListener('click', e => {
     const b = e.target.closest('button[data-i]');
     if (!b) return;
-    carousel.goTo(+b.dataset.i);
+    scrollToDisc(+b.dataset.i);
     setPanel(false);
   });
   addEventListener('hashchange', route);
+}
+
+
+/* ══ HERO ═══════════════════════════════════════════════════════════════ */
+const ROTATE_WORDS = ['Listens', 'Ships', 'Notices', 'Refines'];
+
+/* the second line of the headline changes word: the old one leaves upward,
+   the new one arrives from below, a character at a time */
+function initRotator() {
+  const el = $('#rotator');
+  if (!el) return;
+  let i = 0;
+
+  const paint = (word, animate) => {
+    el.textContent = '';
+    [...word].forEach((ch, n) => {
+      const sp = document.createElement('span');
+      sp.className = 'r-char';
+      sp.textContent = ch;
+      if (animate && !reduce) {
+        sp.style.transform = 'translateY(90%)';
+        sp.style.opacity = '0';
+        sp.style.transition = `transform .8s var(--ease) ${n * 0.035}s, opacity .5s ease ${n * 0.035}s`;
+        requestAnimationFrame(() => requestAnimationFrame(() => {
+          sp.style.transform = 'none'; sp.style.opacity = '1';
+        }));
+      }
+      el.appendChild(sp);
+    });
+  };
+
+  const leave = () => new Promise(done => {
+    const chars = $$('.r-char', el);
+    if (reduce || !chars.length) return done();
+    chars.forEach((sp, n) => {
+      sp.style.transition = `transform .42s cubic-bezier(.55,.06,.68,.19) ${n * 0.026}s, opacity .34s ease ${n * 0.026}s`;
+      sp.style.transform = 'translateY(-80%)';
+      sp.style.opacity = '0';
+    });
+    setTimeout(done, 430 + chars.length * 26);
+  });
+
+  paint(ROTATE_WORDS[0], false);
+  if (reduce) return;
+
+  let timer = null;
+  const tick = async () => {
+    /* no point animating a headline nobody is looking at */
+    if (document.hidden || $('.hero').getBoundingClientRect().bottom < 0) return;
+    await leave();
+    i = (i + 1) % ROTATE_WORDS.length;
+    paint(ROTATE_WORDS[i], true);
+  };
+  const run = () => { clearInterval(timer); timer = setInterval(tick, 3400); };
+  run();
+  document.addEventListener('visibilitychange', () => document.hidden ? clearInterval(timer) : run());
+}
+
+/* ══ THE PROCESSION ═════════════════════════════════════════════════════
+   The figures walk the rule at the foot of the hero. Position comes from the
+   same path the rule is drawn along, sampled in pixel space, and the walk
+   advances in pixels per second so they move at one speed on every screen. */
+const WALKERS = [
+  { sel: '.w-lead', off:  0,     scale: 1    },
+  { sel: '.w-2',    off: -0.055, scale: .78  },
+  { sel: '.w-3',    off: -0.097, scale: .64  },
+  { sel: '.w-4',    off: -0.133, scale: .54  }
+];
+
+function initWalkers() {
+  const wrap = $('.hero-walk'), hero = $('.hero');
+  if (!wrap || !hero) return;
+  const svg = $('.walk-svg', wrap), path = $('#walkPath', wrap);
+  if (!svg || !path) return;
+
+  const VW = 1440, VH = 180;
+  let L = 0, W = 0, H = 0;
+  const measure = () => {
+    const r = svg.getBoundingClientRect();
+    W = r.width; H = r.height; L = path.getTotalLength();
+  };
+  measure();
+  addEventListener('resize', measure, { passive: true });
+
+  const at = f => {
+    const pt = path.getPointAtLength(clamp(f, 0, 1) * L);
+    return { x: pt.x / VW * W, y: pt.y / VH * H };
+  };
+
+  const crew = WALKERS.map(w => ({ ...w, el: $(w.sel, wrap) })).filter(w => w.el);
+  if (!crew.length) return;
+
+  const place = (w, f) => {
+    if (!W) measure();
+    const p = at(f);
+    w.el.style.transform =
+      `translate3d(${p.x}px, ${p.y}px, 0) translate(-50%, -100%) scale(${w.scale})`;
+    /* fade at the very edges so the wrap from right to left is never a pop */
+    w.el.style.opacity = clamp(Math.min(f, 1 - f) * 14, 0, 1).toFixed(3);
+  };
+
+  if (reduce) { crew.forEach(w => place(w, 0.46 + w.off)); return; }
+
+  let dist = 0.16, last = 0, raf = null, running = false, resting = false;
+
+  /* hovering the leader sits the whole line down */
+  const lead = $('.w-lead', wrap);
+  if (lead && fine) {
+    const rest = on => { resting = on; wrap.classList.toggle('resting', on); };
+    lead.addEventListener('pointerenter', () => rest(true));
+    lead.addEventListener('pointerleave', () => rest(false));
+    lead.addEventListener('focus', () => rest(true));
+    lead.addEventListener('blur', () => rest(false));
+  }
+
+  let pace = 1;
+  const frame = now => {
+    if (!running) return;
+    const dt = Math.min((now - (last || now)) / 1000, 0.1);
+    last = now;
+    pace += ((resting ? 0 : 1) - pace) * (1 - Math.pow(0.002, dt));
+    dist = (dist + (46 / Math.max(W, 1)) * pace * dt) % 1;
+    crew.forEach(w => {
+      let f = (dist + w.off) % 1;
+      if (f < 0) f += 1;
+      place(w, f);
+    });
+    raf = requestAnimationFrame(frame);
+  };
+  const start = () => { if (!running) { running = true; last = 0; raf = requestAnimationFrame(frame); } };
+  const stop  = () => { running = false; cancelAnimationFrame(raf); };
+
+  start();
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => (e.isIntersecting && !document.hidden) ? start() : stop(),
+      { threshold: 0 }).observe(hero);
+  }
+  document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
+  addEventListener('resize', () => {
+    measure();
+    if (!running) crew.forEach(w => place(w, (dist + w.off + 1) % 1));
+  }, { passive: true });
+}
+
+/* ══ REVEALS ════════════════════════════════════════════════════════════ */
+function countUp(el) {
+  const target = parseInt(el.dataset.count, 10);
+  const suffix = el.dataset.suffix;
+  if (!target) { el.innerHTML = suffix || '0'; return; }
+  if (reduce) { el.textContent = String(target); return; }
+  const t0 = performance.now();
+  const step = now => {
+    const p = clamp((now - t0) / 1300, 0, 1);
+    el.textContent = String(Math.round(target * (1 - Math.pow(1 - p, 3))));
+    if (p < 1) requestAnimationFrame(step);
+  };
+  requestAnimationFrame(step);
+}
+
+function initReveals() {
+  const items = $$('.reveal');
+  if (!('IntersectionObserver' in window)) {
+    items.forEach(el => el.classList.add('in'));
+    $$('[data-count], [data-suffix]').forEach(countUp);
+    return;
+  }
+  const io = new IntersectionObserver((entries, obs) => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      obs.unobserve(e.target);
+      e.target.classList.add('in');
+      const n = e.target.querySelector('[data-count], [data-suffix]');
+      if (n) countUp(n);
+    });
+  }, { rootMargin: '0px 0px -12% 0px' });
+  items.forEach(el => io.observe(el));
 }
 
 /* ── boot ─────────────────────────────────────────────────────────────── */
@@ -397,6 +609,7 @@ async function boot() {
     carousel = createCarousel($('#stage'), {
       onChange: showProject,
       onOpen: p => { location.hash = '#/p/' + p.slug; },
+      onPick: i => scrollToDisc(i),
       onHover,
       onFrame: drawLoop
     });
@@ -407,9 +620,12 @@ async function boot() {
     return;
   }
   bindInput();
-  carousel.setProjects(byCollection(state.collection), 0);
-  renderIndex();
+  initRotator();
+  initWalkers();
+  initReveals();
+  setCollection(state.collection, { scroll: false });
   route();
+  onPageScroll();
 }
 
 boot();

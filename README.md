@@ -1,8 +1,9 @@
 # Tolulope Elijah — Portfolio (v2, the disc library)
 
-Every project is a physical disc. Browse the library, open a disc, and its
-project page unfolds. Plain HTML, CSS and JavaScript with three.js loaded from
-a CDN. No build step.
+A scrolling page in paper and ink. The hero carries the headline from the
+first version of the site; below it, every project is a physical disc you
+scroll through; below that, the rest of the portfolio. Plain HTML, CSS and
+JavaScript with three.js loaded from a CDN. No build step.
 
 **All projects, figures and testimonials are placeholder.** See
 _Swapping in real content_.
@@ -11,22 +12,42 @@ The layout, type hierarchy and interaction model follow
 [a24.raviklaassens.com](https://a24.raviklaassens.com/) by Ravi Klaassens. It
 uses no A24 branding, and none of that site's artwork, copy or code.
 
+## The page
+
+| Section | What it is |
+| --- | --- |
+| Hero | The headline carried over from the first site, set in title case so it keeps its voice, with the procession walking the rule at its foot. |
+| The library | The discs. A tall section whose face pins while you scroll through it. |
+| About, Process, In their words, What's next | The rest of the portfolio, as ruled rows with their labels in the margin. |
+
+Everything is black on `#f2f2f2`, so the only colour anywhere comes from the
+project artwork on the discs. That contrast is what makes them the subject.
+
 ## How it behaves
 
-**Home: the library**
+**The hero**
+- The second line of the headline changes word on a timer: the old one leaves
+  upward a character at a time, the new one arrives from below.
+- Four hand-drawn figures walk the rule at the foot, the leader carrying a
+  stereo. Hovering the leader sits the whole line down. They walk at a fixed
+  speed in pixels per second, so the pace is the same on every screen.
+
+**The library**
 - A row of large 3D discs running on a diagonal. The disc ahead waits beyond
   the top right corner and travels down across the frame to leave at the
   bottom left, so scrolling reads as falling rather than sliding. Neighbours
   stay nearly full size and crop into the corners, which keeps the screen
-  full instead of empty.
-- **Scroll**, **← / →**, or **swipe** to move one disc at a time. The discs
-  roll as they travel, and each returns to its own resting angle in front.
+  full instead of empty. On a tall narrow screen they shrink and centre, to
+  leave the information block and the reviews room to breathe.
+- The section is taller than the screen and its face pins: **where the page
+  is scrolled inside it chooses the disc**. Scroll position is the single
+  source of truth, so the arrow keys, the index and clicking a neighbour all
+  scroll the page rather than moving the carousel behind its back. Each disc
+  gets roughly one screen of travel. The discs roll as they go, and each
+  settles at its own resting angle in front.
 - **Hover** the front disc and a hand-drawn marker loop circles it. Every loop
   is drawn fresh, so no two are identical. The disc also trembles very
   slightly while you point at it, so it reads as held rather than mounted.
-- One disc per scroll gesture. A trackpad flick arrives as dozens of small
-  deltas, so the carousel steps once and then refuses to step again until the
-  events stop, rather than running through three projects per flick.
 - **Space** flips the disc to its data side: silver, with the rainbow bands
   real discs throw.
 - **Click** the front disc, or press **Enter**, to open it. Click a neighbour

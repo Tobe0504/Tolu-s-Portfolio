@@ -10,7 +10,7 @@
    object read as physical instead of as a flat texture on a circle.
    ═══════════════════════════════════════════════════════════════════════════ */
 import * as THREE from 'three';
-import { discLabel, dataSide } from './art.js?v=10';
+import { discLabel, dataSide } from './art.js?v=14';
 
 /* proportions of a 120mm disc, normalised to radius 1 */
 const R = 1, HOLE = 0.125, HUB = 0.305, BAND = 0.335, LABEL_OUT = 0.985, T = 0.018;
@@ -173,7 +173,7 @@ function makeRenderer(canvas) {
 }
 
 /* ═══ the home carousel ═══════════════════════════════════════════════ */
-export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = {}) {
+export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFrame } = {}) {
   const renderer = makeRenderer(canvas);
   const scene = new THREE.Scene();
   scene.environment = studio(renderer);
@@ -185,7 +185,7 @@ export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = 
   const mats = materials(renderer);
 
   let items = [], current = 0, target = 0, lastIndex = -1;
-  let W = 1, H = 1, visW = 1, visH = 1, unit = 1;
+  let W = 1, H = 1, visW = 1, visH = 1, unit = 1, yBias = 0;
   let pointer = { x: 0, y: 0, inside: false }, hovering = false;
   let openT = 0, openTarget = 0, active = true, raf = 0, t0 = performance.now();
   const raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
@@ -197,11 +197,12 @@ export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = 
     camera.aspect = W / H; camera.updateProjectionMatrix();
     visH = 2 * Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) * camera.position.z;
     visW = visH * camera.aspect;
-    /* the centre disc is bounded by whichever of width or height runs out
-       first, so it reads the same on a phone and on a wide monitor. Sized to
-       fill most of the frame: the library should feel crowded with discs
-       rather than float in whitespace. */
-    unit = Math.min(visW * 0.44, visH * 0.40);
+    /* On a wide screen the discs fill the frame. On a tall narrow one they
+       have to give the information block at the top and the reviews at the
+       bottom room to breathe, so they shrink and sit centred instead. */
+    const portrait = camera.aspect < 0.85;
+    unit = portrait ? Math.min(visW * 0.38, visH * 0.23) : Math.min(visW * 0.44, visH * 0.40);
+    yBias = portrait ? -visH * 0.01 : visH * 0.07;
   }
 
   function setProjects(list, start = 0) {
@@ -252,7 +253,7 @@ export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = 
       const x = d * visW * 0.62;
       /* the row sits a little above centre so the reviews along the bottom
          keep a clear band of paper to sit on */
-      const y = d * visH * 0.54 + visH * 0.07;
+      const y = d * visH * 0.54 + yBias;
       const z = -ad * 0.8;
       const s = unit * (1 - near * 0.18) * (1 - Math.max(0, ad - 1) * 0.22);
 
@@ -346,64 +347,29 @@ export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = 
   }
 
   /* ── input ─────────────────────────────────────────────────────────── */
-  /* A trackpad flick arrives as dozens of small deltas over ~400ms. Stepping
-     whenever an accumulator crosses a threshold therefore fired three or four
-     times per flick. Instead: step once, then refuse to step again until the
-     gesture has actually ended, which is when the events stop arriving. */
-  let wheelAcc = 0, lastWheel = 0, quietTimer = 0, armed = true;
-  function onWheel(e) {
-    if (!active || openTarget) return;
-    e.preventDefault();
-    const now = performance.now();
-    const d = Math.abs(e.deltaY) >= Math.abs(e.deltaX) ? e.deltaY : e.deltaX;
-    const delta = d * (e.deltaMode === 1 ? 16 : 1);
-
-    if (now - lastWheel > 180) { wheelAcc = 0; armed = true; }   /* a fresh gesture */
-    lastWheel = now;
-
-    /* the gesture is over once nothing has arrived for a moment, including
-       the tail of the trackpad's own inertia */
-    clearTimeout(quietTimer);
-    quietTimer = setTimeout(() => { armed = true; wheelAcc = 0; }, 140);
-
-    if (!armed) return;
-    wheelAcc += delta;
-    if (Math.abs(wheelAcc) < 24) return;
-    step(Math.sign(wheelAcc));
-    wheelAcc = 0;
-    armed = false;                       /* one disc per flick, no matter how long it is */
-  }
-
-  let drag = null;
+  /* Scroll drives the carousel now: the library section pins and the page's
+     own scroll position chooses the disc, so the stage only has to handle
+     pointing and clicking. No wheel or drag handling lives here any more. */
+  let press = null;
   function onDown(e) {
     if (!active || openTarget) return;
-    drag = { x: e.clientX, start: target, moved: 0, id: e.pointerId, t: performance.now() };
+    press = { x: e.clientX, y: e.clientY };
   }
   function onMove(e) {
     const r = canvas.getBoundingClientRect();
     pointer.x = ((e.clientX - r.left) / r.width) * 2 - 1;
     pointer.y = -((e.clientY - r.top) / r.height) * 2 + 1;
-    /* only count as "over the stage" when nothing else (the bar) is on top */
-    pointer.inside = e.target === canvas || !!drag;
-    if (!drag) return;
-    const dx = e.clientX - drag.x;
-    drag.moved = Math.max(drag.moved, Math.abs(dx));
-    if (drag.moved > 6) target = clamp(drag.start - dx / (W * 0.42), -0.35, items.length - 0.65);
+    pointer.inside = e.target === canvas;
   }
   function onUp(e) {
-    if (!drag) return;
-    const moved = drag.moved;
-    const velocity = (drag.x - e.clientX) / Math.max(1, performance.now() - drag.t);
-    drag = null;
-    if (moved > 6) {
-      /* a quick flick carries on to the next disc even if it was short */
-      goTo(target + clamp(velocity, -1, 1) * 0.6);
-      return;
-    }
+    if (!press) return;
+    const moved = Math.hypot(e.clientX - press.x, e.clientY - press.y);
+    press = null;
+    if (moved > 6) return;
     const over = pick();
     if (over === null) return;
     if (over === index()) onOpen && onOpen(items[over].project);
-    else goTo(over);
+    else onPick && onPick(over);
   }
 
   canvas.addEventListener('pointerdown', onDown);
@@ -419,7 +385,6 @@ export function createCarousel(canvas, { onChange, onOpen, onHover, onFrame } = 
     setProjects, goTo, jump, step, flip, index, centreOutline,
     count: () => items.length,
     project: () => items[index()]?.project,
-    wheel: onWheel,
     setActive(on) { active = on; frame.last = 0; },
     open(on) { openTarget = on ? 1 : 0; },
     isHovering: () => hovering
