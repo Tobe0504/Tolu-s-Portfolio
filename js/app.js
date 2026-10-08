@@ -6,9 +6,9 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from './data.js?v=14';
-import { whenFonts, heroImage, galleryImage } from './art.js?v=14';
-import { createCarousel, createDiscStage } from './discs.js?v=14';
+import { COLLECTIONS, byCollection, bySlug } from './data.js?v=17';
+import { whenFonts, heroImage, galleryImage } from './art.js?v=17';
+import { createCarousel, createDiscStage } from './discs.js?v=17';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -158,7 +158,8 @@ function onPageScroll() {
   if (!carousel || state.view !== 'home') return;
   const { el, top, travel } = libGeom();
   const n = byCollection(state.collection).length;
-  carousel.goTo(Math.round(clamp((scrollY - top) / travel, 0, 1) * (n - 1)));
+  /* continuous, not rounded: the discs should move with the scroll */
+  carousel.setCurrent(clamp((scrollY - top) / travel, 0, 1) * (n - 1));
 
   /* only render while the library is actually on screen */
   const r = el.getBoundingClientRect();
@@ -361,6 +362,7 @@ async function openProject(slug) {
   }
   unmountProject();
   state.view = 'project'; state.slug = slug;
+  carousel.setScrollDriven(false);
   carousel.setActive(false);
   document.body.dataset.view = 'project';
   document.body.classList.remove('leaving');
@@ -376,6 +378,7 @@ function goHome(collection) {
   document.body.dataset.view = 'home';
   document.title = 'Tolulope Elijah — Work';
   carousel.setActive(true);
+  carousel.setScrollDriven(true);
   carousel.open(false);
   const p = slug && bySlug(slug);
   const index = p && p.collection === collection ? byCollection(collection).indexOf(p) : -1;
@@ -619,6 +622,7 @@ async function boot() {
     console.error(err);
     return;
   }
+  carousel.setScrollDriven(true);
   bindInput();
   initRotator();
   initWalkers();

@@ -10,7 +10,7 @@
    object read as physical instead of as a flat texture on a circle.
    ═══════════════════════════════════════════════════════════════════════════ */
 import * as THREE from 'three';
-import { discLabel, dataSide } from './art.js?v=14';
+import { discLabel, dataSide } from './art.js?v=17';
 
 /* proportions of a 120mm disc, normalised to radius 1 */
 const R = 1, HOLE = 0.125, HUB = 0.305, BAND = 0.335, LABEL_OUT = 0.985, T = 0.018;
@@ -184,7 +184,7 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
   camera.position.set(0, 0, 12);
   const mats = materials(renderer);
 
-  let items = [], current = 0, target = 0, lastIndex = -1;
+  let items = [], current = 0, target = 0, lastIndex = -1, scrollDriven = false;
   let W = 1, H = 1, visW = 1, visH = 1, unit = 1, yBias = 0;
   let pointer = { x: 0, y: 0, inside: false }, hovering = false;
   let openT = 0, openTarget = 0, active = true, raf = 0, t0 = performance.now();
@@ -226,6 +226,14 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
   }
 
   const goTo = i => { target = clamp(Math.round(i), 0, items.length - 1); };
+
+  /* Pinned to the page's scroll: position is taken exactly, with no spring
+     in between, so the discs travel with the scroll instead of sitting still
+     and then lurching a whole step once a rounded index changed. */
+  const setCurrent = v => {
+    target = current = clamp(v, 0, Math.max(0, items.length - 1));
+    layout(0.016, true);
+  };
   /* move without travelling: used while the library is hidden, so coming
      back from a project lands on its disc instead of wheeling there */
   const jump = i => { goTo(i); current = target; layout(0.016, true); };
@@ -331,8 +339,10 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
     const dt = Math.min((now - (frame.last || now)) / 1000, 0.05);
     frame.last = now;
 
-    current = reduce ? target : damp(current, target, 6.5, dt);
-    if (Math.abs(current - target) < 0.0005) current = target;
+    if (!scrollDriven) {
+      current = reduce ? target : damp(current, target, 6.5, dt);
+      if (Math.abs(current - target) < 0.0005) current = target;
+    }
     openT = reduce ? openTarget : damp(openT, openTarget, 7, dt);
 
     layout(dt);
@@ -382,10 +392,11 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
   raf = requestAnimationFrame(frame);
 
   return {
-    setProjects, goTo, jump, step, flip, index, centreOutline,
+    setProjects, goTo, jump, setCurrent, step, flip, index, centreOutline,
     count: () => items.length,
     project: () => items[index()]?.project,
     setActive(on) { active = on; frame.last = 0; },
+    setScrollDriven(on) { scrollDriven = on; },
     open(on) { openTarget = on ? 1 : 0; },
     isHovering: () => hovering
   };

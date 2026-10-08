@@ -23,6 +23,11 @@ uses no A24 branding, and none of that site's artwork, copy or code.
 Everything is black on `#f2f2f2`, so the only colour anywhere comes from the
 project artwork on the discs. That contrast is what makes them the subject.
 
+Text is held to a measure (`--wrap`, 72em) rather than running the full
+width: at 1440 and wider, full-bleed type throws related things to opposite
+edges of the screen. The discs stay full-bleed, since filling the frame is
+the point of them.
+
 ## How it behaves
 
 **The hero**
@@ -40,11 +45,12 @@ project artwork on the discs. That contrast is what makes them the subject.
   full instead of empty. On a tall narrow screen they shrink and centre, to
   leave the information block and the reviews room to breathe.
 - The section is taller than the screen and its face pins: **where the page
-  is scrolled inside it chooses the disc**. Scroll position is the single
-  source of truth, so the arrow keys, the index and clicking a neighbour all
-  scroll the page rather than moving the carousel behind its back. Each disc
-  gets roughly one screen of travel. The discs roll as they go, and each
-  settles at its own resting angle in front.
+  is scrolled inside it chooses the disc**. Position is taken from the scroll
+  continuously, with no spring in between, so the discs travel with your
+  finger rather than sitting still and then lurching a whole step. Scroll
+  position is the single source of truth, so the arrow keys, the index and
+  clicking a neighbour all scroll the page rather than moving the carousel
+  behind its back. Each disc gets roughly one screen of travel.
 - **Hover** the front disc and a hand-drawn marker loop circles it. Every loop
   is drawn fresh, so no two are identical. The disc also trembles very
   slightly while you point at it, so it reads as held rather than mounted.
