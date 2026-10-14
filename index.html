@@ -11,7 +11,17 @@
       name="description"
       content="Tolulope Elijah is a product designer in Lagos. Six years shaping fintech, health and commerce products people keep using."
     />
-    <meta name="theme-color" content="#f2f2f2" />
+    <meta name="theme-color" content="#f2f2f2" id="theme-color" />
+    <script>
+      /* before first paint, so the page never flashes the wrong paper */
+      try {
+        var saved = localStorage.getItem("theme");
+        var dark = saved
+          ? saved === "dark"
+          : matchMedia("(prefers-color-scheme: dark)").matches;
+        document.documentElement.dataset.theme = dark ? "dark" : "light";
+      } catch (e) {}
+    </script>
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -20,7 +30,7 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
     />
-    <link rel="stylesheet" href="css/site.css?v=28" />
+    <link rel="stylesheet" href="css/site.css?v=31" />
 
     <script type="importmap">
       {
@@ -594,6 +604,25 @@
             />
           </svg>
         </button>
+        <!-- a sun and a moon, drawn with the same unsteady pen -->
+        <button class="theme-btn" id="theme-btn" aria-label="Switch to dark">
+          <svg viewBox="0 0 24 24" aria-hidden="true">
+            <g class="t-sun">
+              <path
+                d="M12 7.3c2.6-.2 4.9 2 4.8 4.6-.1 2.7-2 4.9-4.8 4.9-2.6 0-4.9-2-4.8-4.8.1-2.5 2.2-4.7 4.8-4.7Z"
+              />
+              <path d="M12 2.7v2.2M12 19.1v2.2M2.7 12h2.2M19.1 12h2.2" />
+              <path
+                d="m5.5 5.3 1.6 1.7M16.9 17l1.6 1.7M18.5 5.3 16.9 7M7.1 17l-1.6 1.7"
+              />
+            </g>
+            <g class="t-moon">
+              <path
+                d="M15.8 3.5c-4.8.8-8 5.3-7 10 .8 3.7 4 6.4 7.8 6.5-5.9 2.4-12.3-2-12.3-8.4 0-5.2 4.3-9.3 11.5-8.1Z"
+              />
+            </g>
+          </svg>
+        </button>
       </div>
     </nav>
     <div class="scrim" id="scrim" hidden></div>
@@ -604,6 +633,6 @@
       </p></noscript
     >
 
-    <script type="module" src="js/app.js?v=28"></script>
+    <script type="module" src="js/app.js?v=31"></script>
   </body>
 </html>

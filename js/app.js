@@ -6,7 +6,7 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=28";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=31";
 import {
   whenFonts,
   heroImage,
@@ -18,8 +18,9 @@ import {
   heroCloud,
   heroBird,
   doodle,
-} from "./art.js?v=28";
-import { createCarousel, createDiscStage } from "./discs.js?v=28";
+  setInk,
+} from "./art.js?v=31";
+import { createCarousel, createDiscStage } from "./discs.js?v=31";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -54,6 +55,7 @@ let carousel = null,
   unbindProject = null;
 let scene = null,
   player = null,
+  redrawHero = null,
   waveAt = 0;
 
 /* ── small pieces ─────────────────────────────────────────────────────── */
@@ -341,7 +343,7 @@ function tearPath(seed) {
 }
 
 function projectMarkup(p, next) {
-  const tint = `color-mix(in srgb, ${p.art.bg} 9%, #d6d4d1)`;
+  const tint = `color-mix(in srgb, ${p.art.bg} 9%, var(--tint-base))`;
   const meta = [
     ["Client", p.client],
     ["Year", p.year],
@@ -1158,6 +1160,8 @@ function initHeroScene() {
       ),
     };
   }
+  /* the whole scene is pre-drawn, so changing ink means drawing it again */
+  redrawHero = build;
 
   function frame(now) {
     if (!running) return;
@@ -1399,6 +1403,45 @@ function initReveals() {
   items.forEach((el) => io.observe(el));
 }
 
+
+/* ── light and dark ───────────────────────────────────────────────────────
+   The stylesheet holds both palettes, including chalk copies of the three
+   drawn lines, so switching is a single attribute. The one thing CSS can't
+   reach is the hero, which is painted on a canvas: its pen is told the new
+   ink and the scene is drawn again. */
+function initTheme() {
+  const btn = $("#theme-btn");
+  const root = document.documentElement;
+
+  const apply = (dark, remember) => {
+    root.dataset.theme = dark ? "dark" : "light";
+    $("#theme-color")?.setAttribute("content", dark ? "#17161a" : "#f2f2f2");
+    btn?.setAttribute("aria-label", dark ? "Switch to light" : "Switch to dark");
+    setInk(dark ? "#f1ede6" : "#161616");
+    redrawHero && redrawHero();
+    initHeroMarks();
+    if (remember) {
+      try {
+        localStorage.setItem("theme", dark ? "dark" : "light");
+      } catch {}
+    }
+  };
+
+  apply(root.dataset.theme === "dark", false);
+  btn?.addEventListener("click", () =>
+    apply(root.dataset.theme !== "dark", true),
+  );
+
+  /* follow the system until the visitor has said otherwise */
+  matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e) => {
+    let chosen = null;
+    try {
+      chosen = localStorage.getItem("theme");
+    } catch {}
+    if (!chosen) apply(e.matches, false);
+  });
+}
+
 /* ── boot ─────────────────────────────────────────────────────────────── */
 async function boot() {
   renderTabs();
@@ -1444,6 +1487,7 @@ async function boot() {
   initRotator();
   initHeroScene();
   initHeroMarks();
+  initTheme();
   initWalkers();
   initReveals();
   setCollection(state.collection, { scroll: false });

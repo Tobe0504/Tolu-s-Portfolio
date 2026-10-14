@@ -28,6 +28,11 @@
   --ink: #000;
   --rule: rgba(0, 0, 0, 0.42);
   --mute: #8a8a8a;
+  /* surfaces that are not paper: the floating bar, the scrollbar, and the
+     base the project pages tint with the project's own colour */
+  --surface: #fff;
+  --track: #e6e6e6;
+  --tint-base: #d6d4d1;
   /* One family, rounded and geometric. Outfit is the closest free stand-in
      for Gilroy; --display and --ui stay separate tokens so a second face can
      be dropped into either later without hunting through the stylesheet. */
@@ -307,7 +312,7 @@ body[data-view="project"] .stage {
 }
 .loop path {
   fill: none;
-  stroke: #111;
+  stroke: var(--ink);
   stroke-width: 2.1;
   stroke-linecap: round;
   stroke-linejoin: round;
@@ -434,8 +439,8 @@ body[data-view="project"] .stage {
   bottom: calc(1.1em + env(safe-area-inset-bottom));
   z-index: 30;
   transform: translateX(-50%);
-  width: 22em;
-  background: #fff;
+  width: 24.5em;
+  background: var(--surface);
   transition: width 0.45s var(--ease);
 }
 .bar.wide {
@@ -443,7 +448,7 @@ body[data-view="project"] .stage {
 }
 .bar-row {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  grid-template-columns: auto 1fr auto auto;
   align-items: center;
   height: 3.6em;
   padding: 0 1.4em;
@@ -470,6 +475,7 @@ body[data-view="project"] .stage {
   color: var(--mute);
   transition: color 0.25s ease;
   padding: 0.4em 0;
+  white-space: nowrap;
 }
 .tab[aria-selected="true"] {
   color: var(--ink);
@@ -513,6 +519,46 @@ body[data-view="project"] .index-btn {
   visibility: hidden;
 }
 
+/* the sun and the moon swap places, each turning a little as it goes */
+.theme-btn {
+  display: grid;
+  place-items: center;
+  width: 1.9em;
+  height: 1.9em;
+  margin-left: 0.2em;
+  color: var(--ink);
+}
+.theme-btn svg {
+  width: 1.05em;
+  height: 1.05em;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.theme-btn g {
+  transform-origin: 50% 50%;
+  transition:
+    opacity 0.3s ease,
+    transform 0.45s var(--ease);
+}
+.t-sun,
+:root[data-theme="dark"] .t-moon {
+  opacity: 0;
+  transform: scale(0.6) rotate(-40deg);
+}
+.t-moon,
+:root[data-theme="dark"] .t-sun {
+  opacity: 1;
+  transform: none;
+}
+.theme-btn:hover svg,
+.theme-btn:focus-visible svg {
+  color: var(--accent);
+}
+
 .index-panel {
   padding: 1.6em 1.4em 0.4em;
 }
@@ -522,16 +568,16 @@ body[data-view="project"] .index-btn {
   overflow-y: auto;
   padding-right: 0.9em;
   scrollbar-width: thin;
-  scrollbar-color: #000 #e6e6e6;
+  scrollbar-color: var(--ink) var(--track);
 }
 .index-list::-webkit-scrollbar {
   width: 3px;
 }
 .index-list::-webkit-scrollbar-track {
-  background: #e6e6e6;
+  background: var(--track);
 }
 .index-list::-webkit-scrollbar-thumb {
-  background: #000;
+  background: var(--ink);
 }
 .index-list button {
   display: flex;
@@ -546,7 +592,7 @@ body[data-view="project"] .index-btn {
 .index-list button[aria-current="true"],
 .index-list button:hover,
 .index-list button:focus-visible {
-  background: #000;
+  background: var(--ink);
   color: var(--paper);
   outline: none;
 }
@@ -695,7 +741,7 @@ body[data-view="project"] .index-btn {
 .p-next {
   position: relative;
   display: block;
-  background: var(--tint, #d7d5d2);
+  background: var(--tint, var(--tint-base));
   /* taller than the screen: the extra travel is what lifts the disc */
   height: 200vh;
   cursor: pointer;
@@ -790,7 +836,7 @@ body[data-view="project"] .loop {
 .p-after {
   position: relative;
   z-index: 3;
-  background: var(--tint, #d7d5d2);
+  background: var(--tint, var(--tint-base));
   overflow: hidden; /* stickers stay inside the page */
 }
 .p-after > * {
@@ -1348,6 +1394,29 @@ body[data-view="project"] .loop {
 /* ── the procession, in ink ───────────────────────────────────────────── */
 :root {
   --walker: #111;
+}
+
+/* ── dark ─────────────────────────────────────────────────────────────────
+   Not an inversion: chalk on a dark sketchbook. Every drawn line on the
+   site lives inside an SVG data URI with its stroke baked in, so the three
+   of them are restated here in chalk rather than filtered — a filter would
+   drag the artwork and the discs with it. */
+:root[data-theme="dark"] {
+  --paper: #17161a;
+  --ink: #f1ede6;
+  --rule: rgba(241, 237, 230, 0.34);
+  --mute: #918c85;
+  --surface: #211f24;
+  --track: #2a272d;
+  --tint-base: #1d1b20;
+  --walker: #f1ede6;
+  --drawn-h: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='5'%3E%3Cpath d='M0 2.5C18 1.5 34 3.5 52 2.5S88 1.4 106 2.7S140 3.4 160 2.5' fill='none' stroke='%23f1ede6' stroke-opacity='.55' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E");
+  --drawn-box: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M9 6C41 4 80 9 112 6c2 34-2 74 0 106-32 3-72-2-104 0C6 80 11 40 9 6Z' fill='none' stroke='%23f1ede6' stroke-opacity='.6' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+}
+/* the grain is a light speckle; on a dark page it has to lift, not darken */
+:root[data-theme="dark"] .grain {
+  mix-blend-mode: screen;
+  opacity: 0.045;
 }
 
 .hero-walk {
