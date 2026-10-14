@@ -10,7 +10,7 @@
    object read as physical instead of as a flat texture on a circle.
    ═══════════════════════════════════════════════════════════════════════════ */
 import * as THREE from 'three';
-import { discLabel, dataSide } from './art.js?v=23';
+import { discLabel, dataSide } from './art.js?v=24';
 
 /* proportions of a 120mm disc, normalised to radius 1 */
 const R = 1, HOLE = 0.125, HUB = 0.305, BAND = 0.335, LABEL_OUT = 0.985, T = 0.018;
@@ -185,6 +185,9 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
   const mats = materials(renderer);
 
   let items = [], current = 0, target = 0, lastIndex = -1, scrollDriven = false;
+  /* the disc in front turns under its own power while its track plays, and
+     spins up and coasts down rather than snapping to speed */
+  let spinning = false, spinRate = 0, playSpin = 0;
   let W = 1, H = 1, visW = 1, visH = 1, unit = 1, yBias = 0;
   let pointer = { x: 0, y: 0, inside: false }, hovering = false;
   let openT = 0, openTarget = 0, active = true, raf = 0, t0 = performance.now();
@@ -293,7 +296,7 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
 
       /* rolling: the discs spin with the carousel's velocity, like they are
          being wheeled past rather than slid */
-      u.spin.rotation.z = u.restSpin + d * 1.9;
+      u.spin.rotation.z = u.restSpin + d * 1.9 + (ad < 0.6 ? playSpin : 0);
 
       u.flip.rotation.y = snap ? u.flipTarget : damp(u.flip.rotation.y, u.flipTarget, 7, dt);
 
@@ -344,6 +347,9 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
       if (Math.abs(current - target) < 0.0005) current = target;
     }
     openT = reduce ? openTarget : damp(openT, openTarget, 7, dt);
+
+    spinRate = damp(spinRate, spinning && !reduce ? 3.1 : 0, 2.2, dt);
+    if (spinRate > 0.002) playSpin += dt * spinRate;
 
     layout(dt);
 
@@ -397,6 +403,7 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
     project: () => items[index()]?.project,
     setActive(on) { active = on; frame.last = 0; },
     setScrollDriven(on) { scrollDriven = on; },
+    setSpinning(on) { spinning = !!on; },
     open(on) { openTarget = on ? 1 : 0; },
     isHovering: () => hovering
   };

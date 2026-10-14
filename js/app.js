@@ -6,10 +6,10 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from './data.js?v=23';
+import { COLLECTIONS, byCollection, bySlug } from './data.js?v=24';
 import { whenFonts, heroImage, galleryImage, sceneImage,
-         heroScenery, heroSun, heroMoon, heroCloud, heroBird } from './art.js?v=23';
-import { createCarousel, createDiscStage } from './discs.js?v=23';
+         heroScenery, heroSun, heroMoon, heroCloud, heroBird } from './art.js?v=24';
+import { createCarousel, createDiscStage } from './discs.js?v=24';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -141,19 +141,23 @@ function onHover(on) {
     loop.on = true; loop.start = performance.now(); loop.seed = Math.random();
     svg.classList.remove('off');
   } else {
-    loop.on = false; loop.until = performance.now() + 300;
+    loop.on = false;
+    /* while a track plays the ring stays drawn around the disc in front */
+    if (player && player.isPlaying()) return;
+    loop.until = performance.now() + 300;
     svg.classList.add('off');
   }
 }
 
 function drawLoop() {
   const now = performance.now();
-  if (!loop.on && now > loop.until) return;
+  const live = !!(player && player.isPlaying());
+  if (!loop.on && !live && now > loop.until) return;
   const pts = carousel.centreOutline();
   if (!pts) return;
   const path = $('#loop-path');
   path.setAttribute('d', loopPath(pts, loop.seed));
-  const p = reduce ? 1 : Math.min(1, (now - loop.start) / 720);
+  const p = reduce || live ? 1 : Math.min(1, (now - loop.start) / 720);
   path.style.strokeDashoffset = String(1 - (1 - Math.pow(1 - p, 3)));
 }
 
@@ -175,6 +179,28 @@ function scrollToDisc(i, instant) {
   scrollTo({ top: y, behavior: instant || reduce ? 'auto' : 'smooth' });
 }
 
+/* Scroll drives the discs continuously, which is what makes them read as
+   wheeled past rather than clicked through. The cost is that letting go
+   halfway leaves two discs sharing the frame, so once the page goes quiet
+   the library takes up the slack and settles on whichever disc is nearest. */
+let snapTimer = 0;
+function scheduleSnap() {
+  clearTimeout(snapTimer);
+  if (reduce) return;
+  snapTimer = setTimeout(() => {
+    if (!carousel || state.view !== 'home' || state.panel) return;
+    const { el, top, travel } = libGeom();
+    const r = el.getBoundingClientRect();
+    /* only while the face is pinned — arriving and leaving belong to the page */
+    if (r.top > 1 || r.bottom < innerHeight - 1) return;
+    const n = byCollection(state.collection).length;
+    const at = clamp((scrollY - top) / travel, 0, 1) * (n - 1);
+    const i = Math.round(at);
+    if (Math.abs(at - i) < 0.04) return;   /* close enough; don't nudge */
+    scrollToDisc(i);
+  }, 170);
+}
+
 function onPageScroll() {
   if (!carousel || state.view !== 'home') return;
   const { el, top, travel } = libGeom();
@@ -187,6 +213,7 @@ function onPageScroll() {
   const onScreen = r.top < innerHeight && r.bottom > 0;
   carousel.setActive(onScreen);
   if (!onScreen) { onHover(false); if (player && player.isPlaying()) player.stop(); }
+  if (onScreen) scheduleSnap();
 }
 
 function setCollection(id, { scroll = true } = {}) {
@@ -699,6 +726,9 @@ function createPlayer(onProgress) {
     if (master) { try { master.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25); } catch {} }
     setTimeout(() => { voices.forEach(v => { try { v.stop(); } catch {} }); voices = []; }, 300);
     if (el) { el.pause(); }
+    carousel?.setSpinning(false);
+    $('#loop')?.classList.remove('beat');
+    if (!(carousel && carousel.isHovering())) $('#loop')?.classList.add('off');
     $('#track')?.classList.remove('playing');
     $('#track-play')?.setAttribute('aria-label', 'Play this track');
   }
@@ -721,6 +751,12 @@ function createPlayer(onProgress) {
         master = synth(track);
       }
       playing = true;
+      /* the disc in front turns, and the drawn ring stays around it, so you
+         can see at a glance which project is sounding */
+      carousel?.setSpinning(true);
+      loop.start = performance.now(); loop.seed = Math.random();
+      $('#loop')?.classList.remove('off');
+      $('#loop')?.classList.add('beat');
       $('#track')?.classList.add('playing');
       $('#track-play')?.setAttribute('aria-label', 'Pause this track');
       raf = requestAnimationFrame(tick);

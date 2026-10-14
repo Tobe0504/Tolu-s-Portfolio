@@ -397,72 +397,158 @@ function hatch(ctx, x, y, w, h, step, angle, r) {
   ctx.restore();
 }
 
+/* ── things worth drawing ─────────────────────────────────────────────────
+   Blooms, butterflies, hearts, bows, sparkles and trailing vines. Each is
+   drawn with the same wandering pen as everything else, so they belong to
+   the same hand as the hero and the rules. */
+function bloom(ctx, x, y, size, petals, r) {
+  for (let i = 0; i < petals; i++) {
+    const a = (i / petals) * Math.PI * 2 + r() * 0.2;
+    const pts = [];
+    for (let t = 0; t <= 1.001; t += 0.1) {
+      const spread = Math.sin(t * Math.PI) * size * 0.42;
+      const along = t * size;
+      pts.push([x + Math.cos(a) * along - Math.sin(a) * spread,
+                y + Math.sin(a) * along + Math.cos(a) * spread]);
+    }
+    for (let t = 1; t >= -0.001; t -= 0.1) {
+      const spread = -Math.sin(t * Math.PI) * size * 0.42;
+      const along = t * size;
+      pts.push([x + Math.cos(a) * along - Math.sin(a) * spread,
+                y + Math.sin(a) * along + Math.cos(a) * spread]);
+    }
+    pen(ctx, pts, size * 0.06, r);
+  }
+  const c = [];
+  for (let t = 0; t <= Math.PI * 2 + .3; t += .4) c.push([x + Math.cos(t) * size * 0.17, y + Math.sin(t) * size * 0.17]);
+  pen(ctx, c, size * 0.04, r);
+}
+
+function butterfly(ctx, x, y, size, r) {
+  for (const side of [-1, 1]) {
+    const up = [], down = [];
+    for (let t = 0; t <= 1.001; t += 0.12) {
+      up.push([x + side * Math.sin(t * Math.PI) * size * 0.85, y - size * 0.1 - Math.sin(t * Math.PI * 0.9) * size * 0.62]);
+      down.push([x + side * Math.sin(t * Math.PI) * size * 0.62, y + size * 0.12 + Math.sin(t * Math.PI * 0.9) * size * 0.46]);
+    }
+    pen(ctx, [[x, y - size * 0.1], ...up, [x, y]], size * 0.05, r);
+    pen(ctx, [[x, y], ...down, [x, y + size * 0.1]], size * 0.05, r);
+  }
+  pen(ctx, [[x, y - size * 0.3], [x, y + size * 0.3]], size * 0.04, r);
+  pen(ctx, [[x, y - size * 0.3], [x - size * 0.16, y - size * 0.52]], size * 0.04, r);
+  pen(ctx, [[x, y - size * 0.3], [x + size * 0.16, y - size * 0.52]], size * 0.04, r);
+}
+
+function heart(ctx, x, y, size, r) {
+  const pts = [];
+  for (let t = 0; t <= Math.PI * 2 + 0.2; t += 0.18) {
+    const px = 16 * Math.pow(Math.sin(t), 3);
+    const py = -(13 * Math.cos(t) - 5 * Math.cos(2 * t) - 2 * Math.cos(3 * t) - Math.cos(4 * t));
+    pts.push([x + px * size / 18, y + py * size / 18]);
+  }
+  pen(ctx, pts, size * 0.05, r);
+}
+
+function sparkle(ctx, x, y, size, r) {
+  for (let i = 0; i < 4; i++) {
+    const a = (i / 4) * Math.PI;
+    const l = size * (i % 2 ? 0.55 : 1);
+    pen(ctx, [[x - Math.cos(a) * l, y - Math.sin(a) * l], [x + Math.cos(a) * l, y + Math.sin(a) * l]], size * 0.08, r);
+  }
+}
+
+function bow(ctx, x, y, size, r) {
+  for (const side of [-1, 1]) {
+    const loop = [];
+    for (let t = 0; t <= Math.PI * 2 + .2; t += .35)
+      loop.push([x + side * size * 0.55 + Math.cos(t) * size * 0.42, y + Math.sin(t) * size * 0.3]);
+    pen(ctx, loop, size * 0.06, r);
+    pen(ctx, [[x + side * size * 0.15, y + size * 0.1],
+              [x + side * size * 0.5, y + size * 0.85],
+              [x + side * size * 0.3, y + size * 0.95]], size * 0.06, r);
+  }
+  const knot = [];
+  for (let t = 0; t <= Math.PI * 2 + .2; t += .5) knot.push([x + Math.cos(t) * size * 0.16, y + Math.sin(t) * size * 0.16]);
+  pen(ctx, knot, size * 0.04, r);
+}
+
+function vine(ctx, x, y, len, size, r, dir = 1) {
+  const spine = [];
+  for (let t = 0; t <= 1.001; t += 0.08)
+    spine.push([x + t * len * dir, y - Math.sin(t * Math.PI * 1.6) * size * 1.6]);
+  pen(ctx, spine, size * 0.1, r);
+  spine.forEach(([sx, sy], i) => {
+    if (i % 2 || i === 0) return;
+    const a = (i % 4 ? 1 : -1) * 1.1;
+    const leaf = [];
+    for (let t = 0; t <= 1.001; t += 0.15) {
+      const spread = Math.sin(t * Math.PI) * size * 0.3;
+      leaf.push([sx + Math.cos(a) * t * size - Math.sin(a) * spread, sy + Math.sin(a) * t * size + Math.cos(a) * spread]);
+    }
+    pen(ctx, leaf, size * 0.06, r);
+  });
+}
+
 export function sceneImage(p, w, h) {
   const c = document.createElement('canvas');
   c.width = w; c.height = h;
   const ctx = c.getContext('2d'), a = p.art, r = rng(p.slug + 'scene');
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = a.bg2;
 
-  const horizon = h * 0.72;
-  ctx.strokeStyle = a.bg2; ctx.globalAlpha = .5; ctx.lineWidth = Math.max(1.4, w * 0.0012);
+  const S = Math.min(w, h);
 
-  /* the ground */
-  const ground = [];
-  for (let x = -20; x <= w + 20; x += w / 14) ground.push([x, horizon + Math.sin(x / w * 5 + r()) * h * 0.012]);
-  pen(ctx, ground, 3, r);
+  /* a loose garland of blooms along the bottom, and one climbing each side */
+  ctx.globalAlpha = .34; ctx.lineWidth = Math.max(1.4, S * 0.0022);
+  vine(ctx, -w * 0.02, h * 0.93, w * 0.55, S * 0.05, r, 1);
+  vine(ctx, w * 1.02, h * 0.88, w * 0.5, S * 0.045, r, -1);
 
-  /* what stands on it, chosen by the project's motif */
   ctx.globalAlpha = .4;
-  const m = a.motif;
-  if (m === 'waves' || m === 'pulse') {
-    for (let i = 1; i <= 3; i++) {
-      const line = [];
-      for (let x = -20; x <= w + 20; x += w / 18)
-        line.push([x, horizon + i * h * 0.055 + Math.sin(x / w * 7 + i) * h * 0.016]);
-      ctx.globalAlpha = .34 - i * .06;
-      pen(ctx, line, 2.5, r);
-    }
-  } else if (m === 'route' || m === 'grid') {
-    for (let i = 0; i < 7; i++) {
-      const x = w * (0.08 + i * 0.13), bh = h * (0.08 + r() * 0.22);
-      pen(ctx, [[x, horizon], [x, horizon - bh], [x + w * 0.07, horizon - bh], [x + w * 0.07, horizon]], 2.5, r);
-      if (r() > .5) hatch(ctx, x, horizon - bh, w * 0.07, bh, 7, 0.5, r);
-    }
-  } else if (m === 'weave' || m === 'type') {
-    for (let i = 0; i < 5; i++) {
-      const x = w * (0.1 + i * 0.19), y = horizon - h * (0.06 + r() * 0.2), s = w * 0.07;
-      pen(ctx, [[x, y], [x + s, y - s * 0.3], [x + s * 1.1, y + s * 0.7], [x + s * 0.1, y + s], [x, y]], 3, r);
-    }
-  } else {
-    /* rooftops */
-    let x = -w * 0.05;
-    while (x < w * 1.05) {
-      const bw = w * (0.08 + r() * 0.1), bh = h * (0.06 + r() * 0.2);
-      pen(ctx, [[x, horizon], [x, horizon - bh], [x + bw, horizon - bh], [x + bw, horizon]], 2.5, r);
-      if (r() > .6) hatch(ctx, x, horizon - bh, bw, bh, 8, 0.4, r);
-      x += bw * 1.08;
-    }
+  const blooms = 5;
+  for (let i = 0; i < blooms; i++) {
+    const x = w * (0.08 + i * (0.84 / (blooms - 1))) + (r() - .5) * w * 0.05;
+    const y = h * (0.82 + (r() - .5) * 0.1);
+    bloom(ctx, x, y, S * (0.045 + r() * 0.03), 5 + Math.floor(r() * 2), r);
   }
 
-  /* a sun or moon, gone round twice */
-  ctx.globalAlpha = .35;
-  const cx = w * (0.16 + r() * 0.1), cy = h * 0.22, rad = Math.min(w, h) * 0.085;
-  for (let pass = 0; pass < 2; pass++) {
-    ctx.beginPath();
-    for (let t = 0; t <= Math.PI * 2 + 0.3; t += 0.22) {
-      const rr = rad + (r() - 0.5) * 4;
-      const px = cx + Math.cos(t) * rr, py = cy + Math.sin(t) * rr;
-      t ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
-    }
-    ctx.stroke();
-  }
-
-  /* a few birds, because the page has them elsewhere */
+  /* a couple of blooms up high, drifting free */
   ctx.globalAlpha = .3;
-  for (let i = 0; i < 4; i++) {
-    const bx = w * (0.55 + r() * 0.35), by = h * (0.12 + r() * 0.18), s = w * 0.012;
-    pen(ctx, [[bx - s, by], [bx, by - s * 0.6], [bx + s, by]], 1.5, r);
+  bloom(ctx, w * (0.12 + r() * 0.08), h * (0.2 + r() * 0.1), S * 0.05, 6, r);
+  bloom(ctx, w * (0.78 + r() * 0.1), h * (0.16 + r() * 0.1), S * 0.04, 5, r);
+
+  /* butterflies, hearts and bows, picked per project so each scene differs */
+  ctx.globalAlpha = .38;
+  const kind = ['butterfly', 'heart', 'bow', 'sparkle'][Math.floor(r() * 4)];
+  for (let i = 0; i < 3; i++) {
+    const x = w * (0.2 + r() * 0.62), y = h * (0.26 + r() * 0.4), s = S * (0.03 + r() * 0.025);
+    if (kind === 'butterfly') butterfly(ctx, x, y, s, r);
+    else if (kind === 'heart') heart(ctx, x, y, s * 1.5, r);
+    else if (kind === 'bow') bow(ctx, x, y, s, r);
+    else sparkle(ctx, x, y, s, r);
   }
+
+  /* sparkles scattered through, because everything is better with them */
+  ctx.globalAlpha = .34;
+  for (let i = 0; i < 9; i++)
+    sparkle(ctx, w * r(), h * (0.1 + r() * 0.75), S * (0.008 + r() * 0.014), r);
+
+  return c;
+}
+
+/* a single doodle, for margins and stickers elsewhere on the site */
+export function doodle(kind, size, seed = '', colour = '#161616') {
+  const c = document.createElement('canvas');
+  c.width = c.height = Math.round(size * 2.4);
+  const ctx = c.getContext('2d'), r = rng(kind + seed);
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = colour; ctx.globalAlpha = .75;
+  ctx.lineWidth = Math.max(1.3, size * 0.07);
+  const m = c.width / 2;
+  if (kind === 'bloom') bloom(ctx, m, m, size * 0.78, 6, r);
+  else if (kind === 'butterfly') butterfly(ctx, m, m, size * 0.7, r);
+  else if (kind === 'heart') heart(ctx, m, m, size, r);
+  else if (kind === 'bow') bow(ctx, m, m * 0.85, size * 0.7, r);
+  else sparkle(ctx, m, m, size * 0.8, r);
   return c;
 }
 
