@@ -491,7 +491,7 @@ function vine(ctx, x, y, len, size, r, dir = 1) {
 
 export function sceneImage(p, w, h) {
   const c = document.createElement('canvas');
-  c.width = w; c.height = h;
+  c.width = Math.max(1, Math.round(w)); c.height = Math.max(1, Math.round(h));
   const ctx = c.getContext('2d'), a = p.art, r = rng(p.slug + 'scene');
   ctx.lineCap = 'round'; ctx.lineJoin = 'round';
   ctx.strokeStyle = a.bg2;

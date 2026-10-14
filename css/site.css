@@ -186,6 +186,7 @@ canvas {
   background-image: var(--drawn-h);
   background-repeat: repeat-x;
   background-position: left top;
+  padding-top: 100px;
 }
 .row,
 .info-title,
@@ -1160,8 +1161,14 @@ body[data-view="project"] .loop {
 /* ── the library: a tall section whose inner face pins ────────────────── */
 .library {
   position: relative;
-  /* one screen, plus a screen of travel for every disc after the first */
-  height: calc(100vh + (var(--n, 8) - 1) * var(--per-disc, 78vh));
+  /* the run-out: how far the face keeps scrolling after the last disc,
+     fading as it goes. js/app.js reads the same figure (LIB_TAIL). */
+  --lib-tail: 45vh;
+  /* one screen, plus a screen of travel for every disc after the first,
+     plus the run-out the face fades across (set in px from JS) */
+  height: calc(
+    100vh + (var(--n, 8) - 1) * var(--per-disc, 78vh) + var(--lib-tail, 55vh)
+  );
 }
 .library-inner {
   position: sticky;
@@ -1169,6 +1176,7 @@ body[data-view="project"] .loop {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+  opacity: var(--lib-fade, 1);
 }
 .library-hint {
   position: absolute;
@@ -1253,7 +1261,7 @@ body[data-view="project"] .loop {
   border-top: 1px solid rgba(0, 0, 0, 0.18);
 }
 .said:first-child {
-  padding-top: 0;
+  padding-top: 8;
   border-top: 0;
 }
 .said blockquote {
