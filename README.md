@@ -20,8 +20,15 @@ uses no A24 branding, and none of that site's artwork, copy or code.
 | The library | The discs. A tall section whose face pins while you scroll through it. |
 | About, Process, In their words, What's next | The rest of the portfolio, as ruled rows with their labels in the margin. |
 
-Everything is black on `#f2f2f2`, so the only colour anywhere comes from the
-project artwork on the discs. That contrast is what makes them the subject.
+**Drawn, not ruled.** Every line is a stroke with a wobble in it, tiled so
+the joins are invisible; boxes use the same hand through `border-image`. Both
+live as `--drawn-h` and `--drawn-box` in `:root`, so anything that wants a
+line or a frame picks them up.
+
+**Colour comes from the work.** `--accent` is set from whichever disc is in
+front and runs through the page furniture: section labels, step numbers,
+statistics, metrics, the waveform and the scene. Everything else stays ink on
+paper.
 
 Text is held to a measure (`--wrap`, 72em) rather than running the full
 width: at 1440 and wider, full-bleed type throws related things to opposite
@@ -38,6 +45,14 @@ the point of them.
   speed in pixels per second, so the pace is the same on every screen.
 
 **The library**
+- Each disc carries a **track**: number, title, runtime and a drawn waveform,
+  with a play button. With `track.audio` left as `null` the player synthesises
+  an original loop in the browser from that track's key and tempo, so a disc
+  always plays something and the site ships no one else's music. Point
+  `audio` at a file she owns or has licensed and it plays that instead.
+- Behind the discs a **drawn scene** changes with the project: a horizon, a
+  few shapes and some hatching in that project's colours, cross-fading from
+  one disc to the next.
 - A row of large 3D discs running on a diagonal. The disc ahead waits beyond
   the top right corner and travels down across the frame to leave at the
   bottom left, so scrolling reads as falling rather than sliding. Neighbours
@@ -64,9 +79,13 @@ the point of them.
   opens a list above the bar with the current project inverted; pick any to
   jump to it.
 
-**Project page** — a full case study
-- Centred title, credits line, and a ruled table: client, year, industry,
+**Project page** — a full case study, laid out as a working spread
+- The title with a drawn stroke under it, and the facts pinned as a tilted
+  index card rather than ruled across the page: client, year, industry,
   platform, timeline and status.
+- Screens are pinned at slight angles with a strip of tape, chapter labels
+  point in from the margin with a drawn arrow, and the outcome figures are
+  ringed by hand.
 - The hero image is revealed through a torn-paper edge, pinned while the
   project's tagline scrolls past word by word, alternating sides between
   hairlines.
@@ -141,14 +160,10 @@ them freely; a project's `collection` field says which tab it belongs to.
 
 ## Type
 
-| Role | Face | Stand-in for |
-| --- | --- | --- |
-| Headings, labels | Instrument Serif | PP Eiko, PP Museum |
-| Everything else | Inter Tight | PP Neue Montreal |
-
-The reference's fonts are commercial (Pangram Pangram), so free equivalents
-are used. If she licenses the originals, add the files and change `--serif`
-and `--sans` in `css/site.css`.
+One family: **Outfit**, a rounded geometric sans, used for everything.
+It is the closest free stand-in for Gilroy, which is a commercial licence.
+`--display` and `--ui` are kept as separate tokens so a second face can be
+dropped into either without hunting through the stylesheet.
 
 Sizing is fluid: `1em` derives from the viewport through `--size-font` (12px
 at 1440 wide, 16px at 1920), with its own curve inside each breakpoint band.

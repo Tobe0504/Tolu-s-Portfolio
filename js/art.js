@@ -5,15 +5,15 @@
    `discImage` / `heroImage` path uses that file instead.
    ═══════════════════════════════════════════════════════════════════════════ */
 
-const SERIF = '"Instrument Serif", "Times New Roman", serif';
-const SANS  = '"Inter Tight", "Helvetica Neue", Arial, sans-serif';
+const SERIF = '"Outfit", ui-rounded, system-ui, sans-serif';   /* label display */
+const SANS  = '"Outfit", ui-rounded, system-ui, sans-serif';   /* label small print */
 
 let fontsReady = null;
 export function whenFonts() {
   if (!fontsReady) {
     fontsReady = document.fonts
       ? Promise.all([
-          document.fonts.load(`400 80px ${SERIF}`),
+          document.fonts.load(`600 80px ${SERIF}`),
           document.fonts.load(`500 20px ${SANS}`)
         ]).catch(() => {})
       : Promise.resolve();
@@ -191,7 +191,7 @@ export function discLabel(p, size = 1024) {
   /* both lines sit outside the clear hub (a third of the radius), or the
      hub's plastic swallows them */
   const titleSize = p.name.length > 9 ? W * 0.085 : W * 0.115;
-  ctx.font = `400 ${titleSize}px ${SERIF}`;
+  ctx.font = `600 ${titleSize}px ${SERIF}`;
   ctx.fillText(p.name, W * 0.5, H * 0.255);
   ctx.font = `600 ${W * 0.022}px ${SANS}`;
   ctx.globalAlpha = .75;
@@ -364,5 +364,104 @@ export function galleryImage(p, variant = 'detail', w = 1400, h = 950) {
   }
 
   grain(ctx, w, h, 0.07);
+  return c;
+}
+
+/* ── the scene behind the discs ───────────────────────────────────────────
+   A loose backdrop per project, drawn with a wobbling pen rather than clean
+   geometry: a horizon, a few shapes and some hatching in that project's
+   colour. It cross-fades as you scroll from one disc to the next. */
+function pen(ctx, pts, jitter, r) {
+  /* a line drawn by hand wanders, and is gone over more than once */
+  for (let pass = 0; pass < 2; pass++) {
+    ctx.beginPath();
+    pts.forEach(([x, y], i) => {
+      const jx = (r() - 0.5) * jitter, jy = (r() - 0.5) * jitter;
+      i ? ctx.lineTo(x + jx, y + jy) : ctx.moveTo(x + jx, y + jy);
+    });
+    ctx.globalAlpha *= 0.75;
+    ctx.stroke();
+  }
+}
+
+function hatch(ctx, x, y, w, h, step, angle, r) {
+  ctx.save();
+  ctx.beginPath(); ctx.rect(x, y, w, h); ctx.clip();
+  const len = Math.hypot(w, h);
+  for (let i = -len; i < len; i += step) {
+    ctx.beginPath();
+    ctx.moveTo(x + i + (r() - 0.5) * 4, y - 10);
+    ctx.lineTo(x + i + Math.tan(angle) * (h + 20) + (r() - 0.5) * 4, y + h + 10);
+    ctx.stroke();
+  }
+  ctx.restore();
+}
+
+export function sceneImage(p, w, h) {
+  const c = document.createElement('canvas');
+  c.width = w; c.height = h;
+  const ctx = c.getContext('2d'), a = p.art, r = rng(p.slug + 'scene');
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+
+  const horizon = h * 0.72;
+  ctx.strokeStyle = a.bg2; ctx.globalAlpha = .5; ctx.lineWidth = Math.max(1.4, w * 0.0012);
+
+  /* the ground */
+  const ground = [];
+  for (let x = -20; x <= w + 20; x += w / 14) ground.push([x, horizon + Math.sin(x / w * 5 + r()) * h * 0.012]);
+  pen(ctx, ground, 3, r);
+
+  /* what stands on it, chosen by the project's motif */
+  ctx.globalAlpha = .4;
+  const m = a.motif;
+  if (m === 'waves' || m === 'pulse') {
+    for (let i = 1; i <= 3; i++) {
+      const line = [];
+      for (let x = -20; x <= w + 20; x += w / 18)
+        line.push([x, horizon + i * h * 0.055 + Math.sin(x / w * 7 + i) * h * 0.016]);
+      ctx.globalAlpha = .34 - i * .06;
+      pen(ctx, line, 2.5, r);
+    }
+  } else if (m === 'route' || m === 'grid') {
+    for (let i = 0; i < 7; i++) {
+      const x = w * (0.08 + i * 0.13), bh = h * (0.08 + r() * 0.22);
+      pen(ctx, [[x, horizon], [x, horizon - bh], [x + w * 0.07, horizon - bh], [x + w * 0.07, horizon]], 2.5, r);
+      if (r() > .5) hatch(ctx, x, horizon - bh, w * 0.07, bh, 7, 0.5, r);
+    }
+  } else if (m === 'weave' || m === 'type') {
+    for (let i = 0; i < 5; i++) {
+      const x = w * (0.1 + i * 0.19), y = horizon - h * (0.06 + r() * 0.2), s = w * 0.07;
+      pen(ctx, [[x, y], [x + s, y - s * 0.3], [x + s * 1.1, y + s * 0.7], [x + s * 0.1, y + s], [x, y]], 3, r);
+    }
+  } else {
+    /* rooftops */
+    let x = -w * 0.05;
+    while (x < w * 1.05) {
+      const bw = w * (0.08 + r() * 0.1), bh = h * (0.06 + r() * 0.2);
+      pen(ctx, [[x, horizon], [x, horizon - bh], [x + bw, horizon - bh], [x + bw, horizon]], 2.5, r);
+      if (r() > .6) hatch(ctx, x, horizon - bh, bw, bh, 8, 0.4, r);
+      x += bw * 1.08;
+    }
+  }
+
+  /* a sun or moon, gone round twice */
+  ctx.globalAlpha = .35;
+  const cx = w * (0.16 + r() * 0.1), cy = h * 0.22, rad = Math.min(w, h) * 0.085;
+  for (let pass = 0; pass < 2; pass++) {
+    ctx.beginPath();
+    for (let t = 0; t <= Math.PI * 2 + 0.3; t += 0.22) {
+      const rr = rad + (r() - 0.5) * 4;
+      const px = cx + Math.cos(t) * rr, py = cy + Math.sin(t) * rr;
+      t ? ctx.lineTo(px, py) : ctx.moveTo(px, py);
+    }
+    ctx.stroke();
+  }
+
+  /* a few birds, because the page has them elsewhere */
+  ctx.globalAlpha = .3;
+  for (let i = 0; i < 4; i++) {
+    const bx = w * (0.55 + r() * 0.35), by = h * (0.12 + r() * 0.18), s = w * 0.012;
+    pen(ctx, [[bx - s, by], [bx, by - s * 0.6], [bx + s, by]], 1.5, r);
+  }
   return c;
 }

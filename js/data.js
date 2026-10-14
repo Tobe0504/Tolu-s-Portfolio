@@ -4,6 +4,12 @@
    ⚠ Placeholder content. Names, clients, figures and testimonials are
    invented to show the layout at full density. Replace before launch.
 
+   Audio: each project has a `track`. With `audio: null` the player
+   synthesises an original loop in the browser from the track's key and bpm,
+   so every disc plays something without shipping anyone else's music. Set
+   `audio` to a file path (something she owns or has licensed) and the player
+   uses that file instead.
+
    Artwork: each project renders a generated disc label and hero image
    from `art` below. To use real images instead, add them to the project:
      discImage: 'assets/discs/<slug>.webp'    square, printed on the disc
@@ -40,6 +46,8 @@ export const PROJECTS = [
       { caption: 'The dashboard in a merchant’s back office', variant: 'context' }
     ],
     quote: { text: 'Nine days of silence was the product. We just never saw it that way until the replays were on the wall.', who: 'Ifeoma Nwosu, Head of Product' },
+    track: { title: 'Nine Days To Forty Minutes', duration: '2:14', key: 'A', bpm: 96,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Ifeoma Nwosu, Kora', quote: 'Obvious in hindsight', stars: 5 },
@@ -67,6 +75,8 @@ export const PROJECTS = [
       { caption: 'The app on the phone it was designed for', variant: 'context' }
     ],
     quote: { text: 'She designed for the phone our mothers actually own, not the one in the pitch deck.', who: 'Dr. Amara Obi, Clinical Lead' },
+    track: { title: 'Designed For The Real Phone', duration: '2:48', key: 'D', bpm: 72,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Dr. Amara Obi, Azza', quote: 'Designed for the real phone', stars: 5 },
@@ -94,6 +104,8 @@ export const PROJECTS = [
       { caption: 'Browsing the market from abroad', variant: 'context' }
     ],
     quote: { text: 'We stopped competing with printed copies the week the provenance shipped.', who: 'Daniel Achebe, Founder' },
+    track: { title: 'Made By Hand, Sold Worldwide', duration: '3:02', key: 'G', bpm: 84,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Daniel Achebe, Loomfolk', quote: 'The questions we should have asked', stars: 5 },
@@ -121,6 +133,8 @@ export const PROJECTS = [
       { caption: 'The one-page brief a committee sees', variant: 'context' }
     ],
     quote: { text: 'The first version showed everything we knew. The version that worked showed what to do.', who: 'Marta Silva, Product Lead' },
+    track: { title: 'Maps For People, Not Scientists', duration: '2:36', key: 'E', bpm: 68,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Marta Silva, Tidemark', quote: 'Raised the floor for the team', stars: 5 },
@@ -148,6 +162,8 @@ export const PROJECTS = [
       { caption: 'The market, in a pocket', variant: 'context' }
     ],
     quote: { text: 'It behaves like our market. That is the whole compliment.', who: 'Bola Hassan, Founder' },
+    track: { title: 'The Market In Your Pocket', duration: '2:21', key: 'C', bpm: 104,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Bola Hassan, Oja', quote: 'Felt like our market', stars: 5 },
@@ -175,6 +191,8 @@ export const PROJECTS = [
       { caption: 'The driver app at the gate', variant: 'context' }
     ],
     quote: { text: 'Our dispatchers go home on time. I did not expect that to be a design outcome.', who: 'Yemi Alade, Operations Director' },
+    track: { title: 'Every Truck, One Screen', duration: '2:55', key: 'F', bpm: 88,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Yemi Alade, Harbor', quote: 'Our dispatchers go home on time', stars: 5 },
@@ -202,6 +220,8 @@ export const PROJECTS = [
       { caption: 'One tablet, shared between four', variant: 'context' }
     ],
     quote: { text: 'It was built for the classroom we have, not the one in the brochure.', who: 'Aisha Bello, Programme Lead' },
+    track: { title: 'Lessons That Wait For You', duration: '3:11', key: 'D', bpm: 64,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Aisha Bello, Nuri', quote: 'Built for the classroom we have', stars: 5 },
@@ -229,6 +249,8 @@ export const PROJECTS = [
       { caption: 'Filing from the roadside', variant: 'context' }
     ],
     quote: { text: 'Claims stopped being the thing we apologised for.', who: 'Kunle Ade, Claims Director' },
+    track: { title: 'A Calmer Worst Day', duration: '2:42', key: 'A', bpm: 76,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Kunle Ade, Vesta', quote: 'Claims we can be proud of', stars: 4.5 },
@@ -258,6 +280,8 @@ export const PROJECTS = [
       { caption: 'The folded pocket map', variant: 'context' }
     ],
     quote: { text: 'A map that admits what it does not know is more useful than one that pretends.', who: 'Project notes' },
+    track: { title: 'A Map For A City Without One', duration: '2:08', key: 'G', bpm: 110,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Personal project', quote: 'Mapping the unmapped', stars: 5 },
@@ -285,6 +309,8 @@ export const PROJECTS = [
       { caption: 'Across three time zones', variant: 'context' }
     ],
     quote: { text: 'If my grandmother cannot use it in ten seconds, it does not ship.', who: 'Project notes' },
+    track: { title: 'Across Three Oceans', duration: '3:24', key: 'C', bpm: 60,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Personal project', quote: 'Three buttons for grandma', stars: 5 },
@@ -312,6 +338,8 @@ export const PROJECTS = [
       { caption: 'The folded specimen poster', variant: 'context' }
     ],
     quote: { text: 'Every glyph has an address. That felt like the point.', who: 'Project notes' },
+    track: { title: 'Letters With A Home Town', duration: '1:58', key: 'E', bpm: 92,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Personal project', quote: 'Every glyph has an address', stars: 5 },
@@ -339,6 +367,8 @@ export const PROJECTS = [
       { caption: 'The notebook index', variant: 'context' }
     ],
     quote: { text: 'Interruption is the test. Everything looks fine if you never touch it.', who: 'Project notes' },
+    track: { title: 'Small Moves, Kept', duration: '2:30', key: 'F', bpm: 100,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Personal project', quote: 'Forty notes and counting', stars: 5 },
@@ -366,6 +396,8 @@ export const PROJECTS = [
       { caption: 'The system in an interface', variant: 'context' }
     ],
     quote: { text: 'Twelve blues that pass was harder than a hundred that look nice.', who: 'Project notes' },
+    track: { title: 'Twelve Blues That Pass', duration: '2:47', key: 'D', bpm: 70,
+             audio: null },   /* drop a licensed file path here to play it instead */
     links: { prototype: '#', live: '#' },
     reviews: [
       { source: 'Personal project', quote: 'Twelve blues that pass', stars: 5 },

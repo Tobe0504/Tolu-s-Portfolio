@@ -6,9 +6,9 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from './data.js?v=17';
-import { whenFonts, heroImage, galleryImage } from './art.js?v=17';
-import { createCarousel, createDiscStage } from './discs.js?v=17';
+import { COLLECTIONS, byCollection, bySlug } from './data.js?v=21';
+import { whenFonts, heroImage, galleryImage, sceneImage } from './art.js?v=21';
+import { createCarousel, createDiscStage } from './discs.js?v=21';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -20,6 +20,7 @@ const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 
 const state = { collection: 'work', view: 'home', slug: null, panel: false };
 let carousel = null, nextStage = null, unbindProject = null;
+let scene = null, player = null, waveAt = 0;
 
 /* ── small pieces ─────────────────────────────────────────────────────── */
 const STAR = 'M6 .7 7.6 4.2l3.8.4-2.9 2.5.9 3.8L6 8.9 2.6 10.9l.9-3.8L.6 4.6l3.8-.4z';
@@ -60,6 +61,18 @@ function showProject(i, p) {
       <p class="heading-xs"><q>${esc(r.quote)}</q></p>
     </figure>`).join('');
   swap(rev, html, 60);
+
+  /* the whole page takes its colour from whatever disc is in front */
+  document.body.style.setProperty('--accent', p.art.bg);
+  scene && scene.show(p);
+
+  const t = p.track || {};
+  $('#track-no').textContent = `Track ${String(i + 1).padStart(2, '0')}`;
+  $('#track-dur').textContent = t.duration || '';
+  $('#track-title').textContent = t.title || p.name;
+  if (player && player.isPlaying()) player.stop();
+  waveAt = 0;
+  drawWave($('#track-wave'), p, 0);
 
   const list = byCollection(state.collection);
   $('#status').textContent = `${p.name}, ${i + 1} of ${list.length}`;
@@ -165,7 +178,7 @@ function onPageScroll() {
   const r = el.getBoundingClientRect();
   const onScreen = r.top < innerHeight && r.bottom > 0;
   carousel.setActive(onScreen);
-  if (!onScreen) onHover(false);
+  if (!onScreen) { onHover(false); if (player && player.isPlaying()) player.stop(); }
 }
 
 function setCollection(id, { scroll = true } = {}) {
@@ -360,6 +373,7 @@ async function openProject(slug) {
     document.body.classList.add('leaving');
     await wait(460);
   }
+  if (player && player.isPlaying()) player.stop();
   unmountProject();
   state.view = 'project'; state.slug = slug;
   carousel.setScrollDriven(false);
@@ -570,6 +584,166 @@ function initWalkers() {
   }, { passive: true });
 }
 
+
+/* ══ THE SCENE ══════════════════════════════════════════════════════════
+   Two stacked canvases: the incoming project is drawn onto the hidden one,
+   then they swap opacity, so each change is a cross-fade rather than a
+   repaint you can see happen. */
+function createScene() {
+  const layers = [$('#scene-a'), $('#scene-b')].filter(Boolean);
+  if (layers.length < 2) return { show() {}, resize() {} };
+  let front = 0, shown = null;
+
+  const size = el => {
+    const r = el.parentElement.getBoundingClientRect();
+    const dpr = Math.min(devicePixelRatio || 1, 2);
+    el.width = Math.round(r.width * dpr); el.height = Math.round(r.height * dpr);
+    return { w: el.width, h: el.height };
+  };
+
+  const paint = (el, p) => {
+    const { w, h } = size(el);
+    const ctx = el.getContext('2d');
+    ctx.clearRect(0, 0, w, h);
+    ctx.drawImage(sceneImage(p, w, h), 0, 0);
+  };
+
+  return {
+    show(p) {
+      if (!p || shown === p.slug) return;
+      shown = p.slug;
+      const next = layers[1 - front];
+      paint(next, p);
+      next.classList.add('on');
+      layers[front].classList.remove('on');
+      front = 1 - front;
+    },
+    resize() { const p = bySlug(shown); if (p) { paint(layers[front], p); } }
+  };
+}
+
+/* ══ THE TRACK ══════════════════════════════════════════════════════════
+   Every disc carries a track. With no audio file on the project the player
+   synthesises an original loop from the track's key and tempo, so a disc
+   always plays something and the site ships no one else's music. Set
+   `track.audio` on a project and that file is used instead. */
+const SEMITONE = { C: 0, D: 2, E: 4, F: 5, G: 7, A: 9, B: 11 };
+
+function createPlayer(onProgress) {
+  let ctx = null, voices = [], beat = null, el = null;
+  let playing = false, startedAt = 0, length = 1, raf = 0, current = null;
+
+  const seconds = t => {
+    const [m, s] = String(t || '0:00').split(':').map(Number);
+    return (m || 0) * 60 + (s || 0);
+  };
+
+  const tick = () => {
+    if (!playing) return;
+    const now = el ? el.currentTime : (ctx.currentTime - startedAt);
+    onProgress(Math.min(1, now / length));
+    if (now >= length) { stop(); onProgress(0); return; }
+    raf = requestAnimationFrame(tick);
+  };
+
+  /* a short original phrase: a pentatonic root with a soft triangle voice,
+     a gentle filter, and one echo. Nothing clever, but it is ours. */
+  function synth(track) {
+    ctx = ctx || new (window.AudioContext || window.webkitAudioContext)();
+    const root = 220 * Math.pow(2, (SEMITONE[track.key] ?? 0) / 12);
+    const scale = [0, 2, 4, 7, 9, 12, 14];
+    const out = ctx.createGain(); out.gain.value = 0.0001; out.connect(ctx.destination);
+    out.gain.exponentialRampToValueAtTime(0.11, ctx.currentTime + 1.2);
+
+    const delay = ctx.createDelay(); delay.delayTime.value = 60 / track.bpm * 1.5;
+    const fb = ctx.createGain(); fb.gain.value = 0.3;
+    const tone = ctx.createBiquadFilter(); tone.type = 'lowpass'; tone.frequency.value = 1700;
+    delay.connect(fb); fb.connect(delay); delay.connect(tone); tone.connect(out);
+
+    let step = 0;
+    const spb = 60 / track.bpm;
+    const note = () => {
+      const deg = scale[(step * 3 + (step % 5)) % scale.length];
+      const osc = ctx.createOscillator(), g = ctx.createGain();
+      osc.type = step % 4 === 0 ? 'sine' : 'triangle';
+      osc.frequency.value = root * Math.pow(2, deg / 12) * (step % 8 === 7 ? 0.5 : 1);
+      g.gain.setValueAtTime(0.0001, ctx.currentTime);
+      g.gain.exponentialRampToValueAtTime(0.5, ctx.currentTime + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + spb * 1.6);
+      osc.connect(g); g.connect(tone); g.connect(delay);
+      osc.start(); osc.stop(ctx.currentTime + spb * 1.8);
+      voices.push(osc);
+      if (voices.length > 24) voices.shift();
+      step++;
+    };
+    note();
+    beat = setInterval(note, spb * 1000);
+    startedAt = ctx.currentTime;
+    return out;
+  }
+
+  let master = null;
+
+  function stop() {
+    playing = false;
+    clearInterval(beat); beat = null;
+    cancelAnimationFrame(raf);
+    if (master) { try { master.gain.exponentialRampToValueAtTime(0.0001, ctx.currentTime + 0.25); } catch {} }
+    setTimeout(() => { voices.forEach(v => { try { v.stop(); } catch {} }); voices = []; }, 300);
+    if (el) { el.pause(); }
+    $('#track')?.classList.remove('playing');
+    $('#track-play')?.setAttribute('aria-label', 'Play this track');
+  }
+
+  return {
+    stop,
+    isPlaying: () => playing,
+    toggle(project) {
+      if (playing && current === project.slug) { stop(); onProgress(0); return; }
+      if (playing) stop();
+      current = project.slug;
+      const track = project.track;
+      length = seconds(track.duration);
+      if (track.audio) {
+        el = el || new Audio();
+        el.src = track.audio; el.loop = false;
+        el.play().catch(() => {});
+      } else {
+        el = null;
+        master = synth(track);
+      }
+      playing = true;
+      $('#track')?.classList.add('playing');
+      $('#track-play')?.setAttribute('aria-label', 'Pause this track');
+      raf = requestAnimationFrame(tick);
+    }
+  };
+}
+
+/* the waveform is drawn, not sampled: a deterministic shape per project,
+   filled to wherever the track has got to */
+function drawWave(canvas, project, progress) {
+  if (!canvas || !project) return;
+  const r = canvas.getBoundingClientRect();
+  const dpr = Math.min(devicePixelRatio || 1, 2);
+  canvas.width = Math.round(r.width * dpr); canvas.height = Math.round(r.height * dpr);
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  let seed = 0;
+  for (const ch of project.slug) seed = (seed * 31 + ch.charCodeAt(0)) % 9973;
+  const rand = () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+
+  const bars = Math.max(28, Math.floor(w / (6 * dpr)));
+  const bw = w / bars;
+  const accent = getComputedStyle(document.body).getPropertyValue('--accent').trim() || '#c1502e';
+  for (let i = 0; i < bars; i++) {
+    const env = Math.sin((i / bars) * Math.PI) * 0.7 + 0.3;
+    const bh = h * (0.18 + rand() * 0.72) * env;
+    ctx.fillStyle = (i / bars) <= progress ? accent : 'rgba(22,22,22,.28)';
+    ctx.fillRect(i * bw + bw * 0.2, (h - bh) / 2, bw * 0.55, bh);
+  }
+}
+
 /* ══ REVEALS ════════════════════════════════════════════════════════════ */
 function countUp(el) {
   const target = parseInt(el.dataset.count, 10);
@@ -623,6 +797,20 @@ async function boot() {
     return;
   }
   carousel.setScrollDriven(true);
+  scene = createScene();
+  player = createPlayer(progress => {
+    waveAt = progress;
+    drawWave($('#track-wave'), carousel.project(), progress);
+  });
+  $('#track-play')?.addEventListener('click', () => {
+    const p = carousel.project();
+    if (p) player.toggle(p);
+  });
+  addEventListener('resize', () => {
+    scene && scene.resize();
+    drawWave($('#track-wave'), carousel.project(), waveAt);
+  }, { passive: true });
+
   bindInput();
   initRotator();
   initWalkers();

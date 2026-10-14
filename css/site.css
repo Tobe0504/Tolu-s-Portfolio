@@ -20,9 +20,21 @@
   --ink: #000;
   --rule: rgba(0, 0, 0, .42);
   --mute: #8a8a8a;
-  --serif: 'Instrument Serif', 'Times New Roman', serif;
-  --sans: 'Inter Tight', 'Helvetica Neue', Arial, sans-serif;
+  /* One family, rounded and geometric. Outfit is the closest free stand-in
+     for Gilroy; --display and --ui stay separate tokens so a second face can
+     be dropped into either later without hunting through the stylesheet. */
+  --display: 'Outfit', ui-rounded, system-ui, -apple-system, sans-serif;
+  --ui:      'Outfit', ui-rounded, system-ui, -apple-system, sans-serif;
   --ease: cubic-bezier(.19, 1, .22, 1);
+
+  /* Drawn, not ruled. Every line on the page is a stroke with a wobble in
+     it, tiled horizontally; the endpoints sit at the same height so the
+     tiles join invisibly. Boxes use the same hand on a border-image. */
+  --drawn-h: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='5'%3E%3Cpath d='M0 2.5C18 1.5 34 3.5 52 2.5S88 1.4 106 2.7S140 3.4 160 2.5' fill='none' stroke='%23161616' stroke-opacity='.5' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E");
+  --drawn-box: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cpath d='M9 6C41 4 80 9 112 6c2 34-2 74 0 106-32 3-72-2-104 0C6 80 11 40 9 6Z' fill='none' stroke='%23161616' stroke-opacity='.55' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E");
+
+  /* the colour of whatever disc is in front; set from JS as you scroll */
+  --accent: #c1502e;
   --ease-io: cubic-bezier(.65, 0, .35, 1);
 
   /* type scale, desktop */
@@ -49,7 +61,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { -webkit-text-size-adjust: 100%; }
 body {
-  font-family: var(--sans); font-size: var(--size-font);
+  font-family: var(--ui); font-size: var(--size-font);
   font-weight: 500; line-height: 1.4; letter-spacing: -.025em;
   color: var(--ink); background: var(--paper);
   overscroll-behavior: none;
@@ -70,9 +82,36 @@ img, canvas { display: block; }
 
 .sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
 
+/* ── drawn rules ──────────────────────────────────────────────────────── */
+.band, .stats, .steps li, .said, .site-foot,
+.p-chapter, .p-steps li, .p-gallery, .p-quote, .p-foot, .p-meta .row,
+.p-next-lines span, .cs-band, .cs-steps li {
+  border-top-color: transparent;
+  background-image: var(--drawn-h);
+  background-repeat: repeat-x;
+  background-position: left top;
+}
+.row, .info-title, .hero-meta, .p-cta, .p-live, .p-word {
+  border-bottom-color: transparent;
+  background-image: var(--drawn-h);
+  background-repeat: repeat-x;
+  background-position: left bottom;
+}
+.hero-ground { border-top-color: transparent; background-image: var(--drawn-h); background-repeat: repeat-x; }
+.p-cta { border-top-color: transparent; }
+/* on the dark hero the stroke has to be light, so it is drawn with a filter */
+.p-word, .p-cta { filter: none; }
+.p-words { --drawn-h: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='5'%3E%3Cpath d='M0 2.5C18 1.5 34 3.5 52 2.5S88 1.4 106 2.7S140 3.4 160 2.5' fill='none' stroke='%23ffffff' stroke-opacity='.6' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E"); }
+
+/* sketched frames */
+.bar, .index-panel, .p-shot, .track {
+  border: 1.5px solid transparent;
+  border-image: var(--drawn-box) 12 / 12px / 0 round;
+}
+
 /* ── type ─────────────────────────────────────────────────────────────── */
 .heading-xl, .heading-l, .heading-m, .heading-s, .heading-xs {
-  font-family: var(--serif); font-weight: 400; letter-spacing: -.04em;
+  font-family: var(--display); font-weight: 500; letter-spacing: -.02em;
   text-transform: uppercase; line-height: 1;
 }
 .heading-xl { font-size: var(--h-xl); line-height: 1.05; }
@@ -81,8 +120,8 @@ img, canvas { display: block; }
 .heading-s  { font-size: var(--h-s); line-height: 1.1; }
 .heading-xs { font-size: var(--h-xs); line-height: 1.1; }
 .eyebrow {
-  font-family: var(--serif); font-weight: 400;
-  font-size: .625em; line-height: 1.3; letter-spacing: .2em; text-transform: uppercase;
+  font-family: var(--ui); font-weight: 600;
+  font-size: .68em; line-height: 1.3; letter-spacing: .14em; text-transform: uppercase;
 }
 .paragraph-m { font-size: 1.125em; line-height: 1.4; }
 .paragraph-l { font-size: 1.5em; line-height: 1.4; }
@@ -91,7 +130,7 @@ img, canvas { display: block; }
 /* paper grain over everything, the way the reference's ground has tooth */
 .grain {
   position: fixed; inset: 0; z-index: 50; pointer-events: none;
-  opacity: .5; mix-blend-mode: multiply;
+  opacity: .62; mix-blend-mode: multiply;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 .09 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
@@ -118,8 +157,11 @@ body[data-view="project"] .stage { opacity: 0; pointer-events: none; }
 /* ── home: info block ─────────────────────────────────────────────────── */
 .home { position: relative; z-index: 2; }
 .info {
-  position: absolute; z-index: 4; top: var(--pad); left: var(--pad);
-  width: min(calc(50vw - var(--pad)), 34em);
+  /* held to the same column as the rest of the page: only the discs behind
+     it are allowed to run the full width */
+  position: absolute; z-index: 4; top: var(--pad);
+  left: max(var(--pad), calc((100% - var(--wrap)) / 2));
+  width: min(calc(50% - var(--pad)), 30em);
   pointer-events: none;
 }
 .info-title { padding-bottom: .12em; border-bottom: 1px solid var(--rule); }
@@ -141,9 +183,13 @@ body[data-view="project"] .stage { opacity: 0; pointer-events: none; }
 
 /* ── home: reviews ────────────────────────────────────────────────────── */
 .reviews {
-  position: absolute; z-index: 4; left: 50%; bottom: calc(6.4em + env(safe-area-inset-bottom));
-  transform: translateX(-50%); pointer-events: none;
-  display: grid; grid-template-columns: repeat(2, 18em); gap: 3.2em;
+  /* the track sits bottom left, so the quotes take the right of the column
+     rather than the centre, where the two were landing on each other */
+  position: absolute; z-index: 4; pointer-events: none;
+  right: max(var(--pad), calc((100% - var(--wrap)) / 2));
+  bottom: calc(6.2em + env(safe-area-inset-bottom));
+  width: min(30em, 46%);
+  display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2em;
   text-align: center;
 }
 .review .stars { display: inline-flex; gap: .12em; margin-bottom: 1.35em; }
@@ -165,7 +211,7 @@ body[data-view="project"] .stage { opacity: 0; pointer-events: none; }
   height: 3.6em; padding: 0 1.4em;
 }
 .wordmark {
-  font-family: var(--serif); font-size: 1.45em; letter-spacing: -.05em; line-height: 1;
+  font-family: var(--display); font-weight: 600; font-size: 1.3em; letter-spacing: -.03em; line-height: 1;
 }
 .wordmark span { font-size: .8em; margin: 0 .04em; opacity: .5; }
 .tabs { display: flex; justify-content: center; gap: 1.35em; }
@@ -250,7 +296,7 @@ body[data-view="project"] .index-btn { visibility: hidden; }
   display: inline-block; margin-top: 1.3em;
   padding: .3em 0 .15em; border-top: 1px solid var(--ink); border-bottom: 1px solid var(--ink);
 }
-.p-sign { font-family: var(--serif); font-size: var(--h-xs); letter-spacing: -.03em; }
+.p-sign { font-family: var(--display); font-size: var(--h-xs); letter-spacing: -.03em; }
 
 .p-next {
   position: relative; display: block; background: var(--tint, #d7d5d2);
@@ -308,7 +354,7 @@ body[data-view="project"] .home, body[data-view="project"] .loop { display: none
   padding: 1.5em 0; border-top: 1px solid rgba(0, 0, 0, .18);
 }
 .p-steps li:first-child { padding-top: 0; border-top: 0; }
-.p-step-n { padding-top: .45em; opacity: .65; }
+.p-step-n { padding-top: .45em; color: var(--accent); opacity: .95; }
 .p-steps h3 { font-weight: 400; }
 .p-steps p { max-width: 48ch; margin-top: .5em; }
 
@@ -322,7 +368,7 @@ body[data-view="project"] .home, body[data-view="project"] .loop { display: none
 .p-gallery figcaption { margin-top: .7em; opacity: .7; }
 
 .p-metrics { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1.5em; }
-.p-metrics b { display: block; font-weight: 400; }
+.p-metrics b { display: block; font-weight: 500; color: var(--accent); }
 .p-metrics span { display: block; margin-top: .7em; opacity: .7; }
 
 .p-quote {
@@ -407,7 +453,7 @@ body[data-view="project"] .home, body[data-view="project"] .loop { display: none
   padding: 5em var(--pad);
   border-top: 1px solid var(--rule);
 }
-.band-label { padding-top: .5em; }
+.band-label { padding-top: .5em; color: var(--accent); }
 .band-lead { max-width: 18ch; text-transform: none; }
 .band-note { max-width: 34ch; margin-top: 1.6em; }
 
@@ -415,7 +461,7 @@ body[data-view="project"] .home, body[data-view="project"] .loop { display: none
   display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.5em;
   margin-top: 3.5em; padding-top: 1.6em; border-top: 1px solid var(--rule);
 }
-.stats dt { font-weight: 400; }
+.stats dt { font-weight: 500; color: var(--accent); }
 .stats dd { margin-top: .7em; opacity: .7; }
 
 .steps { list-style: none; }
@@ -424,7 +470,7 @@ body[data-view="project"] .home, body[data-view="project"] .loop { display: none
   padding: 1.8em 0; border-top: 1px solid rgba(0, 0, 0, .18);
 }
 .steps li:first-child { padding-top: 0; border-top: 0; }
-.steps li > .eyebrow { padding-top: .5em; opacity: .65; }
+.steps li > .eyebrow { padding-top: .5em; color: var(--accent); opacity: .9; }
 .steps h3 { text-transform: none; }
 .steps p { max-width: 48ch; margin-top: .6em; }
 
@@ -537,4 +583,131 @@ body[data-view="project"] .home, body[data-view="project"] .loop { display: none
   .wk-leg, .wk-arm, .wk-bob, .wk-stereo, .wk-carry, .wk-note { animation: none; }
   .wk-note { opacity: 0; }
   .reveal { opacity: 1; transform: none; }
+}
+
+/* ── the scene behind the discs ───────────────────────────────────────── */
+.scene {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%;
+  opacity: 0; transition: opacity .7s var(--ease);
+}
+.scene.on { opacity: 1; }
+
+/* ── the track ────────────────────────────────────────────────────────── */
+.track {
+  position: absolute; z-index: 4;
+  left: max(var(--pad), calc((100% - var(--wrap)) / 2));
+  bottom: calc(6.2em + env(safe-area-inset-bottom));
+  width: min(26em, calc(50% - var(--pad)));
+  display: grid; grid-template-columns: auto 1fr; gap: .9em;
+  align-items: center; padding: .85em 1em;
+  background: color-mix(in srgb, var(--paper) 78%, transparent);
+  backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
+}
+.track-play {
+  display: grid; place-items: center;
+  width: 2.6em; height: 2.6em; border-radius: 50%;
+  border: 1.5px solid transparent;
+  border-image: var(--drawn-box) 12 / 12px / 0 round;
+  color: var(--accent);
+}
+.track-play svg { width: 1.1em; height: 1.1em; }
+.track-play .pause { display: none; }
+.track.playing .track-play .play { display: none; }
+.track.playing .track-play .pause { display: block; }
+.track-body { min-width: 0; }
+.track-no { display: flex; justify-content: space-between; gap: 1em; opacity: .7; }
+.track-title {
+  font-weight: 500; font-size: 1.05em; letter-spacing: -.01em;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin: .15em 0 .4em;
+}
+.track-wave { display: block; width: 100%; height: 1.9em; }
+
+@media (max-width: 1100px) { .reviews { display: none; } }
+@media (max-width: 767px) {
+  .track { width: calc(100% - 2 * var(--pad)); bottom: calc(6.2em + env(safe-area-inset-bottom)); }
+}
+
+/* ══════════════════════════════════════════════════════════════════════
+   THE PROJECT PAGE, as a working spread: screens pinned at angles with
+   tape, numbers ringed by hand, labels pointing in from the margin.
+   ══════════════════════════════════════════════════════════════════════ */
+
+/* the title gets a drawn stroke under it, the way you underline a heading
+   on paper when you want it to be the heading */
+.p-title {
+  display: inline-block;
+  padding-bottom: .22em;
+  background-image: var(--drawn-h);
+  background-repeat: repeat-x;
+  background-position: left bottom;
+  background-size: 160px 7px;
+}
+
+/* the facts, pinned like an index card rather than ruled across the page */
+.p-meta {
+  display: grid; grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .2em 2em;
+  padding: 1.6em 1.8em;
+  border: 1.5px solid transparent;
+  border-image: var(--drawn-box) 12 / 12px / 0 round;
+  transform: rotate(-.4deg);
+}
+.p-meta .row {
+  display: block; padding: .7em 0; background-image: none; border: 0;
+}
+.p-meta .row .eyebrow { color: var(--accent); }
+.p-meta .row .paragraph-m { margin-top: .2em; }
+
+/* labels sit in the margin and point at what they describe */
+.p-chapter > .eyebrow, .band-label {
+  position: relative;
+}
+.p-chapter > .eyebrow::after, .band-label::after {
+  content: ''; position: absolute; left: 0; top: 2.1em;
+  width: 2.6em; height: 1.4em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='42' height='22'%3E%3Cpath d='M2 6c12 1 24 5 36 9' fill='none' stroke='%23161616' stroke-opacity='.45' stroke-width='1.3' stroke-linecap='round'/%3E%3Cpath d='M31 13l7 2-3 6' fill='none' stroke='%23161616' stroke-opacity='.45' stroke-width='1.3' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+}
+@media (max-width: 767px) {
+  .p-chapter > .eyebrow::after, .band-label::after { display: none; }
+}
+
+/* screens pinned to the page */
+.p-shot-wrap {
+  position: relative;
+  padding: .7em .7em 0;
+  background: color-mix(in srgb, var(--paper) 55%, transparent);
+  border: 1.5px solid transparent;
+  border-image: var(--drawn-box) 12 / 12px / 0 round;
+}
+.p-shot-wrap:nth-child(1) { transform: rotate(-.7deg); }
+.p-shot-wrap:nth-child(2) { transform: rotate(.9deg); }
+.p-shot-wrap:nth-child(3) { transform: rotate(-.5deg); }
+.p-shot-wrap::before {                      /* a strip of tape */
+  content: ''; position: absolute; z-index: 2; top: -.7em; left: 50%;
+  width: 5.5em; height: 1.5em; margin-left: -2.75em;
+  transform: rotate(-1.6deg);
+  background: color-mix(in srgb, var(--accent) 22%, rgba(255,255,255,.55));
+  box-shadow: 0 1px 0 rgba(0,0,0,.06);
+}
+.p-gallery figcaption { padding: .7em .2em .9em; opacity: .75; }
+
+/* numbers ringed by hand */
+.p-metrics div { position: relative; padding: .4em .2em; }
+.p-metrics b { position: relative; display: inline-block; padding: .18em .5em; }
+.p-metrics b::after {
+  content: ''; position: absolute; inset: -.35em -.65em;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='90' preserveAspectRatio='none'%3E%3Cpath d='M86 6C44 2 10 20 8 46c-2 27 36 40 76 38 38-2 70-16 70-40C154 20 126 8 86 6' fill='none' stroke='%23161616' stroke-opacity='.4' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-size: 100% 100%; background-repeat: no-repeat;
+  pointer-events: none;
+}
+
+/* the quote reads like something written in the margin and boxed */
+.p-quote {
+  border: 1.5px solid transparent;
+  border-image: var(--drawn-box) 12 / 12px / 0 round;
+  background-image: none;
+  margin: 3em 0; padding: 3.4em 2em;
 }
