@@ -30,7 +30,7 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
     />
-    <link rel="stylesheet" href="css/site.css?v=31" />
+    <link rel="stylesheet" href="css/site.css?v=33" />
 
     <script type="importmap">
       {
@@ -345,6 +345,10 @@
           <canvas class="scene" id="scene-a" aria-hidden="true"></canvas>
           <canvas class="scene" id="scene-b" aria-hidden="true"></canvas>
           <canvas id="stage" class="stage" aria-hidden="true"></canvas>
+          <!-- the corners the discs arrive from and leave by, hazed so
+               neither crossing is a hard edge -->
+          <div class="haze haze-in" aria-hidden="true"></div>
+          <div class="haze haze-out" aria-hidden="true"></div>
           <svg class="loop" id="loop" aria-hidden="true">
             <path id="loop-path" pathLength="1" />
           </svg>
@@ -633,6 +637,6 @@
       </p></noscript
     >
 
-    <script type="module" src="js/app.js?v=31"></script>
+    <script type="module" src="js/app.js?v=33"></script>
   </body>
 </html>

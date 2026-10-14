@@ -1222,7 +1222,63 @@ body[data-view="project"] .loop {
   height: 100vh;
   height: 100dvh;
   overflow: hidden;
+}
+/* the run-out dims the paper furniture, never the discs */
+.info,
+.reviews,
+.track,
+.library-hint,
+.loop {
   opacity: var(--lib-fade, 1);
+}
+
+/* ── the haze ─────────────────────────────────────────────────────────────
+   The discs run a diagonal, in past the top right corner and out past the
+   bottom left. Meeting the edge of the screen at full sharpness made them
+   look cut off, so both ends of that run are hazed: a blur that deepens
+   into the corner, under a wash of paper, both faded in by the same mask so
+   neither has an edge of its own. A disc goes soft before it goes. */
+.haze {
+  position: absolute;
+  z-index: 2; /* over the discs, under the type and the drawn ring */
+  width: 56%;
+  height: 54%;
+  pointer-events: none;
+  background: color-mix(in srgb, var(--paper) 46%, transparent);
+  backdrop-filter: blur(11px);
+  -webkit-backdrop-filter: blur(11px);
+}
+.haze-in {
+  top: 0;
+  right: 0;
+  -webkit-mask-image: radial-gradient(
+    118% 118% at 100% 0%,
+    #000 2%,
+    rgba(0, 0, 0, 0.52) 34%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(
+    118% 118% at 100% 0%,
+    #000 2%,
+    rgba(0, 0, 0, 0.52) 34%,
+    transparent 78%
+  );
+}
+.haze-out {
+  bottom: 0;
+  left: 0;
+  -webkit-mask-image: radial-gradient(
+    118% 118% at 0% 100%,
+    #000 2%,
+    rgba(0, 0, 0, 0.52) 34%,
+    transparent 78%
+  );
+  mask-image: radial-gradient(
+    118% 118% at 0% 100%,
+    #000 2%,
+    rgba(0, 0, 0, 0.52) 34%,
+    transparent 78%
+  );
 }
 .library-hint {
   position: absolute;

@@ -6,7 +6,7 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=31";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=33";
 import {
   whenFonts,
   heroImage,
@@ -19,8 +19,8 @@ import {
   heroBird,
   doodle,
   setInk,
-} from "./art.js?v=31";
-import { createCarousel, createDiscStage } from "./discs.js?v=31";
+} from "./art.js?v=33";
+import { createCarousel, createDiscStage } from "./discs.js?v=33";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -300,7 +300,13 @@ function onPageScroll() {
   carousel.setCurrent(clamp(into / disc, 0, 1) * (n - 1));
 
   /* the run-out: the face dims away before the edge can cut it */
+  /* The run-out. The discs do not fade: they keep travelling, so the last
+     one leaves through the bottom-left corner exactly as every disc before
+     it did, softening into the haze on the way. Only the paper furniture
+     around them — the scene, the details, the track, the quotes — dims, so
+     the band rising from below has nothing left to cut across. */
   const out = clamp((into - disc) / tail, 0, 1);
+  carousel.setExit(out * 2.2);
   el.style.setProperty("--lib-fade", String(1 - out * out));
 
   /* only render while the library is actually on screen */

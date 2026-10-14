@@ -10,7 +10,7 @@
    object read as physical instead of as a flat texture on a circle.
    ═══════════════════════════════════════════════════════════════════════════ */
 import * as THREE from 'three';
-import { discLabel, dataSide } from './art.js?v=31';
+import { discLabel, dataSide } from './art.js?v=33';
 
 /* proportions of a 120mm disc, normalised to radius 1 */
 const R = 1, HOLE = 0.125, HUB = 0.305, BAND = 0.335, LABEL_OUT = 0.985, T = 0.018;
@@ -188,6 +188,10 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
   /* the disc in front turns under its own power while its track plays, and
      spins up and coasts down rather than snapping to speed */
   let spinning = false, spinRate = 0, playSpin = 0;
+  /* a push along the diagonal used by the run-out at the end of the section:
+     it moves the discs on without moving which project is current, so the
+     last one leaves the way all the others did */
+  let exit = 0;
   let W = 1, H = 1, visW = 1, visH = 1, unit = 1, yBias = 0;
   let pointer = { x: 0, y: 0, inside: false }, hovering = false;
   let openT = 0, openTarget = 0, active = true, raf = 0, t0 = performance.now();
@@ -253,7 +257,7 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
   function layout(dt, snap) {
     const now = (performance.now() - t0) / 1000;
     items.forEach(({ disc }, i) => {
-      const d = i - current, ad = Math.abs(d), sd = Math.sign(d);
+      const d = i - current - exit, ad = Math.abs(d), sd = Math.sign(d);
       const near = clamp(ad, 0, 1);
 
       /* The row runs on a diagonal: the disc ahead waits beyond the top
@@ -404,6 +408,7 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
     setActive(on) { active = on; frame.last = 0; },
     setScrollDriven(on) { scrollDriven = on; },
     setSpinning(on) { spinning = !!on; },
+    setExit(v) { exit = v || 0; },
     open(on) { openTarget = on ? 1 : 0; },
     isHovering: () => hovering
   };
