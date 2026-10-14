@@ -6,15 +6,23 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from './data.js?v=21';
-import { whenFonts, heroImage, galleryImage, sceneImage } from './art.js?v=21';
-import { createCarousel, createDiscStage } from './discs.js?v=21';
+import { COLLECTIONS, byCollection, bySlug } from './data.js?v=23';
+import { whenFonts, heroImage, galleryImage, sceneImage,
+         heroScenery, heroSun, heroMoon, heroCloud, heroBird } from './art.js?v=23';
+import { createCarousel, createDiscStage } from './discs.js?v=23';
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const reduce = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const fine = matchMedia('(hover: hover) and (pointer: fine)').matches;
 const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+
+/* a repeatable random, so a given mark always wobbles the same way */
+const rng = seed => {
+  let h = 2166136261;
+  for (const c of String(seed)) { h ^= c.charCodeAt(0); h = Math.imul(h, 16777619); }
+  return () => { h ^= h << 13; h ^= h >>> 17; h ^= h << 5; return ((h >>> 0) % 10000) / 10000; };
+};
 const wait = ms => new Promise(r => setTimeout(r, reduce ? 0 : ms));
 const esc = t => String(t).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
 
@@ -744,6 +752,176 @@ function drawWave(canvas, project, progress) {
   }
 }
 
+
+/* ══ THE HERO SCENE ═════════════════════════════════════════════════════
+   Each piece of the scene is drawn three times from three seeds and the
+   frames are cycled about seven times a second. Nothing is redrawn at
+   frame rate: the loop only composites finished images, so the whole thing
+   costs a handful of drawImage calls. */
+function initHeroScene() {
+  const cv = $('#hero-scene');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  const hero = $('.hero');
+  let W = 0, H = 0, dpr = 1, art = null, raf = 0, running = false, t0 = performance.now();
+
+  const CLOUDS = [
+    { x: .08, y: .14, w: .26, speed: .009 },
+    { x: .58, y: .08, w: .19, speed: .014 },
+    { x: .34, y: .26, w: .15, speed: .006 }
+  ];
+  const BIRDS = [{ x: .2, y: .3, s: .022, speed: .03 }, { x: .5, y: .24, s: .017, speed: .036 },
+                 { x: .72, y: .33, s: .013, speed: .026 }];
+
+  function build() {
+    const r = hero.getBoundingClientRect();
+    dpr = Math.min(devicePixelRatio || 1, 2);
+    W = Math.round(r.width * dpr); H = Math.round(r.height * dpr);
+    cv.width = W; cv.height = H;
+    cv.style.width = r.width + 'px'; cv.style.height = r.height + 'px';
+    const sunSize = Math.min(W, H) * 0.34;
+    art = {
+      scenery: [0, 1, 2].map(v => heroScenery(W, H, v)),
+      sun:     [0, 1, 2].map(v => heroSun(sunSize, v)),
+      moon:    [0, 1, 2].map(v => heroMoon(sunSize * 0.74, v)),
+      clouds:  CLOUDS.map((c, i) => [0, 1, 2].map(v => heroCloud(W * c.w, v, 'c' + i))),
+      birds:   BIRDS.map((b, i) => [0, 1, 2].map(v => heroBird(W * b.s, v, 'b' + i)))
+    };
+  }
+
+  function frame(now) {
+    if (!running) return;
+    raf = requestAnimationFrame(frame);
+    const t = (now - t0) / 1000;
+    const v = reduce ? 0 : Math.floor(t * 7) % 3;      /* the boil */
+    ctx.clearRect(0, 0, W, H);
+
+    ctx.drawImage(art.scenery[v], 0, 0);
+
+    /* the sun and the moon share the sky, each drifting on its own slow arc */
+    const sun = art.sun[v], moon = art.moon[v];
+    const drift = reduce ? 0 : 1;
+    ctx.drawImage(sun,
+      W * 0.13 - sun.width / 2 + Math.sin(t * 0.06) * W * 0.012 * drift,
+      H * 0.2 - sun.height / 2 + Math.sin(t * 0.09) * H * 0.018 * drift);
+    ctx.drawImage(moon,
+      W * 0.82 - moon.width / 2 + Math.sin(t * 0.05 + 2) * W * 0.01 * drift,
+      H * 0.17 - moon.height / 2 + Math.cos(t * 0.07) * H * 0.016 * drift);
+
+    /* clouds and birds cross and wrap */
+    CLOUDS.forEach((c, i) => {
+      const img = art.clouds[i][v];
+      const span = W + img.width;
+      let x = (c.x * W + t * c.speed * W * drift) % span;
+      if (x > W) x -= span;
+      ctx.drawImage(img, x, H * c.y);
+    });
+    BIRDS.forEach((b, i) => {
+      const img = art.birds[i][v];
+      const span = W + img.width;
+      let x = (b.x * W + t * b.speed * W * drift) % span;
+      if (x > W) x -= span;
+      ctx.drawImage(img, x, H * b.y + Math.sin(t * 0.8 + i) * H * 0.006 * drift);
+    });
+  }
+
+  const start = () => { if (!running) { running = true; raf = requestAnimationFrame(frame); } };
+  const stop  = () => { running = false; cancelAnimationFrame(raf); };
+
+  build(); start();
+  addEventListener('resize', () => { build(); }, { passive: true });
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(([e]) => (e.isIntersecting && !document.hidden) ? start() : stop(),
+      { threshold: 0 }).observe(hero);
+  }
+  document.addEventListener('visibilitychange', () => document.hidden ? stop() : start());
+}
+
+/* ══ THE MARKS ON THE WORDS ═════════════════════════════════════════════
+   A ring round the word that changes, a stroke under the line above it and
+   a couple of sparks. Three variants of each, swapped on the same beat as
+   the scene, so the marks shiver the way a pencil line does. */
+function initHeroMarks() {
+  const svg = $('#hero-marks'), lineOne = $('#line-one'), rot = $('#rotator');
+  if (!svg || !lineOne || !rot) return;
+  let variants = [], i = 0, timer = null;
+
+  const jitter = (r, n) => (r() - 0.5) * n;
+
+  function ringPath(x, y, w, h, r) {
+    let d = '';
+    const cx = x + w / 2, cy = y + h / 2, rx = w / 2 + w * 0.04, ry = h / 2 + h * 0.12;
+    for (let turn = 0; turn < 2; turn++) {
+      for (let k = 0; k <= 26; k++) {
+        const a = (k / 26) * Math.PI * 2 - 0.5 + turn * 0.25;
+        const px = cx + Math.cos(a) * (rx + jitter(r, 7)) ;
+        const py = cy + Math.sin(a) * (ry + jitter(r, 6));
+        d += `${k ? 'L' : 'M'}${px.toFixed(1)},${py.toFixed(1)}`;
+      }
+    }
+    return d;
+  }
+
+  function underline(x, y, w, r) {
+    let d = `M${x},${y}`;
+    for (let k = 1; k <= 12; k++)
+      d += `L${(x + (w * k) / 12).toFixed(1)},${(y + jitter(r, 7)).toFixed(1)}`;
+    return d;
+  }
+
+  function spark(cx, cy, s, r) {
+    let d = '';
+    for (let k = 0; k < 3; k++) {
+      const a = (k / 3) * Math.PI + jitter(r, .4);
+      d += `M${(cx - Math.cos(a) * s).toFixed(1)},${(cy - Math.sin(a) * s).toFixed(1)}` +
+           `L${(cx + Math.cos(a) * s).toFixed(1)},${(cy + Math.sin(a) * s).toFixed(1)}`;
+    }
+    return d;
+  }
+
+  function build() {
+    const box = svg.getBoundingClientRect();
+    if (!box.width) return;
+    svg.setAttribute('viewBox', `0 0 ${box.width} ${box.height}`);
+    const rel = el => {
+      const b = el.getBoundingClientRect();
+      return { x: b.x - box.x, y: b.y - box.y, w: b.width, h: b.height };
+    };
+    /* the rotating line is a full-width block, so the ring goes round the
+       text inside it rather than the box */
+    const rotBox = rel(rot);
+    const chars = $$('.r-char', rot);
+    if (chars.length) {
+      const first = chars[0].getBoundingClientRect(), last = chars[chars.length - 1].getBoundingClientRect();
+      rotBox.x = first.x - box.x; rotBox.w = (last.x + last.width) - first.x;
+    }
+    const one = rel(lineOne);
+
+    variants = [0, 1, 2].map(v => {
+      const r = rng('marks' + v + chars.length);
+      return [
+        ringPath(rotBox.x, rotBox.y + rotBox.h * 0.12, rotBox.w, rotBox.h * 0.78, r),
+        underline(one.x, one.y + one.h * 0.92, Math.min(one.w, rotBox.w * 1.1 || one.w * 0.5), r),
+        spark(one.x - 18, one.y + one.h * 0.3, 9, r),
+        spark(rotBox.x + rotBox.w + 22, rotBox.y + rotBox.h * 0.3, 11, r)
+      ].join(' ');
+    });
+    svg.innerHTML = `<path stroke-width="2.2" opacity=".85"/>`;
+    show();
+  }
+
+  const show = () => { const p = svg.firstElementChild; if (p && variants.length) p.setAttribute('d', variants[i % variants.length]); };
+  const run = () => { clearInterval(timer); if (!reduce) timer = setInterval(() => { i++; show(); }, 140); };
+
+  /* rebuild whenever the word changes length, and on resize */
+  const ro = 'ResizeObserver' in window ? new ResizeObserver(() => build()) : null;
+  ro && ro.observe(rot);
+  addEventListener('resize', build, { passive: true });
+  document.fonts && document.fonts.ready.then(build).catch(() => {});
+  build(); run();
+  document.addEventListener('visibilitychange', () => document.hidden ? clearInterval(timer) : run());
+}
+
 /* ══ REVEALS ════════════════════════════════════════════════════════════ */
 function countUp(el) {
   const target = parseInt(el.dataset.count, 10);
@@ -813,6 +991,8 @@ async function boot() {
 
   bindInput();
   initRotator();
+  initHeroScene();
+  initHeroMarks();
   initWalkers();
   initReveals();
   setCollection(state.collection, { scroll: false });

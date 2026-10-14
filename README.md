@@ -38,9 +38,18 @@ the point of them.
 ## How it behaves
 
 **The hero**
+- A drawn scene: hills with hatching under them, a sun on one side and a moon
+  on the other, clouds and birds crossing. Every piece is drawn three times
+  from three seeds and the frames are cycled about seven times a second, so
+  the lines boil the way hand-drawn animation does. The loop only composites
+  finished images, so it costs a handful of drawImage calls rather than
+  redrawing the scene.
+- A ring is drawn round the word that changes, a stroke under the line above
+  it, and a couple of sparks beside them. Those are redrawn on the same beat,
+  so they shiver like a pencil line. They take the accent colour.
 - The second line of the headline changes word on a timer: the old one leaves
   upward a character at a time, the new one arrives from below.
-- Four hand-drawn figures walk the rule at the foot, the leader carrying a
+- Four hand-drawn figures walk the ground of the scene, the leader carrying a
   stereo. Hovering the leader sits the whole line down. They walk at a fixed
   speed in pixels per second, so the pace is the same on every screen.
 

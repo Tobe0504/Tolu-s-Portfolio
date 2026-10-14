@@ -465,3 +465,130 @@ export function sceneImage(p, w, h) {
   }
   return c;
 }
+
+/* ══ THE HERO SCENE ══════════════════════════════════════════════════════
+   Everything here is drawn with the same wobbling pen as the rest of the
+   site, and every piece is rendered three times from three different seeds.
+   Cycling those three frames a few times a second is what gives hand-drawn
+   animation its boil: the line is alive without anything actually moving. */
+
+const INK = '#161616';
+
+function layer(w, h) {
+  const c = document.createElement('canvas');
+  c.width = Math.max(1, Math.round(w));
+  c.height = Math.max(1, Math.round(h));
+  const ctx = c.getContext('2d');
+  ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+  ctx.strokeStyle = INK;
+  return { c, ctx };
+}
+
+/* a closed-ish ring, gone round once and a bit, the way you draw a circle */
+function ring(ctx, cx, cy, rad, wobble, r, turns = 1.08) {
+  ctx.beginPath();
+  const steps = 42;
+  for (let i = 0; i <= steps * turns; i++) {
+    const a = (i / steps) * Math.PI * 2 - 0.6;
+    const rr = rad + (r() - 0.5) * wobble;
+    const x = cx + Math.cos(a) * rr, y = cy + Math.sin(a) * rr * 0.98;
+    i ? ctx.lineTo(x, y) : ctx.moveTo(x, y);
+  }
+  ctx.stroke();
+}
+
+export function heroScenery(w, h, variant) {
+  const { c, ctx } = layer(w, h);
+  const r = rng('scenery' + variant);
+  const horizon = h * 0.76;
+
+  /* far ridge, light */
+  ctx.globalAlpha = .28; ctx.lineWidth = 1.4;
+  const far = [];
+  for (let x = -20; x <= w + 20; x += w / 16)
+    far.push([x, horizon - h * 0.16 + Math.sin(x / w * 4.2) * h * 0.05 + (r() - 0.5) * 6]);
+  pen(ctx, far, 3, r);
+
+  /* middle ridge, with hatching under it */
+  ctx.globalAlpha = .4; ctx.lineWidth = 1.5;
+  const mid = [];
+  for (let x = -20; x <= w + 20; x += w / 20)
+    mid.push([x, horizon - h * 0.07 + Math.sin(x / w * 6.5 + 1.4) * h * 0.028 + (r() - 0.5) * 5]);
+  pen(ctx, mid, 2.6, r);
+  ctx.globalAlpha = .12; ctx.lineWidth = 1;
+  hatch(ctx, 0, horizon - h * 0.06, w, h * 0.06, 14, 0.45, r);
+
+  /* the ground the procession walks on */
+  ctx.globalAlpha = .55; ctx.lineWidth = 1.7;
+  const front = [];
+  for (let x = -20; x <= w + 20; x += w / 24) front.push([x, horizon + (r() - 0.5) * 3]);
+  pen(ctx, front, 2, r);
+
+  /* a few tufts, so the ground is not a bare line */
+  ctx.globalAlpha = .3; ctx.lineWidth = 1.2;
+  for (let i = 0; i < 26; i++) {
+    const x = r() * w, s = 4 + r() * 7;
+    pen(ctx, [[x, horizon], [x + (r() - .5) * 4, horizon - s]], 1.2, r);
+  }
+  return c;
+}
+
+export function heroSun(size, variant) {
+  const { c, ctx } = layer(size, size);
+  const r = rng('sun' + variant), m = size / 2, rad = size * 0.26;
+  ctx.globalAlpha = .72; ctx.lineWidth = 2.2;
+  ring(ctx, m, m, rad, 3, r);
+  ctx.globalAlpha = .6; ctx.lineWidth = 2;
+  for (let i = 0; i < 12; i++) {
+    const a = (i / 12) * Math.PI * 2 + r() * .1;
+    const i0 = rad * 1.22, i1 = rad * (1.72 + r() * 0.3);
+    pen(ctx, [[m + Math.cos(a) * i0, m + Math.sin(a) * i0],
+              [m + Math.cos(a) * i1, m + Math.sin(a) * i1]], 1.6, r);
+  }
+  return c;
+}
+
+export function heroMoon(size, variant) {
+  const { c, ctx } = layer(size, size);
+  const r = rng('moon' + variant), m = size / 2, rad = size * 0.24;
+  ctx.globalAlpha = .68; ctx.lineWidth = 2;
+  ring(ctx, m, m, rad, 2.5, r);
+  /* the shadow edge that makes it read as a moon rather than a sun */
+  ctx.globalAlpha = .4; ctx.lineWidth = 1.5;
+  const crescent = [];
+  for (let i = 0; i <= 18; i++) {
+    const a = -Math.PI / 2 + (i / 18) * Math.PI;
+    crescent.push([m + Math.cos(a) * rad * 0.52, m + Math.sin(a) * rad * 0.98]);
+  }
+  pen(ctx, crescent, 2, r);
+  ctx.globalAlpha = .3; ctx.lineWidth = 1.2;
+  for (let i = 0; i < 3; i++) ring(ctx, m + (r() - .6) * rad * .7, m + (r() - .5) * rad * .8, rad * (.08 + r() * .07), 1.5, r, 1);
+  return c;
+}
+
+export function heroCloud(w, variant, seed = '') {
+  const h = w * 0.42;
+  const { c, ctx } = layer(w, h);
+  const r = rng('cloud' + variant + seed);
+  ctx.globalAlpha = .34; ctx.lineWidth = 1.5;
+  const pts = [];
+  const bumps = 4 + Math.floor(r() * 2);
+  pts.push([w * .06, h * .74]);
+  for (let i = 0; i < bumps; i++) {
+    const x = w * (.12 + i * (.76 / bumps));
+    pts.push([x, h * (.4 - r() * .2)], [x + w * (.38 / bumps), h * (.24 + r() * .14)]);
+  }
+  pts.push([w * .94, h * .74], [w * .06, h * .74]);
+  pen(ctx, pts, 2.4, r);
+  return c;
+}
+
+export function heroBird(size, variant, seed = '') {
+  const { c, ctx } = layer(size, size * 0.5);
+  const r = rng('bird' + variant + seed);
+  ctx.globalAlpha = .45; ctx.lineWidth = 1.4;
+  const m = size * 0.5, y = size * 0.26;
+  pen(ctx, [[m - size * .4, y], [m - size * .12, y - size * .16], [m, y - size * .02]], 1.2, r);
+  pen(ctx, [[m, y - size * .02], [m + size * .12, y - size * .16], [m + size * .4, y]], 1.2, r);
+  return c;
+}

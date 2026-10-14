@@ -97,7 +97,6 @@ img, canvas { display: block; }
   background-repeat: repeat-x;
   background-position: left bottom;
 }
-.hero-ground { border-top-color: transparent; background-image: var(--drawn-h); background-repeat: repeat-x; }
 .p-cta { border-top-color: transparent; }
 /* on the dark hero the stroke has to be light, so it is drawn with a filter */
 .p-word, .p-cta { filter: none; }
@@ -397,11 +396,21 @@ body[data-view="project"] .home, body[data-view="project"] .loop { display: none
 
 /* ── hero ─────────────────────────────────────────────────────────────── */
 .hero {
-  position: relative;
+  position: relative; overflow: hidden;
   min-height: 100vh; min-height: 100dvh;
   display: flex; flex-direction: column;
-  padding: 4.5em var(--pad) 24vh;        /* the foot is left to the procession */
+  padding: 4.5em var(--pad) 26vh;        /* the foot is left to the scene */
 }
+.hero-scene {
+  position: absolute; inset: 0; z-index: 0;
+  width: 100%; height: 100%; pointer-events: none;
+}
+.hero-meta, .hero-inner { position: relative; z-index: 2; }
+.hero-marks {
+  position: absolute; inset: -12% -6%; z-index: -1;
+  width: 112%; height: 124%; overflow: visible; pointer-events: none;
+}
+.hero-marks path { fill: none; stroke: var(--accent); stroke-linecap: round; stroke-linejoin: round; }
 .hero-inner { width: min(100%, var(--wrap)); margin: auto; }
 .hero-title { display: block; }
 .hero-title .h-line {
@@ -422,12 +431,7 @@ body[data-view="project"] .home, body[data-view="project"] .loop { display: none
   padding-bottom: .8em; border-bottom: 1px solid var(--rule);
 }
 
-.hero-ground {
-  position: absolute; bottom: 8.5em; height: 0;
-  left:  max(var(--pad), calc((100% - var(--wrap)) / 2));
-  right: max(var(--pad), calc((100% - var(--wrap)) / 2));
-  border-top: 1px solid var(--rule);
-}
+
 
 /* ── the library: a tall section whose inner face pins ────────────────── */
 .library {
@@ -515,7 +519,8 @@ body[data-view="project"] .home, body[data-view="project"] .loop { display: none
 :root { --walker: #111; }
 
 .hero-walk {
-  position: absolute; left: 0; right: 0; bottom: 0;
+  /* the baseline of this strip sits on the drawn ground at 82% of the hero */
+  position: absolute; left: 0; right: 0; bottom: 24%;
   height: 13vh; z-index: 3; pointer-events: none;
 }
 .walk-svg { position: absolute; inset: 0; width: 100%; height: 100%; }
