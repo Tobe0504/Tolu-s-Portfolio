@@ -8,6 +8,8 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 
 :root {
+  /* a circle drawn by hand, used as a mask so it can take any colour */
+  --drawn-ring: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' preserveAspectRatio='none'%3E%3Cpath d='M50 4C74 4.5 96.5 24 96.5 50.5 96.5 76 74.5 96.5 49.5 96.5 25 96.5 3.5 75.5 3.5 49 3.5 23.5 25 4.5 49 4c9 0 17.5 2 24 6' fill='none' stroke='%23000' stroke-width='1.7' stroke-linecap='round'/%3E%3C/svg%3E");
   --size-unit: 16;
   --size-container-ideal: 1920;
   --size-container-min: 992px;
@@ -788,18 +790,55 @@ body[data-view="project"] .loop {
   position: relative;
   z-index: 3;
   background: var(--tint, #d7d5d2);
+  overflow: hidden; /* stickers stay inside the page */
 }
 .p-after > * {
+  position: relative;
+  z-index: 1;
   width: min(100%, var(--wrap));
   margin-inline: auto;
   padding-inline: var(--pad);
 }
 
+/* ── stickers ─────────────────────────────────────────────────────────────
+   Blooms, butterflies, hearts, bows and sparkles scattered down the margins,
+   seeded from the slug so each project is always decorated the same way.
+   They sit behind the text and never take a click. */
+.p-stickers {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  max-width: none;
+  padding: 0;
+  pointer-events: none;
+}
+.p-sticker {
+  position: absolute;
+  opacity: 0.5;
+  transform: rotate(var(--turn, 0deg));
+}
+@media (max-width: 1100px) {
+  /* no margins to spare: keep only a few, and well out of the way */
+  .p-sticker {
+    opacity: 0.26;
+  }
+  .p-sticker:nth-child(2n) {
+    display: none;
+  }
+}
+
+/* the opening gets the project's colour outright, pinned like a note */
 .p-opening {
   padding: 2.6em 0 3.4em;
 }
 .p-summary {
   max-width: 44ch;
+  padding: 1.4em 1.5em;
+  background: color-mix(in srgb, var(--accent) 13%, transparent);
+  border: 1.5px solid transparent;
+  border-image: var(--drawn-box) 12 / 12px / 0 round;
+  transform: rotate(-0.5deg);
 }
 
 /* every chapter is a ruled row: its label in the margin, its content beside
@@ -832,10 +871,34 @@ body[data-view="project"] .loop {
   padding-top: 0;
   border-top: 0;
 }
+/* each step is numbered inside a drawn ring */
 .p-step-n {
-  padding-top: 0.45em;
+  position: relative;
+  display: grid;
+  place-items: center;
+  width: 2.5em;
+  height: 2.5em;
+  margin-top: 0.1em;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 14%, transparent);
   color: var(--accent);
-  opacity: 0.95;
+  transform: rotate(-2deg);
+}
+.p-step-n::before,
+.p-badge::before {
+  content: "";
+  position: absolute;
+  inset: -4%;
+  background: var(--accent);
+  -webkit-mask-image: var(--drawn-ring);
+  mask-image: var(--drawn-ring);
+  -webkit-mask-size: 100% 100%;
+  mask-size: 100% 100%;
+  opacity: 0.85;
+  pointer-events: none;
+}
+.p-steps li:nth-child(even) .p-step-n {
+  transform: rotate(2.5deg);
 }
 .p-steps h3 {
   font-weight: 400;
@@ -875,6 +938,24 @@ body[data-view="project"] .loop {
   grid-template-columns: repeat(3, 1fr);
   gap: 1.5em;
 }
+/* the numbers are stickers: drawn discs in the project's colour, each one
+   stuck down at its own angle */
+.p-badge {
+  position: relative;
+  display: grid;
+  place-items: center;
+  gap: 0.3em;
+  aspect-ratio: 1;
+  padding: 1.6em;
+  text-align: center;
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  transform: rotate(var(--turn, 0deg));
+  transition: transform 0.4s cubic-bezier(0.2, 0.8, 0.2, 1);
+}
+.p-badge:hover {
+  transform: rotate(0deg) scale(1.03);
+}
 .p-metrics b {
   display: block;
   font-weight: 500;
@@ -882,8 +963,8 @@ body[data-view="project"] .loop {
 }
 .p-metrics span {
   display: block;
-  margin-top: 0.7em;
-  opacity: 0.7;
+  max-width: 14ch;
+  opacity: 0.75;
 }
 
 .p-quote {
@@ -891,10 +972,38 @@ body[data-view="project"] .loop {
   text-align: center;
   border-top: 1px solid var(--rule);
 }
+/* the quote is said, so it sits in a drawn bubble with a tail */
+.p-bubble {
+  position: relative;
+  width: fit-content;
+  max-width: min(100%, 26em);
+  margin: 0 auto 2.4em;
+  padding: 1.5em 1.8em 1.7em;
+  border: 1.5px solid transparent;
+  border-image: var(--drawn-box) 12 / 12px / 0 round;
+  background: color-mix(in srgb, var(--accent) 10%, transparent);
+  transform: rotate(-0.8deg);
+}
+.p-bubble-tail {
+  position: absolute;
+  left: 2.4em;
+  bottom: -2.2em;
+  width: 3.2em;
+  height: 2.4em;
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  opacity: 0.8;
+}
 .p-quote p {
-  max-width: 18ch;
+  max-width: 20ch;
   margin: 0 auto;
   text-transform: none;
+}
+.p-quote cite {
+  margin-top: 0;
 }
 .p-quote cite {
   display: block;

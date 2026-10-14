@@ -8,7 +8,7 @@
    ═══════════════════════════════════════════════════════════════════════════ */
 import { COLLECTIONS, byCollection, bySlug } from './data.js?v=24';
 import { whenFonts, heroImage, galleryImage, sceneImage,
-         heroScenery, heroSun, heroMoon, heroCloud, heroBird } from './art.js?v=24';
+         heroScenery, heroSun, heroMoon, heroCloud, heroBird, doodle } from './art.js?v=24';
 import { createCarousel, createDiscStage } from './discs.js?v=24';
 
 const $ = (s, r = document) => r.querySelector(s);
@@ -270,7 +270,10 @@ function projectMarkup(p, next) {
     </section>
 
     <div class="p-after">
-      <section class="p-opening"><p class="p-summary paragraph-l">${esc(p.summary)}</p></section>
+      <div class="p-stickers" aria-hidden="true"></div>
+      <section class="p-opening">
+        <p class="p-summary paragraph-l">${esc(p.summary)}</p>
+      </section>
 
       <section class="p-chapter">
         <p class="eyebrow">The problem</p>
@@ -299,12 +302,21 @@ function projectMarkup(p, next) {
       <section class="p-chapter">
         <p class="eyebrow">The outcome</p>
         <div class="p-metrics">
-          ${p.outcome.map(o => `<div><b class="heading-m">${esc(o.value)}</b><span class="eyebrow">${esc(o.label)}</span></div>`).join('')}
+          ${p.outcome.map((o, i) => `
+            <div class="p-badge" style="--turn:${(i % 2 ? 1 : -1) * (1.6 + i * 0.5)}deg">
+              <b class="heading-m">${esc(o.value)}</b>
+              <span class="eyebrow">${esc(o.label)}</span>
+            </div>`).join('')}
         </div>
       </section>
 
       <blockquote class="p-quote">
-        <p class="heading-m">&ldquo;${esc(p.quote.text)}&rdquo;</p>
+        <div class="p-bubble">
+          <p class="heading-m">&ldquo;${esc(p.quote.text)}&rdquo;</p>
+          <svg class="p-bubble-tail" viewBox="0 0 60 44" aria-hidden="true">
+            <path d="M6 2c2 14 10 26 24 34-7-1-12-2-16-4 6 6 14 9 24 10-18 1-30-6-36-18" />
+          </svg>
+        </div>
         <cite class="eyebrow">${esc(p.quote.who)}</cite>
       </blockquote>
 
@@ -339,6 +351,23 @@ function mountProject(p) {
     const img = new Image(); img.src = p.heroImage; img.alt = ''; media.appendChild(img);
   } else {
     const c = heroImage(p); c.setAttribute('aria-hidden', 'true'); media.appendChild(c);
+  }
+
+  /* Stickers down the margins: blooms, butterflies, hearts, bows and
+     sparkles, scattered on a seed from the slug so a project's page is
+     always decorated the same way and no two are alike. */
+  const sr = rng(p.slug + 'stick');
+  const kinds = ['bloom', 'butterfly', 'heart', 'bow', 'sparkle'];
+  const stickers = $('.p-stickers', root);
+  for (let i = 0; i < 9; i++) {
+    const kind = kinds[Math.floor(sr() * kinds.length)];
+    const size = 26 + sr() * 44;
+    const c = doodle(kind, size, p.slug + i, p.art.bg);
+    c.className = 'p-sticker';
+    c.style.top = `${4 + i * 10.5 + sr() * 4}%`;
+    c.style[i % 2 ? 'right' : 'left'] = `${1 + sr() * 5}%`;
+    c.style.setProperty('--turn', `${(sr() - 0.5) * 36}deg`);
+    stickers.appendChild(c);
   }
 
   /* gallery shots are painted as they approach, not all at once on load */
