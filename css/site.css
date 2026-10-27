@@ -180,7 +180,6 @@ canvas {
 .site-foot,
 .p-chapter,
 .p-steps li,
-.p-gallery,
 .p-quote,
 .p-foot,
 .p-meta .row,
@@ -204,7 +203,6 @@ canvas {
 /* sketched frames */
 .bar,
 .index-panel,
-.p-shot,
 .track {
   border: 1.5px solid transparent;
   border-image: var(--drawn-box) 12 / 12px / 0 round;
@@ -620,6 +618,25 @@ body[data-view="project"] .index-btn {
   height: 100%;
   object-fit: cover;
 }
+/* With no real screens to show, the page leads with the project's own
+   record sleeve — this site's artwork, rather than a mocked-up screenshot
+   standing in for a product nobody has photographed yet. */
+.p-hero-sticky.sleeve {
+  display: grid;
+  place-items: center;
+  background: var(--tint, var(--tint-base));
+}
+.p-hero-sticky.sleeve img,
+.p-hero-sticky.sleeve canvas {
+  width: min(62vh, 78vw);
+  height: auto;
+  aspect-ratio: 1;
+  object-fit: contain;
+  transform: rotate(-1.2deg);
+  box-shadow:
+    0 2px 0 rgba(0, 0, 0, 0.06),
+    0 24px 60px rgba(0, 0, 0, 0.16);
+}
 .p-live {
   display: inline-block;
   margin-top: 1.3em;
@@ -800,31 +817,6 @@ body[data-view="project"] .loop {
   margin-top: 0.5em;
 }
 
-.p-gallery {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 1.6em 1.2em;
-  padding: 3.4em 0;
-  border-top: 1px solid var(--rule);
-}
-.p-shot-wrap.wide {
-  grid-column: 1 / -1;
-}
-.p-shot {
-  overflow: hidden;
-  background: rgba(0, 0, 0, 0.06);
-  aspect-ratio: 1400 / 950;
-}
-.p-shot canvas {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-.p-gallery figcaption {
-  margin-top: 0.7em;
-  opacity: 0.7;
-}
-
 .p-metrics {
   /* one, two or three — a row of scope facts should look deliberate at
      any length rather than leaving a hole where a third would go */
@@ -922,9 +914,6 @@ body[data-view="project"] .loop {
   }
   .p-chapter > .eyebrow {
     padding-top: 0;
-  }
-  .p-gallery {
-    grid-template-columns: 1fr;
   }
   .p-metrics {
     grid-template-columns: 1fr;
@@ -1991,42 +1980,6 @@ body[data-view="project"] .loop {
   .band-label::after {
     display: none;
   }
-}
-
-/* screens pinned to the page */
-.p-shot-wrap {
-  position: relative;
-  padding: 0.7em 0.7em 0;
-  background: color-mix(in srgb, var(--paper) 55%, transparent);
-  border: 1.5px solid transparent;
-  border-image: var(--drawn-box) 12 / 12px / 0 round;
-}
-.p-shot-wrap:nth-child(1) {
-  transform: rotate(-0.7deg);
-}
-.p-shot-wrap:nth-child(2) {
-  transform: rotate(0.9deg);
-}
-.p-shot-wrap:nth-child(3) {
-  transform: rotate(-0.5deg);
-}
-.p-shot-wrap::before {
-  /* a strip of tape */
-  content: "";
-  position: absolute;
-  z-index: 2;
-  top: -0.7em;
-  left: 50%;
-  width: 5.5em;
-  height: 1.5em;
-  margin-left: -2.75em;
-  transform: rotate(-1.6deg);
-  background: color-mix(in srgb, var(--accent) 22%, rgba(255, 255, 255, 0.55));
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.06);
-}
-.p-gallery figcaption {
-  padding: 0.7em 0.2em 0.9em;
-  opacity: 0.75;
 }
 
 /* numbers ringed by hand */

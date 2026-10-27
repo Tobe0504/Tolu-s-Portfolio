@@ -6,11 +6,10 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=40";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=41";
 import {
   whenFonts,
-  heroImage,
-  galleryImage,
+  discLabel,
   sceneImage,
   heroScenery,
   heroSun,
@@ -18,8 +17,8 @@ import {
   heroCloud,
   heroBird,
   doodle,
-} from "./art.js?v=40";
-import { createCarousel } from "./discs.js?v=40";
+} from "./art.js?v=41";
+import { createCarousel } from "./discs.js?v=41";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -398,18 +397,6 @@ function projectMarkup(p, prev, next, pos, total) {
         </ol>
       </section>
 
-      <section class="p-gallery" aria-label="Selected screens">
-        ${p.gallery
-          .map(
-            (g, i) => `
-          <figure class="p-shot-wrap${i === 0 ? " wide" : ""}">
-            <div class="p-shot" data-variant="${esc(g.variant)}" data-i="${i}"></div>
-            <figcaption class="eyebrow">${esc(g.caption)}</figcaption>
-          </figure>`,
-          )
-          .join("")}
-      </section>
-
       ${!p.outcome || !p.outcome.length ? "" : `
       <section class="p-chapter">
         <p class="eyebrow">What it covered</p>
@@ -489,6 +476,9 @@ function mountProject(p) {
   root.hidden = false;
   document.title = `${p.name} — Tolulope Elijah`;
 
+  /* A real screenshot if there is one. Otherwise the project's own record
+     sleeve, which is this site's artwork rather than a mocked-up screen
+     pretending to be the product. */
   const media = $("#p-media");
   if (p.heroImage) {
     const img = new Image();
@@ -496,8 +486,10 @@ function mountProject(p) {
     img.alt = "";
     media.appendChild(img);
   } else {
-    const c = heroImage(p);
+    const c = p.discImage ? new Image() : discLabel(p, 1200);
+    if (p.discImage) c.src = p.discImage;
     c.setAttribute("aria-hidden", "true");
+    media.classList.add("sleeve");
     media.appendChild(c);
   }
 
@@ -518,21 +510,6 @@ function mountProject(p) {
     stickers.appendChild(c);
   }
 
-  /* gallery shots are painted as they approach, not all at once on load */
-  const shots = new IntersectionObserver(
-    (entries) => {
-      entries.forEach((e) => {
-        if (!e.isIntersecting) return;
-        shots.unobserve(e.target);
-        const img = galleryImage(p, e.target.dataset.variant);
-        img.setAttribute("aria-hidden", "true");
-        e.target.appendChild(img);
-      });
-    },
-    { rootMargin: "30% 0px" },
-  );
-  $$(".p-shot", root).forEach((el) => shots.observe(el));
-
   /* The page used to end in a tall sticky section that handed you to the
      next project on its own once you scrolled far enough. Being moved
      somewhere you did not ask to go is a strange thing for a page to do, so
@@ -552,7 +529,6 @@ function mountProject(p) {
   addEventListener("keydown", onKey);
 
   unbindProject = () => {
-    shots.disconnect();
     removeEventListener("keydown", onKey);
   };
   requestAnimationFrame(() =>
