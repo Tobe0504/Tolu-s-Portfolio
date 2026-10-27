@@ -28,6 +28,9 @@ jobs:
           mkdir -p _site
           cp -r index.html css js assets _site/
           touch _site/.nojekyll
+          # A custom domain has to travel with the artifact. Without CNAME in
+          # here, a deploy can clear the domain set in the repo's settings.
+          [ -f CNAME ] && cp CNAME _site/ || true
 
       # Stamp every asset with this commit's hash so each deploy busts the
       # browser cache. The ES module imports inside js/ are stamped too:
