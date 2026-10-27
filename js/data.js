@@ -35,7 +35,6 @@ export const PROJECTS = [
     role: 'UX/UI design', client: 'First City Monument Bank',
     industry: 'Digital banking', platform: 'FCMB mobile app',
     status: 'Live on the FCMB mobile app',
-    tagline: ['Points', 'you', 'can', 'actually', 'read.'],
     summary: 'A points-based rewards system on the FCMB mobile app. I contributed the UX and UI design, working on how customers understand the points they hold and find their way around the rewards experience.',
     challenge: 'A rewards balance is only worth what a customer can make sense of. Points have to be legible at a glance — what you have, what moves them, and where to go next — inside a banking app people open to do something else.',
     approach: [
@@ -58,7 +57,6 @@ export const PROJECTS = [
     role: 'UX design', client: 'First City Monument Bank',
     industry: 'Digital banking', platform: 'FCMB mobile app',
     status: 'Designed, savings plan journeys',
-    tagline: ['A', 'plan', 'you', 'can', 'put', 'down', 'and', 'pick', 'up.'],
     summary: 'Savings plan journeys end to end: creating a plan, setting recurring contributions, choosing a duration, resuming a plan that was paused, and reading back the savings history. The work was about making schedules and plan status clear at the moment they matter.',
     challenge: 'Saving on a schedule asks a customer to keep a promise to themselves over months. The journeys have to say plainly what has been agreed, what state a plan is in today, and how to start again after a break — otherwise a paused plan quietly becomes an abandoned one.',
     approach: [
@@ -84,7 +82,6 @@ export const PROJECTS = [
     role: 'UX design', client: 'First City Monument Bank',
     industry: 'Digital banking, Trading', platform: 'FCMB digital banking',
     status: 'Designed, activation flows',
-    tagline: ['Consent,', 'said', 'out', 'loud.'],
     summary: 'Activation flows for a CSL trading account. The journey covers what data is shared with CSL, explicit consent for sharing it, read-only prefilled details, the additional information still needed, and confirmation that the account is active.',
     challenge: 'Activating a trading account moves a customer’s details from the bank to a third party. Consent for that cannot be buried in a tick box: the customer has to be able to see exactly what is being shared, agree to it deliberately, and know when it is done.',
     approach: [
@@ -110,7 +107,6 @@ export const PROJECTS = [
     role: 'Competitive UX analysis', client: 'First City Monument Bank',
     industry: 'Digital banking', platform: 'Research, stakeholder summary',
     status: 'Delivered to stakeholders',
-    tagline: ['Five', 'banks,', 'one', 'journey,', 'side', 'by', 'side.'],
     summary: 'A competitive UX analysis of account tier upgrades. I compared the journey across FCMB, Wema, Moniepoint, OPay and PalmPay, then organised the steps and screens into a stakeholder summary used to push journey improvements.',
     challenge: 'Everyone had an opinion on where the tier upgrade journey lost people, and no shared picture to argue with. The work was to replace opinions with the journeys themselves, laid out so they could be compared step by step.',
     approach: [

@@ -195,26 +195,12 @@ canvas {
 .row,
 .info-title,
 .hero-meta,
-.p-cta,
-.p-live,
-.p-word {
+.p-live {
   border-bottom-color: transparent;
   background-image: var(--drawn-h);
   background-repeat: repeat-x;
   background-position: left bottom;
 }
-.p-cta {
-  border-top-color: transparent;
-}
-/* on the dark hero the stroke has to be light, so it is drawn with a filter */
-.p-word,
-.p-cta {
-  filter: none;
-}
-.p-words {
-  --drawn-h: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='5'%3E%3Cpath d='M0 2.5C18 1.5 34 3.5 52 2.5S88 1.4 106 2.7S140 3.4 160 2.5' fill='none' stroke='%23ffffff' stroke-opacity='.6' stroke-width='1.1' stroke-linecap='round'/%3E%3C/svg%3E");
-}
-
 /* sketched frames */
 .bar,
 .index-panel,
@@ -620,7 +606,6 @@ body[data-view="project"] .index-btn {
 .p-hero {
   position: relative;
   margin-top: 6.5em;
-  color: #fff;
 }
 .p-hero-sticky {
   position: sticky;
@@ -635,55 +620,6 @@ body[data-view="project"] .index-btn {
   height: 100%;
   object-fit: cover;
 }
-.p-hero-sticky::after {
-  /* keeps the white type legible */
-  content: "";
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.18), rgba(0, 0, 0, 0.28));
-}
-.p-tear {
-  /* the torn paper edge */
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: -1px;
-  z-index: 2;
-  height: 15vh;
-  pointer-events: none;
-}
-.p-tear path {
-  fill: var(--paper);
-}
-.p-words {
-  position: relative;
-  z-index: 3;
-  margin-top: -100vh;
-  margin-top: -100dvh;
-  padding-top: 32vh;
-}
-.p-cta {
-  display: block;
-  width: max-content;
-  margin: 0 auto;
-  padding: 0.5em 0 0.45em;
-  border-top: 1px solid rgba(255, 255, 255, 0.7);
-  border-bottom: 1px solid rgba(255, 255, 255, 0.7);
-}
-.p-word {
-  display: flex;
-  align-items: flex-end;
-  height: 34vh;
-  padding: 0 var(--pad) 0.1em;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.55);
-}
-.p-word:nth-child(even) {
-  justify-content: flex-end;
-} /* first word sits right, then alternates */
-.p-word:first-of-type {
-  height: 42vh;
-}
-
 .p-live {
   display: inline-block;
   margin-top: 1.3em;
@@ -1349,12 +1285,20 @@ body[data-view="project"] .loop {
 }
 
 .p-ends {
+  /* a screen of its own: the page has finished, and where you go next is
+     the only thing on it */
   position: relative;
   z-index: 3;
+  display: grid;
+  align-content: center;
+  min-height: 100vh;
+  min-height: 100dvh;
+  padding: 4em var(--pad) 4.5em;
+  background: var(--tint, var(--tint-base));
+}
+.p-ends > * {
   width: min(100%, var(--wrap));
   margin-inline: auto;
-  padding: 3.5em var(--pad) 5em;
-  background: var(--tint, var(--tint-base));
 }
 .p-jumps {
   display: grid;
@@ -1392,7 +1336,7 @@ body[data-view="project"] .loop {
 }
 
 .p-more-label {
-  margin: 3em 0 0.8em;
+  margin: 3.4em 0 0.8em;
   opacity: 0.6;
 }
 .p-more {

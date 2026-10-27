@@ -6,7 +6,7 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=38";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=39";
 import {
   whenFonts,
   heroImage,
@@ -18,8 +18,8 @@ import {
   heroCloud,
   heroBird,
   doodle,
-} from "./art.js?v=38";
-import { createCarousel } from "./discs.js?v=38";
+} from "./art.js?v=39";
+import { createCarousel } from "./discs.js?v=39";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -334,22 +334,6 @@ function setCollection(id, { scroll = true } = {}) {
   if (scroll && state.view === "home") scrollToDisc(0, true);
 }
 
-/* ── project page ─────────────────────────────────────────────────────── */
-function tearPath(seed) {
-  /* a torn edge: low at the sides, rising into a ragged hill, with small
-     tears along the way so it never reads as a smooth curve */
-  let s = seed * 997,
-    pts = [];
-  const r = () => (s = (s * 9301 + 49297) % 233280) / 233280;
-  for (let x = 0; x <= 1000; x += 6 + r() * 10) {
-    const hill = Math.exp(-Math.pow((x - 560) / 190, 2));
-    const y = 230 - hill * 180 + (r() - 0.5) * 16 + Math.sin(x / 23) * 3;
-    pts.push(`${x.toFixed(0)},${y.toFixed(1)}`);
-  }
-  pts.push("1000,230");
-  return `M0,0 L1000,0 L1000,230 L${pts.reverse().join(" L")} L0,230 Z`;
-}
-
 function projectMarkup(p, prev, next, pos, total) {
   const tint = `color-mix(in srgb, ${p.art.bg} 9%, var(--tint-base))`;
   const meta = [
@@ -386,10 +370,6 @@ function projectMarkup(p, prev, next, pos, total) {
 
     <section class="p-hero">
       <div class="p-hero-sticky" id="p-media"></div>
-      <div class="p-words">
-        ${links.prototype ? `<a class="p-cta heading-xs" href="${esc(links.prototype)}">View prototype</a>` : ""}
-        ${p.tagline.map((w) => `<div class="p-word"><span class="heading-xl">${esc(w)}</span></div>`).join("")}
-      </div>
     </section>
 
     <div class="p-after">
@@ -458,7 +438,10 @@ function projectMarkup(p, prev, next, pos, total) {
       </blockquote>`}
 
       <section class="p-foot">
-        ${links.live ? `<a class="p-live heading-xs" href="${esc(links.live)}">View live</a>` : `<span class="p-live-none eyebrow">${esc(p.status || "")}</span>`}
+        <span class="p-foot-links">
+          ${links.prototype ? `<a class="p-live heading-xs" href="${esc(links.prototype)}">View prototype</a>` : ""}
+          ${links.live ? `<a class="p-live heading-xs" href="${esc(links.live)}">View live</a>` : `<span class="p-live-none eyebrow">${esc(p.status || "")}</span>`}
+        </span>
         <p class="p-sign">${esc(p.name)}.</p>
       </section>
     </div>
