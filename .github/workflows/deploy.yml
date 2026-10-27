@@ -41,7 +41,21 @@ jobs:
         run: |
           V=${GITHUB_SHA::7}
           sed -i -E "s/\?v=[0-9a-zA-Z]+/?v=$V/g" _site/index.html
-          sed -i -E "s#(from '\./[a-z]+\.js)(\?v=[0-9a-zA-Z]+)?'#\1?v=$V'#g" _site/js/*.js
+          # the quote style matches whatever the formatter last used, so
+          # accept either and keep the closing quote that was there
+          sed -i -E "s#(from [\"']\./[a-z0-9-]+\.js)(\?v=[0-9a-zA-Z]+)?([\"'])#\1?v=$V\3#g" _site/js/*.js
+
+      # This has failed silently once already — a formatter changed the
+      # quotes and the stamp quietly stopped landing, which is precisely
+      # the stale-module bug it exists to prevent. Now it is checked.
+      - name: Check every asset carries this commit's stamp
+        run: |
+          V=${GITHUB_SHA::7}
+          if grep -rno '?v=[0-9a-zA-Z]\+' _site/index.html _site/js | grep -v "?v=$V"; then
+            echo "::error::the lines above were not stamped with $V"
+            exit 1
+          fi
+          echo "all ?v= stamps are $V"
 
       - uses: actions/upload-pages-artifact@v3
         with:
