@@ -6,7 +6,7 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=39";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=40";
 import {
   whenFonts,
   heroImage,
@@ -18,8 +18,8 @@ import {
   heroCloud,
   heroBird,
   doodle,
-} from "./art.js?v=39";
-import { createCarousel } from "./discs.js?v=39";
+} from "./art.js?v=40";
+import { createCarousel } from "./discs.js?v=40";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -944,6 +944,8 @@ function createPlayer(onProgress) {
       .map(Number);
     return (m || 0) * 60 + (s || 0);
   };
+  const clock = (n) =>
+    `${Math.floor(n / 60)}:${String(Math.floor(n % 60)).padStart(2, "0")}`;
 
   const tick = () => {
     if (!playing) return;
@@ -1057,6 +1059,32 @@ function createPlayer(onProgress) {
         el = el || new Audio();
         el.src = track.audio;
         el.loop = false;
+        el.preload = "metadata";
+        /* The duration written in the data is a label. For a real file the
+           file is the truth, and if the two disagree the waveform fills at
+           the wrong rate — so take the length from the audio itself as soon
+           as it is known, and correct the label with it. */
+        el.addEventListener(
+          "loadedmetadata",
+          () => {
+            if (!isFinite(el.duration) || el.duration <= 0) return;
+            length = el.duration;
+            const dur = $("#track-dur");
+            if (dur && current === project.slug) dur.textContent = clock(length);
+          },
+          { once: true },
+        );
+        /* a file that will not load should not leave a dead play button */
+        el.addEventListener(
+          "error",
+          () => {
+            if (current !== project.slug || !playing) return;
+            el = null;
+            length = seconds(track.duration);
+            master = synth(track);
+          },
+          { once: true },
+        );
         el.play().catch(() => {});
       } else {
         el = null;
