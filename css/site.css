@@ -176,7 +176,7 @@ canvas {
 .band,
 .stats,
 .steps li,
-.said,
+.fact,
 .site-foot,
 .p-chapter,
 .p-steps li,
@@ -981,8 +981,10 @@ body[data-view="project"] .loop {
 }
 
 .p-metrics {
+  /* one, two or three — a row of scope facts should look deliberate at
+     any length rather than leaving a hole where a third would go */
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
+  grid-template-columns: repeat(auto-fit, minmax(9em, 14em));
   gap: 1.5em;
 }
 /* the numbers are stickers: drawn discs in the project's colour, each one
@@ -1358,21 +1360,50 @@ body[data-view="project"] .loop {
   margin-top: 0.6em;
 }
 
-.said {
-  padding: 1.8em 0;
+/* ── background: a list of plain facts, ruled like everything else ───── */
+.facts {
+  display: grid;
+}
+.fact {
+  display: grid;
+  grid-template-columns: 11em 1fr;
+  gap: 2em;
+  padding: 1.6em 0;
   border-top: 1px solid rgba(0, 0, 0, 0.18);
 }
-.said:first-child {
-  padding-top: 8;
+.fact:first-child {
+  padding-top: 0;
   border-top: 0;
 }
-.said blockquote {
-  max-width: 42ch;
-  text-transform: none;
+.fact dt {
+  padding-top: 0.45em;
+  color: var(--accent);
+  opacity: 0.9;
 }
-.said figcaption {
-  margin-top: 1em;
-  opacity: 0.7;
+.fact dd {
+  max-width: 48ch;
+}
+.fact-note {
+  display: block;
+  margin-top: 0.5em;
+  opacity: 0.6;
+}
+@media (max-width: 700px) {
+  .fact {
+    grid-template-columns: 1fr;
+    gap: 0.5em;
+  }
+  .fact dt {
+    padding-top: 0;
+  }
+}
+
+/* an info row whose value is missing is hidden rather than left blank */
+.info .row.empty {
+  display: none;
+}
+.p-live-none {
+  opacity: 0.6;
 }
 
 .contact-link {

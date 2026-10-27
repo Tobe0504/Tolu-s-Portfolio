@@ -5,8 +5,14 @@ first version of the site; below it, every project is a physical disc you
 scroll through; below that, the rest of the portfolio. Plain HTML, CSS and
 JavaScript with three.js loaded from a CDN. No build step.
 
-**All projects, figures and testimonials are placeholder.** See
-_Swapping in real content_.
+**The content is Tolulope's own, taken from her CV (Oct 2026).** Only what
+the CV states is written as fact; where it is silent the field is left out
+and the page hides what is missing. Three things are still waiting on her:
+testimonials (none are invented, so the quote and review slots are empty),
+performance figures (the badges count scope the CV itself lists — steps
+covered, banks compared — never impact), and real screens (captions name the
+screens, the images under them are generated). See _Swapping in real
+content_.
 
 The layout, type hierarchy and interaction model follow
 [a24.raviklaassens.com](https://a24.raviklaassens.com/) by Ravi Klaassens. It
@@ -84,7 +90,8 @@ the point of them.
   to bring it to the front.
 - Top left: title, role, year, team. Bottom: two reviews. Both roll over as
   the disc changes.
-- The bar: wordmark, **Client work / Explorations**, and **Index**. Index
+- The bar: wordmark, the collection tabs (hidden while there is only one
+  collection), a light/dark toggle, and **Index**. Index
   opens a list above the bar with the current project inverted; pick any to
   jump to it.
 
@@ -116,7 +123,6 @@ Hash based, so deep links work on GitHub Pages with no server config:
 | Route | Shows |
 | --- | --- |
 | `#/` | Client work library |
-| `#/explore` | Explorations library |
 | `#/p/<slug>` | A project page |
 
 The browser Back button returns from a project to the library, landing on
@@ -165,7 +171,8 @@ from the centre, where the hole and the clear hub are. Hero images should be
 dark enough for white type to read over them.
 
 **Collections.** `COLLECTIONS` in `js/data.js` defines the two tabs. Rename
-them freely; a project's `collection` field says which tab it belongs to.
+them freely; a project's `collection` field says which tab it belongs to,
+and the tab row only appears once there is more than one collection.
 
 ## Type
 

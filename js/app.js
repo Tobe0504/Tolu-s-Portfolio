@@ -6,7 +6,7 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=33";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=35";
 import {
   whenFonts,
   heroImage,
@@ -19,8 +19,8 @@ import {
   heroBird,
   doodle,
   setInk,
-} from "./art.js?v=33";
-import { createCarousel, createDiscStage } from "./discs.js?v=33";
+} from "./art.js?v=35";
+import { createCarousel, createDiscStage } from "./discs.js?v=35";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -97,10 +97,13 @@ function showProject(i, p) {
   swap($("#info-title"), esc(p.name), 0);
   swap($("#info-role"), esc(p.role), 40);
   swap($("#info-year"), esc(p.year), 80);
-  swap($("#info-team"), p.team.map(esc).join("<br>"), 120);
+  const team = p.team || [];
+  swap($("#info-team"), team.map(esc).join("<br>"), 120);
+  /* a row with nothing in it is a gap, not a label */
+  $("#info-team").closest(".row")?.classList.toggle("empty", !team.length);
 
   const rev = $("#reviews");
-  const html = p.reviews
+  const html = (p.reviews || [])
     .map(
       (r) => `
     <figure class="review">
@@ -132,6 +135,8 @@ function showProject(i, p) {
 }
 
 function renderTabs() {
+  /* a single collection is not a choice, so it gets no tab row */
+  $("#tabs").hidden = COLLECTIONS.length < 2;
   $("#tabs").innerHTML = COLLECTIONS.map(
     (c) =>
       `<a class="tab" role="tab" href="${c.id === "work" ? "#/" : "#/" + c.id}" aria-selected="${c.id === state.collection}">${esc(c.label)}</a>`,
@@ -357,14 +362,15 @@ function projectMarkup(p, next) {
     ["Platform", p.platform],
     ["Timeline", p.timeline],
     ["Status", p.status],
-  ];
+  ].filter(([, v]) => v);
+  const links = p.links || {};
   return `
   <div style="--tint:${tint}">
     <header class="p-head">
       <h1 class="p-title heading-l reveal" style="--d:.05">${esc(p.name)}</h1>
       <p class="p-credits reveal" style="--d:.18">
         <span class="eyebrow">Role</span>${esc(p.role)}
-        <span class="eyebrow">Team</span>${p.team.map(esc).join(", ")}
+        ${p.team && p.team.length ? `<span class="eyebrow">Team</span>${p.team.map(esc).join(", ")}` : ""}
       </p>
     </header>
 
@@ -375,7 +381,7 @@ function projectMarkup(p, next) {
     <section class="p-hero">
       <div class="p-hero-sticky" id="p-media"></div>
       <div class="p-words">
-        <a class="p-cta heading-xs" href="${esc(p.links.prototype)}">View prototype</a>
+        ${links.prototype ? `<a class="p-cta heading-xs" href="${esc(links.prototype)}">View prototype</a>` : ""}
         ${p.tagline.map((w) => `<div class="p-word"><span class="heading-xl">${esc(w)}</span></div>`).join("")}
       </div>
     </section>
@@ -418,8 +424,9 @@ function projectMarkup(p, next) {
           .join("")}
       </section>
 
+      ${!p.outcome || !p.outcome.length ? "" : `
       <section class="p-chapter">
-        <p class="eyebrow">The outcome</p>
+        <p class="eyebrow">What it covered</p>
         <div class="p-metrics">
           ${p.outcome
             .map(
@@ -431,8 +438,9 @@ function projectMarkup(p, next) {
             )
             .join("")}
         </div>
-      </section>
+      </section>`}
 
+      ${!p.quote ? "" : `
       <blockquote class="p-quote">
         <div class="p-bubble">
           <p class="heading-m">&ldquo;${esc(p.quote.text)}&rdquo;</p>
@@ -441,10 +449,10 @@ function projectMarkup(p, next) {
           </svg>
         </div>
         <cite class="eyebrow">${esc(p.quote.who)}</cite>
-      </blockquote>
+      </blockquote>`}
 
       <section class="p-foot">
-        <a class="p-live heading-xs" href="${esc(p.links.live)}">View live</a>
+        ${links.live ? `<a class="p-live heading-xs" href="${esc(links.live)}">View live</a>` : `<span class="p-live-none eyebrow">${esc(p.status || "")}</span>`}
         <p class="p-sign">${esc(p.name)}.</p>
       </section>
     </div>
@@ -1375,13 +1383,14 @@ function countUp(el) {
     return;
   }
   if (reduce) {
-    el.textContent = String(target);
+    el.textContent = String(target) + (suffix || "");
     return;
   }
   const t0 = performance.now();
   const step = (now) => {
     const p = clamp((now - t0) / 1300, 0, 1);
-    el.textContent = String(Math.round(target * (1 - Math.pow(1 - p, 3))));
+    el.textContent =
+      String(Math.round(target * (1 - Math.pow(1 - p, 3)))) + (suffix || "");
     if (p < 1) requestAnimationFrame(step);
   };
   requestAnimationFrame(step);
