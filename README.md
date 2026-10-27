@@ -24,7 +24,7 @@ uses no A24 branding, and none of that site's artwork, copy or code.
 | --- | --- |
 | Hero | The headline carried over from the first site, set in title case so it keeps its voice, with the procession walking the rule at its foot. |
 | The library | The discs. A tall section whose face pins while you scroll through it. |
-| About, Process, In their words, What's next | The rest of the portfolio, as ruled rows with their labels in the margin. |
+| About, How I work, Background, The CV, What's next | The rest of the portfolio, as ruled rows with their labels in the margin. The CV band offers `assets/Tolulope-Elijah-CV.pdf` as a download; replace that file and the size beside it when the CV changes. |
 
 **Drawn, not ruled.** Every line is a stroke with a wobble in it, tiled so
 the joins are invisible; boxes use the same hand through `border-image`. Both
@@ -91,7 +91,7 @@ the point of them.
 - Top left: title, role, year, team. Bottom: two reviews. Both roll over as
   the disc changes.
 - The bar: wordmark, the collection tabs (hidden while there is only one
-  collection), a light/dark toggle, and **Index**. Index
+  collection) and **Index**. Index
   opens a list above the bar with the current project inverted; pick any to
   jump to it.
 

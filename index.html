@@ -11,17 +11,7 @@
       name="description"
       content="Tolulope Elijah is a lead UX designer in Lagos, Nigeria. Three years in digital banking at FCMB, designing rewards, savings and account journeys."
     />
-    <meta name="theme-color" content="#f2f2f2" id="theme-color" />
-    <script>
-      /* before first paint, so the page never flashes the wrong paper */
-      try {
-        var saved = localStorage.getItem("theme");
-        var dark = saved
-          ? saved === "dark"
-          : matchMedia("(prefers-color-scheme: dark)").matches;
-        document.documentElement.dataset.theme = dark ? "dark" : "light";
-      } catch (e) {}
-    </script>
+    <meta name="theme-color" content="#f2f2f2" />
     <link rel="icon" href="assets/favicon.svg" type="image/svg+xml" />
 
     <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -30,7 +20,7 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
     />
-    <link rel="stylesheet" href="css/site.css?v=35" />
+    <link rel="stylesheet" href="css/site.css?v=36" />
 
     <script type="importmap">
       {
@@ -562,9 +552,48 @@
         </div>
       </section>
 
+      <!-- ══════════════ THE CV ══════════════ -->
+      <section class="band" id="cv">
+        <p class="band-label eyebrow">04 / The CV</p>
+        <div class="band-body">
+          <p class="band-lead heading-m reveal">The one-page version.</p>
+          <p class="band-note paragraph-l reveal">
+            Everything on this site, set in order and sized for a printer: the
+            roles, the projects, the tools and where I studied.
+          </p>
+          <a
+            class="cv-card reveal"
+            href="assets/Tolulope-Elijah-CV.pdf"
+            download="Tolulope-Elijah-CV.pdf"
+          >
+            <!-- a sheet of paper, drawn, with its corner turned -->
+            <svg class="cv-sheet" viewBox="0 0 84 108" aria-hidden="true">
+              <path
+                class="cv-page"
+                d="M6 5c18-1.5 36 1 52 .5 7 6.5 14 13 21 19.5-1 26 1.5 53 .5 79-24 1.5-49-1-73 0C8 77 5.5 31 6 5Z"
+              />
+              <path
+                class="cv-fold"
+                d="M58 5.5c-.5 7 .5 14 0 20 7 .5 14-.5 21 0"
+              />
+              <path class="cv-rule" d="M17 44c13-1 26 1 39 0" />
+              <path class="cv-rule" d="M17 57c17-1 34 1 50 0" />
+              <path class="cv-rule" d="M17 70c11-.5 22 .5 33 0" />
+              <path class="cv-rule" d="M17 83c16-1 32 1 47 0" />
+            </svg>
+            <span class="cv-meta">
+              <span class="cv-do heading-xs">Download the CV</span>
+              <span class="eyebrow"
+                >PDF &middot; 72 KB &middot; October 2026</span
+              >
+            </span>
+          </a>
+        </div>
+      </section>
+
       <!-- ══════════════ CONTACT ══════════════ -->
       <section class="band" id="contact">
-        <p class="band-label eyebrow">04 / What&rsquo;s next</p>
+        <p class="band-label eyebrow">05 / What&rsquo;s next</p>
         <div class="band-body">
           <p class="band-lead heading-m reveal">
             Let&rsquo;s build something worth keeping.
@@ -596,6 +625,14 @@
           </li>
           <li>
             <a class="eyebrow" href="mailto:Tolulope8888@gmail.com">Email</a>
+          </li>
+          <li>
+            <a
+              class="eyebrow"
+              href="assets/Tolulope-Elijah-CV.pdf"
+              download="Tolulope-Elijah-CV.pdf"
+              >CV</a
+            >
           </li>
         </ul>
         <p class="eyebrow">&copy;2026</p>
@@ -639,25 +676,6 @@
             />
           </svg>
         </button>
-        <!-- a sun and a moon, drawn with the same unsteady pen -->
-        <button class="theme-btn" id="theme-btn" aria-label="Switch to dark">
-          <svg viewBox="0 0 24 24" aria-hidden="true">
-            <g class="t-sun">
-              <path
-                d="M12 7.3c2.6-.2 4.9 2 4.8 4.6-.1 2.7-2 4.9-4.8 4.9-2.6 0-4.9-2-4.8-4.8.1-2.5 2.2-4.7 4.8-4.7Z"
-              />
-              <path d="M12 2.7v2.2M12 19.1v2.2M2.7 12h2.2M19.1 12h2.2" />
-              <path
-                d="m5.5 5.3 1.6 1.7M16.9 17l1.6 1.7M18.5 5.3 16.9 7M7.1 17l-1.6 1.7"
-              />
-            </g>
-            <g class="t-moon">
-              <path
-                d="M15.8 3.5c-4.8.8-8 5.3-7 10 .8 3.7 4 6.4 7.8 6.5-5.9 2.4-12.3-2-12.3-8.4 0-5.2 4.3-9.3 11.5-8.1Z"
-              />
-            </g>
-          </svg>
-        </button>
       </div>
     </nav>
     <div class="scrim" id="scrim" hidden></div>
@@ -668,6 +686,6 @@
       </p></noscript
     >
 
-    <script type="module" src="js/app.js?v=35"></script>
+    <script type="module" src="js/app.js?v=36"></script>
   </body>
 </html>

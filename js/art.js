@@ -558,10 +558,7 @@ export function doodle(kind, size, seed = '', colour = INK) {
    Cycling those three frames a few times a second is what gives hand-drawn
    animation its boil: the line is alive without anything actually moving. */
 
-let INK = '#161616';
-
-/* dark mode draws the same scene in chalk rather than inverting it */
-export function setInk(colour) { INK = colour; }
+const INK = '#161616';
 
 function layer(w, h) {
   const c = document.createElement('canvas');
