@@ -628,13 +628,18 @@ body[data-view="project"] .index-btn {
   margin-inline: auto;
   padding: 1em var(--pad) 0;
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(19em, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(29em, 1fr));
   gap: 2em 1.4em;
 }
 /* a lone image, and the lead image of three or more, take the full width */
 .p-shot-wrap:only-child,
 .p-shot-wrap:first-child:nth-last-child(n + 3) {
-  grid-column: 1 / -1;
+  grid-column: 1 / -2;
+}
+
+.p-shot-wrap:only-child img,
+.p-shot-wrap:first-child:nth-last-child(n + 3) img {
+  max-height: 1600px;
 }
 .p-shot-wrap {
   margin: 0;
@@ -676,9 +681,6 @@ body[data-view="project"] .index-btn {
   }
 }
 
-/* With no real screens to show, the page leads with the project's own
-   record sleeve — this site's artwork, rather than a mocked-up screenshot
-   standing in for a product nobody has photographed yet. */
 .p-hero-sticky.sleeve {
   display: grid;
   place-items: center;

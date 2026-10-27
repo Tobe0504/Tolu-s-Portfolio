@@ -173,24 +173,21 @@ export const PROJECTS = [
     outcome: [{ value: "Live", label: "on the FCMB mobile app" }],
     images: [
       {
-        name: "The points balance",
-        src: "https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114836/Iphone_14_-_7_qrb3e8.png",
-      },
-      {
-        name: "The points balance",
-        src: 'https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114836/Iphone_14_-_6_eksonp.png",',
-      },
-      {
-        name: "The points balance",
+        name: "FCMB Mobile Dashboard",
         src: "https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114835/Iphone_14_-_3_e9zgyw.png",
       },
       {
-        name: "The points balance",
-        src: "https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114835/Iphone_14_-_5_bv54eo.png",
+        name: "Rewards Homepage",
+        src: "https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114835/Iphone_14_-_4_m7j1u2.png",
       },
       {
-        name: "The points balance",
-        src: "https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114835/Iphone_14_-_4_m7j1u2.png",
+        name: "How to Earn Points",
+        src: "https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114836/Iphone_14_-_7_qrb3e8.png",
+      },
+
+      {
+        name: "Rewards History",
+        src: "https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114835/Iphone_14_-_5_bv54eo.png",
       },
     ],
     track: {
