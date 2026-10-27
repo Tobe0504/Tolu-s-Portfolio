@@ -79,11 +79,12 @@ export const PROJECTS = [
     ],
     images: [],
     track: {
-      title: "The Right Door First",
-      duration: "2:36",
-      key: "F",
-      bpm: 92,
-      audio: null,
+      title: "Slick - Victony",
+      duration: "1:46",
+      key: "A",
+      bpm: 96,
+      audio:
+        "https://res.cloudinary.com/dryjxk5jw/video/upload/v1793109198/Victony-SLICK-_JustNaija.com_yusqhg.mp3",
     },
     links: {},
     art: {
@@ -125,11 +126,12 @@ export const PROJECTS = [
     outcome: [{ value: "Live", label: "at fcmbgroup.com" }],
     images: [],
     track: {
-      title: "One Vision",
-      duration: "2:48",
-      key: "C",
-      bpm: 86,
-      audio: null,
+      title: "Wild Things - Alessia Cara",
+      duration: "3:08",
+      key: "A",
+      bpm: 96,
+      audio:
+        "https://res.cloudinary.com/dryjxk5jw/video/upload/v1793115119/Alessia_Cara_-_Wild_Things__mp3.pm_y5kxzu.mp3",
     },
     links: { live: "https://fcmbgroup.com" },
     art: {
@@ -169,13 +171,35 @@ export const PROJECTS = [
       },
     ],
     outcome: [{ value: "Live", label: "on the FCMB mobile app" }],
-    images: [],
+    images: [
+      {
+        name: "The points balance",
+        src: "https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114836/Iphone_14_-_7_qrb3e8.png",
+      },
+      {
+        name: "The points balance",
+        src: 'https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114836/Iphone_14_-_6_eksonp.png",',
+      },
+      {
+        name: "The points balance",
+        src: "https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114835/Iphone_14_-_3_e9zgyw.png",
+      },
+      {
+        name: "The points balance",
+        src: "https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114835/Iphone_14_-_5_bv54eo.png",
+      },
+      {
+        name: "The points balance",
+        src: "https://res.cloudinary.com/dryjxk5jw/image/upload/v1793114835/Iphone_14_-_4_m7j1u2.png",
+      },
+    ],
     track: {
-      title: "Points, Plainly Put",
-      duration: "2:24",
+      title: "DND - Rema",
+      duration: "2:46",
       key: "A",
       bpm: 96,
-      audio: null,
+      audio:
+        "https://res.cloudinary.com/dryjxk5jw/video/upload/v1793115593/Rema-DND2-_JustNaija.com_jhpwiq.mp3",
     },
     links: {},
     art: {
@@ -220,11 +244,12 @@ export const PROJECTS = [
     ],
     images: [],
     track: {
-      title: "Put Down, Picked Up",
-      duration: "3:02",
-      key: "D",
-      bpm: 88,
-      audio: null,
+      title: "Favourite Girl - Darkoo & Rema",
+      duration: "3:04",
+      key: "A",
+      bpm: 96,
+      audio:
+        "https://res.cloudinary.com/dryjxk5jw/video/upload/v1793116014/Darkoo_Rema_-_Favourite_Girl_Lyric_Video__mp3.pm_ywjb7k.mp3",
     },
     links: {},
     art: {
@@ -269,11 +294,12 @@ export const PROJECTS = [
     ],
     images: [],
     track: {
-      title: "Said Out Loud",
-      duration: "2:41",
+      title: "Lalala - Young John",
+      duration: "2:57",
       key: "E",
       bpm: 104,
-      audio: null,
+      audio:
+        "https://res.cloudinary.com/dryjxk5jw/video/upload/v1793116245/Young-Jonn-Lalala-feat-Rema-Vistanaij.com__uiwug8.mp3",
     },
     links: {},
     art: {
@@ -318,11 +344,12 @@ export const PROJECTS = [
     ],
     images: [],
     track: {
-      title: "Side By Side",
-      duration: "2:58",
+      title: "Waist - Omah Lay",
+      duration: "2:48",
       key: "G",
       bpm: 92,
-      audio: null,
+      audio:
+        "https://res.cloudinary.com/dryjxk5jw/video/upload/v1793116320/Omah-Lay-Waist-_TrendySongz.com_mk7vnf.mp3",
     },
     links: {},
     art: {
