@@ -618,6 +618,64 @@ body[data-view="project"] .index-btn {
   height: 100%;
   object-fit: cover;
 }
+/* ── real screens ─────────────────────────────────────────────────────────
+   Whatever is in a project's `images` takes this section. One fills the
+   width, two sit side by side, and from three the first leads and the rest
+   follow underneath. Each is framed by hand and hung a touch off square,
+   the way a print is pinned to a wall. */
+.p-shots {
+  width: min(100%, var(--wrap));
+  margin-inline: auto;
+  padding: 1em var(--pad) 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(19em, 1fr));
+  gap: 2em 1.4em;
+}
+/* a lone image, and the lead image of three or more, take the full width */
+.p-shot-wrap:only-child,
+.p-shot-wrap:first-child:nth-last-child(n + 3) {
+  grid-column: 1 / -1;
+}
+.p-shot-wrap {
+  margin: 0;
+  padding: 0.7em 0.7em 0;
+  background: color-mix(in srgb, var(--paper) 55%, transparent);
+  border: 1.5px solid transparent;
+  border-image: var(--drawn-box) 12 / 12px / 0 round;
+  transition: transform 0.45s var(--ease);
+}
+.p-shot-wrap:nth-child(3n + 1) {
+  transform: rotate(-0.6deg);
+}
+.p-shot-wrap:nth-child(3n + 2) {
+  transform: rotate(0.8deg);
+}
+.p-shot-wrap:nth-child(3n) {
+  transform: rotate(-0.4deg);
+}
+.p-shot-wrap:hover {
+  transform: rotate(0deg);
+}
+.p-shot-wrap img {
+  display: block;
+  width: 100%;
+  height: auto;
+  background: rgba(0, 0, 0, 0.05);
+}
+.p-shot-wrap figcaption {
+  padding: 0.75em 0.2em 0.9em;
+  opacity: 0.75;
+}
+/* a URL that will not load leaves a gap rather than a broken icon */
+.p-shot-wrap.failed {
+  display: none;
+}
+@media (prefers-reduced-motion: reduce) {
+  .p-shot-wrap {
+    transition: none;
+  }
+}
+
 /* With no real screens to show, the page leads with the project's own
    record sleeve — this site's artwork, rather than a mocked-up screenshot
    standing in for a product nobody has photographed yet. */

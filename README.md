@@ -147,32 +147,45 @@ Two decisions carry most of the realism:
 
 ## Swapping in real content
 
-Everything lives in `js/data.js`. Each project carries its library entry
-(name, year, role, team, two reviews) and its case study: client, status,
-industry, platform, timeline, a tagline (one word per row over the hero), a
-summary, the `challenge` paragraph, three `approach` steps, three `outcome`
-metrics, three `gallery` captions and a pull `quote`.
+Everything lives in `js/data.js`. A project carries its library entry (name,
+year, role) and its case study: client, status, industry, platform, a
+summary, the `challenge` paragraph, the `approach` steps, the `outcome`
+badges, a `track` and its `art` colours. Every field is optional except the
+slug, name and art — anything missing is simply not drawn, so a sparse
+project looks deliberate rather than broken.
 
-**Artwork.** Each disc label and each hero image is generated from the
-project's `art` colours and motif, so the site looks finished with no image
-files at all. To use real images, add to the project:
+**Screens.** Drop real pictures of the work into a project's `images` and
+they fill the second section of its page:
 
 ```js
-discImage: 'assets/discs/kora.webp',   // square, printed on the disc
-heroImage: 'assets/heroes/kora.webp',  // landscape, the project page image
+images: [
+  { src: 'assets/shots/rewards-balance.webp', name: 'The points balance' },
+  { src: 'https://res.cloudinary.com/.../redeem.png', name: 'Redeeming' }
+]
 ```
 
-Gallery shots come in three looks, set per image by its `variant`: `detail`
-(a close crop of the interface), `system` (the component set laid out flat)
-and `context` (the thing in use).
+Local paths and full URLs both work. One image fills the width, two sit side
+by side, and from three the first leads with the rest underneath. A URL that
+fails to load is hidden rather than left as a broken icon. Leave the array
+empty and the section falls back to the project's record sleeve — the site
+generates no fake screenshots, because a picture of nothing is worse than no
+picture.
 
-Keep anything important on a disc label more than a third of the way out
-from the centre, where the hole and the clear hub are. Hero images should be
-dark enough for white type to read over them.
+**Artwork.** Each disc label is generated from the project's `art` colours
+and motif, so the library looks finished with no image files at all. To
+print a real square on the disc instead, add `discImage:
+'assets/discs/<slug>.webp'`. Keep anything important more than a third of
+the way out from the centre, where the hole and the clear hub are.
 
-**Collections.** `COLLECTIONS` in `js/data.js` defines the two tabs. Rename
-them freely; a project's `collection` field says which tab it belongs to,
-and the tab row only appears once there is more than one collection.
+**Audio.** With `audio: null` a project's track is synthesised in the
+browser from its key and bpm, so every disc plays something without
+shipping anyone else's music. Point `audio` at a file or URL and the player
+uses that instead, taking the real length from the file rather than the
+written `duration`.
+
+**Collections.** `COLLECTIONS` defines the tabs. A project's `collection`
+field says which it belongs to, and the tab row only appears once there is
+more than one.
 
 ## Type
 

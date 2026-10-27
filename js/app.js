@@ -6,7 +6,7 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=41";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=42";
 import {
   whenFonts,
   discLabel,
@@ -17,8 +17,8 @@ import {
   heroCloud,
   heroBird,
   doodle,
-} from "./art.js?v=41";
-import { createCarousel } from "./discs.js?v=41";
+} from "./art.js?v=42";
+import { createCarousel } from "./discs.js?v=42";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -344,6 +344,9 @@ function projectMarkup(p, prev, next, pos, total) {
     ["Status", p.status],
   ].filter(([, v]) => v);
   const links = p.links || {};
+  /* Drop real screens into a project's `images` and they take this section.
+     With none, it falls back to the record sleeve. */
+  const shots = (p.images || []).filter((g) => g && (g.src || g.url));
   return `
   <div style="--tint:${tint}">
     <header class="p-head">
@@ -368,7 +371,21 @@ function projectMarkup(p, prev, next, pos, total) {
     </section>
 
     <section class="p-hero">
-      <div class="p-hero-sticky" id="p-media"></div>
+      ${
+        shots.length
+          ? `<div class="p-shots">
+        ${shots
+          .map(
+            (g) => `
+          <figure class="p-shot-wrap">
+            <img src="${esc(g.src || g.url || "")}" alt="" loading="lazy" decoding="async" />
+            ${g.name || g.caption ? `<figcaption class="eyebrow">${esc(g.name || g.caption)}</figcaption>` : ""}
+          </figure>`,
+          )
+          .join("")}
+      </div>`
+          : `<div class="p-hero-sticky" id="p-media"></div>`
+      }
     </section>
 
     <div class="p-after">
@@ -476,22 +493,26 @@ function mountProject(p) {
   root.hidden = false;
   document.title = `${p.name} — Tolulope Elijah`;
 
-  /* A real screenshot if there is one. Otherwise the project's own record
-     sleeve, which is this site's artwork rather than a mocked-up screen
-     pretending to be the product. */
+  /* With no real screens, the section holds the project's own record
+     sleeve: this site's artwork rather than a mocked-up screen standing in
+     for a product nobody has photographed. */
   const media = $("#p-media");
-  if (p.heroImage) {
-    const img = new Image();
-    img.src = p.heroImage;
-    img.alt = "";
-    media.appendChild(img);
-  } else {
+  if (media) {
     const c = p.discImage ? new Image() : discLabel(p, 1200);
     if (p.discImage) c.src = p.discImage;
     c.setAttribute("aria-hidden", "true");
     media.classList.add("sleeve");
     media.appendChild(c);
   }
+
+  /* a URL that does not load should leave a gap, not a broken-image icon */
+  $$(".p-shot-wrap img", root).forEach((img) => {
+    img.addEventListener(
+      "error",
+      () => img.closest(".p-shot-wrap")?.classList.add("failed"),
+      { once: true },
+    );
+  });
 
   /* Stickers down the margins: blooms, butterflies, hearts, bows and
      sparkles, scattered on a seed from the slug so a project's page is

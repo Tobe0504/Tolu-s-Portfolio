@@ -1,3 +1,43 @@
+/* ═══════════════════════════════════════════════════════════════════════════
+   Project data. Everything the site shows about a project lives here.
+
+   Content comes from Tolulope's CV and her own case studies. Only what
+   those state is written as fact. Where they are silent the field is left
+   out rather than filled in, and the page hides what is missing — so
+   anything that reads as a gap is waiting on her, not on the code. Known
+   gaps: no testimonials (`quote` and `reviews` are omitted everywhere,
+   since a quote attributed to a real colleague cannot be invented) and no
+   performance figures (the `outcome` badges count only what the source
+   itself lists — steps covered, banks compared — never impact).
+
+   Screens: drop real pictures of the work into a project's `images` and
+   they fill the second section of its page. Each entry is a URL and a
+   name, and the name shows as the caption underneath:
+
+     images: [
+       { src: 'assets/shots/rewards-balance.webp', name: 'The points balance' },
+       { src: 'https://res.cloudinary.com/.../redeem.png', name: 'Redeeming' }
+     ]
+
+   Local paths and full URLs both work. One image fills the width, two sit
+   side by side, and from three the first leads with the rest underneath.
+   Leave the array empty and the page falls back to the project's record
+   sleeve — a picture of nothing is worse than no picture.
+
+   Audio: each project has a `track`. With `audio: null` the player
+   synthesises an original loop in the browser from the track's key and
+   bpm, so every disc plays something without shipping anyone else's music.
+   Point `audio` at a file and the player uses that instead, taking the
+   real length from the file. The titles are part of the record-sleeve
+   conceit, not claims about the work.
+
+   Artwork: each project renders a generated disc label from `art` below.
+   To print a real square on the disc instead, add
+   `discImage: 'assets/discs/<slug>.webp'`. The label covers the whole
+   square, so keep anything important more than a third of the way out from
+   the centre, where the hole and the clear hub are.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
 export const COLLECTIONS = [{ id: "work", label: "Selected work" }];
 
 export const PROJECTS = [
@@ -37,6 +77,7 @@ export const PROJECTS = [
       { value: "4", label: "services in one ecosystem" },
       { value: "AI", label: "as the first point of contact" },
     ],
+    images: [],
     track: {
       title: "The Right Door First",
       duration: "2:36",
@@ -82,6 +123,7 @@ export const PROJECTS = [
       },
     ],
     outcome: [{ value: "Live", label: "at fcmbgroup.com" }],
+    images: [],
     track: {
       title: "One Vision",
       duration: "2:48",
@@ -127,6 +169,7 @@ export const PROJECTS = [
       },
     ],
     outcome: [{ value: "Live", label: "on the FCMB mobile app" }],
+    images: [],
     track: {
       title: "Points, Plainly Put",
       duration: "2:24",
@@ -175,6 +218,7 @@ export const PROJECTS = [
       { value: "5", label: "journeys designed" },
       { value: "Resume", label: "designed in, not bolted on" },
     ],
+    images: [],
     track: {
       title: "Put Down, Picked Up",
       duration: "3:02",
@@ -223,6 +267,7 @@ export const PROJECTS = [
       { value: "5", label: "steps, sharing to confirmation" },
       { value: "Explicit", label: "consent, as its own step" },
     ],
+    images: [],
     track: {
       title: "Said Out Loud",
       duration: "2:41",
@@ -271,6 +316,7 @@ export const PROJECTS = [
       { value: "5", label: "banks compared" },
       { value: "1", label: "stakeholder summary" },
     ],
+    images: [],
     track: {
       title: "Side By Side",
       duration: "2:58",
