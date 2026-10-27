@@ -6,7 +6,7 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=36";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=38";
 import {
   whenFonts,
   heroImage,
@@ -18,8 +18,8 @@ import {
   heroCloud,
   heroBird,
   doodle,
-} from "./art.js?v=36";
-import { createCarousel, createDiscStage } from "./discs.js?v=36";
+} from "./art.js?v=38";
+import { createCarousel } from "./discs.js?v=38";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -50,7 +50,6 @@ const esc = (t) =>
 
 const state = { collection: "work", view: "home", slug: null, panel: false };
 let carousel = null,
-  nextStage = null,
   unbindProject = null;
 let scene = null,
   player = null,
@@ -351,7 +350,7 @@ function tearPath(seed) {
   return `M0,0 L1000,0 L1000,230 L${pts.reverse().join(" L")} L0,230 Z`;
 }
 
-function projectMarkup(p, next) {
+function projectMarkup(p, prev, next, pos, total) {
   const tint = `color-mix(in srgb, ${p.art.bg} 9%, var(--tint-base))`;
   const meta = [
     ["Client", p.client],
@@ -365,6 +364,15 @@ function projectMarkup(p, next) {
   return `
   <div style="--tint:${tint}">
     <header class="p-head">
+      <div class="p-nav reveal" style="--d:0">
+        <a class="p-back eyebrow" href="#/">
+          <svg viewBox="0 0 24 10" aria-hidden="true">
+            <path d="M23 5.2c-6 .4-13 .1-21 .3M6.6 1C4.4 2.6 2.6 4 1.4 5.4c1.6 1.3 3.4 2.5 5.4 3.5" />
+          </svg>
+          All work
+        </a>
+        <p class="eyebrow">Disc ${String(pos).padStart(2, "0")} of ${String(total).padStart(2, "0")}</p>
+      </div>
       <h1 class="p-title heading-l reveal" style="--d:.05">${esc(p.name)}</h1>
       <p class="p-credits reveal" style="--d:.18">
         <span class="eyebrow">Role</span>${esc(p.role)}
@@ -455,29 +463,46 @@ function projectMarkup(p, next) {
       </section>
     </div>
 
-    <a class="p-next" href="#/p/${next.slug}" aria-label="Next project: ${esc(next.name)}">
-      <div class="p-next-inner">
-        <div class="p-next-lines" aria-hidden="true">${"<span></span>".repeat(6)}</div>
-        <h2 class="p-next-title heading-l">
-          ${next.name
-            .split(" ")
-            .map(
-              (w, i, arr) =>
-                `<span class="p-next-word" style="grid-row:${3 + i}; justify-self:${arr.length === 1 ? "center" : i % 2 ? "end" : "start"}">${esc(w)}</span>`,
-            )
-            .join("")}
-        </h2>
-        <div class="p-next-disc" id="p-next-disc"></div>
+    <nav class="p-ends" aria-label="More projects">
+      <div class="p-jumps">
+        <a class="p-jump prev" href="#/p/${prev.slug}">
+          <span class="eyebrow">Previous</span>
+          <span class="heading-s">${esc(prev.name)}</span>
+        </a>
+        <a class="p-jump next" href="#/p/${next.slug}">
+          <span class="eyebrow">Next</span>
+          <span class="heading-s">${esc(next.name)}</span>
+        </a>
       </div>
-    </a>
+
+      <p class="p-more-label eyebrow">The rest of the library</p>
+      <ul class="p-more">
+        ${byCollection(p.collection)
+          .map(
+            (o, i) => `
+          <li${o.slug === p.slug ? ' class="here"' : ""}>
+            <a href="#/p/${o.slug}" style="--dot:${o.art.bg}">
+              <span class="p-more-dot" aria-hidden="true"></span>
+              <span class="p-more-name">${esc(o.name)}</span>
+              <span class="eyebrow">${esc(o.year)}</span>
+            </a>
+          </li>`,
+          )
+          .join("")}
+      </ul>
+
+      <a class="p-home heading-xs" href="#/">Back to the library</a>
+    </nav>
   </div>`;
 }
 
 function mountProject(p) {
   const list = byCollection(p.collection);
-  const next = list[(list.indexOf(p) + 1) % list.length];
+  const at = list.indexOf(p);
+  const prev = list[(at - 1 + list.length) % list.length];
+  const next = list[(at + 1) % list.length];
   const root = $("#project");
-  root.innerHTML = projectMarkup(p, next);
+  root.innerHTML = projectMarkup(p, prev, next, at + 1, list.length);
   root.hidden = false;
   document.title = `${p.name} — Tolulope Elijah`;
 
@@ -525,46 +550,27 @@ function mountProject(p) {
   );
   $$(".p-shot", root).forEach((el) => shots.observe(el));
 
-  /* the next disc only spins up when its section is near, and rises with scroll */
-  const nextEl = $(".p-next", root),
-    discEl = $("#p-next-disc", root);
-  const io = new IntersectionObserver(
-    ([e]) => {
-      if (e.isIntersecting && !nextStage) {
-        try {
-          nextStage = createDiscStage(discEl, next);
-        } catch {
-          /* no WebGL: the title alone still works */
-        }
-      }
-    },
-    { rootMargin: "40% 0px" },
-  );
-  io.observe(nextEl);
-
-  /* The ending is a tall sticky section. Scrolling through it lifts the next
-     project's disc from below the fold up and off the top of the screen; once
-     it has left, the handover happens on its own and the next page animates
-     in. Clicking anywhere in the section still jumps straight there. */
-  let handedOver = false;
-  const onScroll = () => {
-    const r = nextEl.getBoundingClientRect();
-    const travel = Math.max(1, nextEl.offsetHeight - innerHeight);
-    const t = Math.min(1, Math.max(0, -r.top / travel));
-    discEl.style.setProperty("--rise", `${58 - t * 96}%`);
-    nextStage && nextStage.setProgress(t);
-    if (t > 0.94 && !handedOver) {
-      handedOver = true;
-      location.hash = "#/p/" + next.slug;
-    }
+  /* The page used to end in a tall sticky section that handed you to the
+     next project on its own once you scrolled far enough. Being moved
+     somewhere you did not ask to go is a strange thing for a page to do, so
+     it is gone. The arrows below are the way on, and the arrow keys do the
+     same thing: left and right step through the library in order, Escape
+     goes back to the discs. */
+  const onKey = (e) => {
+    if (state.view !== "project" || e.metaKey || e.ctrlKey || e.altKey) return;
+    const el = document.activeElement;
+    if (el && /^(INPUT|TEXTAREA|SELECT)$/.test(el.tagName)) return;
+    if (e.key === "ArrowLeft") location.hash = "#/p/" + prev.slug;
+    else if (e.key === "ArrowRight") location.hash = "#/p/" + next.slug;
+    else if (e.key === "Escape") location.hash = "#/";
+    else return;
+    e.preventDefault();
   };
-  addEventListener("scroll", onScroll, { passive: true });
-  onScroll();
+  addEventListener("keydown", onKey);
 
   unbindProject = () => {
-    io.disconnect();
     shots.disconnect();
-    removeEventListener("scroll", onScroll);
+    removeEventListener("keydown", onKey);
   };
   requestAnimationFrame(() =>
     requestAnimationFrame(() => root.classList.add("in")),
@@ -574,10 +580,6 @@ function mountProject(p) {
 function unmountProject() {
   unbindProject && unbindProject();
   unbindProject = null;
-  if (nextStage) {
-    nextStage.dispose();
-    nextStage = null;
-  }
   const root = $("#project");
   root.classList.remove("in");
   root.hidden = true;

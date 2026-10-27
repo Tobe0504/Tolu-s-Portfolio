@@ -184,7 +184,6 @@ canvas {
 .p-quote,
 .p-foot,
 .p-meta .row,
-.p-next-lines span,
 .cs-band,
 .cs-steps li {
   border-top-color: transparent;
@@ -696,56 +695,6 @@ body[data-view="project"] .index-btn {
   font-family: var(--display);
   font-size: var(--h-xs);
   letter-spacing: -0.03em;
-}
-
-.p-next {
-  position: relative;
-  display: block;
-  background: var(--tint, var(--tint-base));
-  /* taller than the screen: the extra travel is what lifts the disc */
-  height: 200vh;
-  cursor: pointer;
-}
-.p-next-inner {
-  position: sticky;
-  top: 0;
-  height: 100vh;
-  height: 100dvh;
-  overflow: hidden;
-}
-.p-next-lines {
-  position: absolute;
-  inset: 0;
-  display: grid;
-  grid-template-rows: repeat(6, 1fr);
-  padding: 0 var(--pad);
-}
-.p-next-lines span {
-  border-top: 1px solid var(--rule);
-}
-.p-next-title {
-  position: absolute;
-  inset: 0;
-  z-index: 2;
-  display: grid;
-  grid-template-rows: repeat(6, 1fr);
-  align-items: center;
-  padding: 0 var(--pad);
-}
-.p-next-word {
-  display: block;
-}
-.p-next-disc {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  height: 78vh;
-  transform: translateY(var(--rise, 58%));
-}
-.p-next-disc canvas {
-  width: 100% !important;
-  height: 100% !important;
 }
 
 .noscript {
@@ -1366,6 +1315,148 @@ body[data-view="project"] .loop {
   opacity: 0.6;
 }
 
+/* ── the project page's ends ──────────────────────────────────────────────
+   The page used to finish with a screen and a half of near-empty scroll
+   that handed you to the next project whether you wanted it or not. This
+   is the replacement: the way back, the way on, and the whole library in
+   one glance. */
+.p-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 1.5em;
+  margin-bottom: 2.2em;
+}
+.p-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6em;
+}
+.p-back svg {
+  width: 1.7em;
+  height: 0.75em;
+  overflow: visible;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 1.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  transition: transform 0.4s var(--ease);
+}
+.p-back:hover svg,
+.p-back:focus-visible svg {
+  transform: translateX(-0.35em);
+}
+
+.p-ends {
+  position: relative;
+  z-index: 3;
+  width: min(100%, var(--wrap));
+  margin-inline: auto;
+  padding: 3.5em var(--pad) 5em;
+  background: var(--tint, var(--tint-base));
+}
+.p-jumps {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.5em;
+}
+.p-jump {
+  display: grid;
+  gap: 0.5em;
+  padding: 1.5em 1.3em;
+  border: 1.5px solid transparent;
+  border-image: var(--drawn-box) 12 / 12px / 0 round;
+  transition:
+    transform 0.4s var(--ease),
+    background-color 0.3s ease;
+}
+.p-jump:hover,
+.p-jump:focus-visible {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  outline: none;
+}
+.p-jump.prev:hover,
+.p-jump.prev:focus-visible {
+  transform: translateX(-4px);
+}
+.p-jump.next {
+  text-align: right;
+}
+.p-jump.next:hover,
+.p-jump.next:focus-visible {
+  transform: translateX(4px);
+}
+.p-jump .heading-s {
+  text-transform: none;
+}
+
+.p-more-label {
+  margin: 3em 0 0.8em;
+  opacity: 0.6;
+}
+.p-more {
+  list-style: none;
+}
+.p-more li {
+  border-top: 1px solid transparent;
+  background-image: var(--drawn-h);
+  background-repeat: repeat-x;
+  background-position: left top;
+}
+.p-more a {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 1em;
+  padding: 0.9em 0.4em;
+  transition: padding-left 0.35s var(--ease);
+}
+.p-more a:hover,
+.p-more a:focus-visible {
+  padding-left: 1.1em;
+  outline: none;
+}
+.p-more-dot {
+  width: 0.7em;
+  height: 0.7em;
+  border-radius: 50%;
+  background: var(--dot, var(--accent));
+}
+.p-more-name {
+  font-size: 1.05em;
+}
+.p-more li.here a {
+  opacity: 0.45;
+  pointer-events: none;
+}
+.p-more li.here .p-more-name::after {
+  content: " — you are here";
+  font-size: 0.72em;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  opacity: 0.8;
+}
+
+.p-home {
+  display: inline-block;
+  margin-top: 3em;
+  padding-bottom: 0.2em;
+  border-bottom: 1.5px solid transparent;
+  background-image: var(--drawn-h);
+  background-repeat: repeat-x;
+  background-position: left bottom;
+}
+
+@media (max-width: 700px) {
+  .p-jumps {
+    grid-template-columns: 1fr;
+  }
+  .p-jump.next {
+    text-align: left;
+  }
+}
+
 /* ── the CV ───────────────────────────────────────────────────────────────
    A drawn sheet with its corner turned, pinned a little crooked. It
    straightens and lifts when you point at it, the way paper does when you
@@ -1453,6 +1544,7 @@ body[data-view="project"] .loop {
 .contact-link {
   display: inline-block;
   margin-top: 1.8em;
+  margin-right: 1.8em;
   text-transform: none;
   background-image: linear-gradient(currentColor, currentColor);
   background-size: 100% 1px;
@@ -1638,27 +1730,45 @@ body[data-view="project"] .loop {
 }
 
 .wk-leg,
-.wk-arm {
+.wk-arm,
+.wk-foot {
   animation: wkSwing calc(var(--step) / 2) ease-in-out infinite alternate;
 }
+/* Each leg hinges where it is actually drawn rather than at a shared point
+   between them, and the swing is a walk rather than the splits: ±22° read
+   as a stride at a hundred pixels tall and as doing the box splits at
+   twenty, which is the size these are. */
 .wk-leg-a {
-  --a: 22deg;
-  --b: -22deg;
-  transform-origin: 24px 56px;
+  --a: 13deg;
+  --b: -13deg;
+  transform-origin: 20px 56px;
 }
 .wk-leg-b {
-  --a: -22deg;
-  --b: 22deg;
-  transform-origin: 24px 56px;
+  --a: -13deg;
+  --b: 13deg;
+  transform-origin: 28.4px 56px;
+}
+/* The foot sits inside the leg and turns against it by the same amount, so
+   it stays level with the ground instead of pointing into it. Same keyframes
+   and same duration, so the two can never drift apart. */
+.wk-leg-a .wk-foot {
+  --a: -13deg;
+  --b: 13deg;
+  transform-origin: 19.4px 72.9px;
+}
+.wk-leg-b .wk-foot {
+  --a: 13deg;
+  --b: -13deg;
+  transform-origin: 29px 72.9px;
 }
 .wk-arm-a {
-  --a: -17deg;
-  --b: 17deg;
+  --a: -14deg;
+  --b: 14deg;
   transform-origin: 24px 27px;
 }
 .wk-arm-b {
-  --a: 17deg;
-  --b: -17deg;
+  --a: 14deg;
+  --b: -14deg;
   transform-origin: 24px 27px;
 }
 .wk-bob {
@@ -1675,6 +1785,7 @@ body[data-view="project"] .loop {
   animation: wkBreathe 2.6s ease-in-out infinite alternate;
 }
 .hero-walk.resting .wk-leg,
+.hero-walk.resting .wk-foot,
 .hero-walk.resting .wk-arm,
 .hero-walk.resting .wk-stereo,
 .hero-walk.resting .wk-carry {
@@ -1725,6 +1836,7 @@ body[data-view="project"] .loop {
     transform: scaleY(0.7);
   }
   .wk-leg,
+  .wk-foot,
   .wk-arm,
   .wk-bob,
   .wk-stereo,

@@ -10,7 +10,7 @@
    object read as physical instead of as a flat texture on a circle.
    ═══════════════════════════════════════════════════════════════════════════ */
 import * as THREE from 'three';
-import { discLabel, dataSide } from './art.js?v=36';
+import { discLabel, dataSide } from './art.js?v=38';
 
 /* proportions of a 120mm disc, normalised to radius 1 */
 const R = 1, HOLE = 0.125, HUB = 0.305, BAND = 0.335, LABEL_OUT = 0.985, T = 0.018;
@@ -411,48 +411,5 @@ export function createCarousel(canvas, { onChange, onOpen, onPick, onHover, onFr
     setExit(v) { exit = v || 0; },
     open(on) { openTarget = on ? 1 : 0; },
     isHovering: () => hovering
-  };
-}
-
-/* ═══ a single disc on its own stage (the next-project teaser) ═════════ */
-export function createDiscStage(container, project) {
-  const canvas = document.createElement('canvas');
-  container.appendChild(canvas);
-  const renderer = makeRenderer(canvas);
-  const scene = new THREE.Scene();
-  scene.environment = studio(renderer);
-  scene.add(new THREE.HemisphereLight(0xffffff, 0xd8d8d8, 0.55));
-  const camera = new THREE.PerspectiveCamera(26, 1, 0.1, 100);
-  camera.position.set(0, 0, 9);
-  const disc = buildDisc(project, renderer, materials(renderer));
-  scene.add(disc);
-
-  let raf = 0, alive = true, progress = 0;
-  const resize = () => {
-    const r = container.getBoundingClientRect();
-    renderer.setSize(r.width, r.height, false);
-    camera.aspect = r.width / Math.max(r.height, 1); camera.updateProjectionMatrix();
-    const vh = 2 * Math.tan(THREE.MathUtils.degToRad(13)) * 9;
-    disc.scale.setScalar(Math.min(vh * camera.aspect * 0.34, vh * 0.42));
-  };
-  const frame = now => {
-    if (!alive) return;
-    raf = requestAnimationFrame(frame);
-    const t = now / 1000;
-    disc.rotation.set(-0.62 - progress * 0.3, 0.18, 0.4);
-    disc.userData.spin.rotation.z = reduce ? 0 : t * 0.5;
-    renderer.render(scene, camera);
-  };
-  resize();
-  addEventListener('resize', resize, { passive: true });
-  raf = requestAnimationFrame(frame);
-
-  return {
-    setProgress(p) { progress = clamp(p, 0, 1); },
-    dispose() {
-      alive = false; cancelAnimationFrame(raf);
-      removeEventListener('resize', resize);
-      disposeDisc(disc); renderer.dispose(); canvas.remove();
-    }
   };
 }
