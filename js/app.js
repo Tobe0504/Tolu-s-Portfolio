@@ -6,7 +6,7 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=48";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=51";
 import {
   whenFonts,
   discLabel,
@@ -17,8 +17,8 @@ import {
   heroCloud,
   heroBird,
   doodle,
-} from "./art.js?v=48";
-import { createCarousel } from "./discs.js?v=48";
+} from "./art.js?v=51";
+import { createCarousel } from "./discs.js?v=51";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];

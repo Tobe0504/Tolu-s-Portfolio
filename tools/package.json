@@ -1,0 +1,9 @@
+{
+  "name": "portfolio-drawing-tools",
+  "private": true,
+  "type": "module",
+  "description": "Dev-only, no dependencies. Draws the loading screen's turntable with the same wandering pen js/art.js uses for everything else, and splices the result into index.html. The site has no build step; this runs by hand when the drawing changes.",
+  "scripts": {
+    "draw": "node draw-turntable.mjs"
+  }
+}
