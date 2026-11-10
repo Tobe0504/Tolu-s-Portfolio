@@ -39,10 +39,19 @@ const table = [
   ...S([[268, 201], [270, 224]], { jitter: 1.1, alpha: 0.45 }),
 ];
 
-/* ── a sleeve leaning against it ──────────────────────────────────────── */
-const sleeve = [
-  ...S([[24, 190], [36, 124], [70, 131], [58, 196]], { close: true, jitter: 1.5, over: 2 }),
-  ...S([[34, 130], [67, 136]], { jitter: 1.1, alpha: 0.6 }),
+/* ── a small pot of something beside it ──────────────────────────────── */
+const pot = [
+  ...S([[30, 170], [62, 170], [56, 194], [36, 194]], { close: true, jitter: 1.3, over: 1.8 }),
+  ...S([[32, 176], [60, 176]], { jitter: 1, alpha: 0.55, over: 1.2 }), // the rim
+];
+/* drawn from the mouth of the pot so the whole thing can sway from there */
+const leaves = [
+  ...S([[46, 170], [44, 150], [48, 134]], { jitter: 1.1, over: 1.2 }),
+  ...S([[45, 152], [34, 142], [33, 132]], { jitter: 1, over: 1.2, alpha: 0.9 }),
+  ...S([[46, 158], [58, 150], [61, 140]], { jitter: 1, over: 1.2, alpha: 0.9 }),
+  ...C(33, 129, 4.5, { jitter: 0.8, passes: 1, alpha: 0.9 }),
+  ...C(61, 137, 4, { jitter: 0.8, passes: 1, alpha: 0.9 }),
+  ...C(48, 130, 5, { jitter: 0.8, passes: 1 }),
 ];
 
 /* ── the record. Drawn as true circles about the origin; the group that
@@ -70,8 +79,11 @@ const svg = `
           <g class="pl-table">
 ${render(table)}
           </g>
-          <g class="pl-sleeve">
-${render(sleeve)}
+          <g class="pl-pot">
+${render(pot)}
+            <g class="pl-leaves">
+${render(leaves)}
+            </g>
           </g>
           <g class="pl-shade">
 ${render(shade)}

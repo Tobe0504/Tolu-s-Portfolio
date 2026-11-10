@@ -6,7 +6,7 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=52";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=54";
 import {
   whenFonts,
   discLabel,
@@ -17,8 +17,8 @@ import {
   heroCloud,
   heroBird,
   doodle,
-} from "./art.js?v=52";
-import { createCarousel } from "./discs.js?v=52";
+} from "./art.js?v=54";
+import { createCarousel } from "./discs.js?v=54";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -837,6 +837,26 @@ function initWalkers() {
     });
     raf = requestAnimationFrame(frame);
   };
+  /* The curtain hands its own procession over to this one, and needs to
+     know where the leader will be when it gets here rather than where it
+     is now — the two are half a second apart, which is exactly the lag you
+     see otherwise. This motion is a plain function of elapsed time, so it
+     can simply be asked. */
+  const leader = crew.find((w) => w.el === lead) || crew[0];
+  window.__heroWalkAhead = (secs) => {
+    if (!W) measure();
+    const d = (dist + (46 / Math.max(W, 1)) * pace * secs) % 1;
+    let f = (d + leader.off) % 1;
+    if (f < 0) f += 1;
+    const p = at(f);
+    const box = wrap.getBoundingClientRect();
+    return {
+      x: box.left + p.x,
+      y: box.top + p.y,
+      opacity: clamp(Math.min(f, 1 - f) * 14, 0, 1),
+    };
+  };
+
   const start = () => {
     if (!running) {
       running = true;
