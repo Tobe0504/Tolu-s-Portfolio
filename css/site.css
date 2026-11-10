@@ -2070,3 +2070,248 @@ body[data-view="project"] .loop {
   margin: 3em 0;
   padding: 3.4em 2em;
 }
+
+/* ── the curtain ──────────────────────────────────────────────────────────
+   What a visitor looks at while three.js, the fonts and the first disc are
+   still on their way. Two versions, chosen by data-preload on <html>: a
+   record turning on a turntable, or the hero's procession given the whole
+   screen. Both are inline SVG so they paint without waiting for a module,
+   and both are drawn with the same pen as the rest of the site. */
+#preload {
+  color: var(--ink);
+  transition:
+    opacity 0.7s var(--ease),
+    transform 0.9s var(--ease),
+    visibility 0.7s;
+}
+#preload.gone {
+  opacity: 0;
+  visibility: hidden;
+  transform: scale(1.03);
+  pointer-events: none;
+}
+.pl-inner {
+  display: grid;
+  justify-items: center;
+  gap: 0.2em;
+  padding: var(--pad);
+  text-align: center;
+}
+.pl-art {
+  height: auto;
+  overflow: visible;
+  margin-bottom: 1.4em;
+}
+.pl-vinyl {
+  width: min(34em, 80vw);
+}
+/* the procession has the whole screen to itself here, so it takes it */
+.pl-walk {
+  width: min(46em, 94vw);
+}
+.pl-name {
+  font-family: var(--display);
+  font-weight: 600;
+  font-size: clamp(1.1rem, 1.9em, 7vw);
+  letter-spacing: -0.015em;
+}
+.pl-sub {
+  font-size: 0.78em;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  opacity: 0.55;
+}
+
+/* ── the record ─────────────────────────────────────────────────────────── */
+.pl-vinyl path,
+.pl-vinyl circle,
+.pl-vinyl ellipse {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pl-plinth {
+  opacity: 0.45;
+}
+.pl-platter {
+  transform-origin: 104px 124px;
+  animation: pl-spin 2.4s linear infinite;
+}
+.pl-groove {
+  opacity: 0.32;
+  stroke-width: 1.4;
+}
+/* concentric circles give nothing away about turning, so one scratch does */
+.pl-scratch {
+  opacity: 0.4;
+  stroke-width: 1.4;
+}
+.pl-vinyl .pl-label {
+  /* its own colour, not --accent: the app sets that from the disc in front
+     partway through the load, and a label that changes colour behind the
+     curtain reads as a glitch */
+  fill: #c1502e;
+  stroke: none;
+}
+.pl-vinyl .pl-spindle {
+  fill: var(--paper);
+  stroke: none;
+}
+.pl-pivot {
+  opacity: 0.5;
+}
+.pl-tonearm {
+  stroke-width: 2.6;
+}
+/* the arm lifts off the record as the curtain goes up */
+.pl-arm-rig {
+  transform-origin: 216px 74px;
+  transition: transform 0.6s var(--ease);
+}
+#preload.gone .pl-arm-rig {
+  transform: rotate(-16deg);
+}
+
+.pl-vinyl .pl-note ellipse {
+  fill: currentColor;
+  stroke: none;
+}
+.pl-note {
+  opacity: 0;
+  animation: pl-rise 3.4s var(--ease) infinite;
+}
+.pl-note.n2 {
+  animation-duration: 4s;
+  animation-delay: -1.3s;
+}
+.pl-note.n3 {
+  animation-duration: 3s;
+  animation-delay: -2.2s;
+}
+
+@keyframes pl-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+@keyframes pl-rise {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) rotate(-6deg) scale(0.7);
+  }
+  18% {
+    opacity: 0.85;
+  }
+  70% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-62px) rotate(10deg) scale(1.05);
+  }
+}
+
+/* ── the procession ─────────────────────────────────────────────────────── */
+.pl-walk path,
+.pl-walk rect,
+.pl-walk circle {
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2.4;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.pl-ground {
+  opacity: 0.35;
+  stroke-width: 1.8;
+}
+.pl-seam {
+  stroke-width: 1.5;
+  opacity: 0.42;
+}
+.pl-figure {
+  /* the figures behind are further off, so they read fainter */
+  opacity: 0.55;
+}
+.pl-figure:last-child {
+  opacity: 1;
+}
+/* the same walk as the hero: a 13° swing, each leg hinged at its own hip,
+   and each foot turning against its leg so it stays level with the ground */
+.pl-leg,
+.pl-arm,
+.pl-foot {
+  animation: pl-swing calc(var(--step, 0.74s) / 2) ease-in-out infinite
+    alternate;
+  animation-delay: var(--delay, 0s);
+}
+.pl-leg-a {
+  --a: 13deg;
+  --b: -13deg;
+  transform-origin: 20px 56px;
+}
+.pl-leg-b {
+  --a: -13deg;
+  --b: 13deg;
+  transform-origin: 28.4px 56px;
+}
+.pl-leg-a .pl-foot {
+  --a: -13deg;
+  --b: 13deg;
+  transform-origin: 19.4px 72.9px;
+}
+.pl-leg-b .pl-foot {
+  --a: 13deg;
+  --b: -13deg;
+  transform-origin: 29px 72.9px;
+}
+.pl-arm {
+  --a: -14deg;
+  --b: 14deg;
+  transform-origin: 24px 27px;
+}
+.pl-arm-b {
+  --a: 14deg;
+  --b: -14deg;
+}
+.pl-bob {
+  animation: pl-bob calc(var(--step, 0.74s) / 4) ease-in-out infinite alternate;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes pl-swing {
+  from {
+    transform: rotate(var(--a));
+  }
+  to {
+    transform: rotate(var(--b));
+  }
+}
+@keyframes pl-bob {
+  from {
+    transform: translateY(0);
+  }
+  to {
+    transform: translateY(-1.3px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* the curtain still appears, it simply holds still */
+  .pl-platter,
+  .pl-note,
+  .pl-leg,
+  .pl-arm,
+  .pl-foot,
+  .pl-bob {
+    animation: none;
+  }
+  .pl-note {
+    opacity: 0.6;
+  }
+  #preload,
+  .pl-arm-rig {
+    transition-duration: 0.2s;
+  }
+}

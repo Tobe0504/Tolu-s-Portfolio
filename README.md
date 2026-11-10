@@ -22,6 +22,7 @@ uses no A24 branding, and none of that site's artwork, copy or code.
 
 | Section | What it is |
 | --- | --- |
+| The curtain | What a visitor looks at while three.js, the fonts and the first disc arrive. Two of them — see below. |
 | Hero | The headline carried over from the first site, set in title case so it keeps its voice, with the procession walking the rule at its foot. |
 | The library | The discs. A tall section whose face pins while you scroll through it. |
 | About, How I work, Background, The CV, What's next | The rest of the portfolio, as ruled rows with their labels in the margin. The CV band offers `assets/Tolulope-Elijah-CV.pdf` as a download; replace that file and the size beside it when the CV changes. |
@@ -144,6 +145,33 @@ Two decisions carry most of the realism:
   with two softboxes. three.js's stock room environment has very hot light
   panels, and a flat glossy disc reflects one direction across its whole
   face, so any disc angled at a panel went solid white.
+
+## The loading screen
+
+Two versions, chosen by `data-preload` on `<html>` and switchable live:
+
+| URL | What you get |
+| --- | --- |
+| `?preload=vinyl` | A record turning on a turntable, tonearm down, notes rising from the stylus. The default. |
+| `?preload=walk` | The hero's procession given the whole screen: the lead with the stereo, two figures trailing behind. |
+| `?preload=off` | No curtain at all. |
+
+To change the default, edit the one line in the inline `<script>` at the top
+of `index.html` that sets `root.dataset.preload`. Once a version is chosen
+for good, the other's SVG and its CSS block can be deleted outright.
+
+Both are inline SVG animated in CSS, so the curtain paints without waiting
+for a stylesheet or a module. The controller lives in that same inline
+script rather than in `js/app.js`, deliberately: a module that never arrives
+must not be able to leave anyone stuck behind a curtain that cannot lift. It
+comes up when `boot()` finishes — fonts loaded, carousel built, first
+project shown — and on its own seven-second timer whatever else happens. It
+also holds for a beat on fast connections, because a curtain that flashes
+for 80ms is worse than no curtain.
+
+It does not play audio. Browsers block sound until a visitor has interacted
+with the page, so a loading screen that tried would be silent for almost
+everyone; the record turning and the notes rising carry the idea instead.
 
 ## Swapping in real content
 

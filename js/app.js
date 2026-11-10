@@ -6,7 +6,7 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=42";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=45";
 import {
   whenFonts,
   discLabel,
@@ -17,8 +17,8 @@ import {
   heroCloud,
   heroBird,
   doodle,
-} from "./art.js?v=42";
-import { createCarousel } from "./discs.js?v=42";
+} from "./art.js?v=45";
+import { createCarousel } from "./discs.js?v=45";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1445,6 +1445,7 @@ async function boot() {
       '<p class="noscript">This library needs WebGL to show its discs. The index below still works.</p>',
     );
     console.error(err);
+    window.__preloadDone && window.__preloadDone();
     return;
   }
   carousel.setScrollDriven(true);
@@ -1475,6 +1476,12 @@ async function boot() {
   setCollection(state.collection, { scroll: false });
   route();
   onPageScroll();
+
+  /* The curtain comes up once the discs are actually there to look at —
+     fonts loaded, carousel built, first project shown. It holds for a beat
+     longer if all that happened quickly, and lifts on its own timer if any
+     of it never happens at all. */
+  window.__preloadDone && window.__preloadDone();
 }
 
 boot();

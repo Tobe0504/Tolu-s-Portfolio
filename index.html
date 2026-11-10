@@ -20,7 +20,66 @@
       rel="stylesheet"
       href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap"
     />
-    <link rel="stylesheet" href="css/site.css?v=42" />
+    <script>
+      /* The loading screen. It is chosen and dismissed here rather than in
+         a module, so that a script which never arrives cannot trap anyone
+         behind it — the timeout below runs whatever else happens. */
+      (function () {
+        var root = document.documentElement;
+        var asked = new URLSearchParams(location.search).get("preload");
+        root.dataset.preload =
+          asked === "walk" || asked === "vinyl" || asked === "off"
+            ? asked
+            : "vinyl";
+
+        var born = Date.now();
+        var gone = false;
+        window.__preloadDone = function () {
+          if (gone) return;
+          gone = true;
+          /* a curtain that flashes is worse than no curtain, so it stays
+             for a beat even when the site was ready immediately */
+          var wait = Math.max(0, 900 - (Date.now() - born));
+          setTimeout(function () {
+            var el = document.getElementById("preload");
+            if (!el) return;
+            el.classList.add("gone");
+            root.removeAttribute("data-loading");
+            setTimeout(function () {
+              el.remove();
+            }, 900);
+          }, wait);
+        };
+        /* whatever happens, it lifts */
+        setTimeout(window.__preloadDone, 7000);
+        root.setAttribute("data-loading", "");
+      })();
+    </script>
+    <style>
+      /* enough to paint the curtain correctly before site.css arrives */
+      #preload {
+        position: fixed;
+        inset: 0;
+        z-index: 999;
+        display: grid;
+        place-items: center;
+        background: #f2f2f2;
+      }
+      html[data-preload="off"] #preload {
+        display: none;
+      }
+      html[data-loading] body {
+        overflow: hidden;
+      }
+      .pl-art {
+        display: none;
+      }
+      html[data-preload="vinyl"] .pl-vinyl,
+      html[data-preload="walk"] .pl-walk {
+        display: block;
+      }
+    </style>
+    <link rel="stylesheet" href="css/site.css?v=45" />
 
     <script type="importmap">
       {
@@ -32,6 +91,196 @@
     </script>
   </head>
   <body data-view="home">
+    <!-- ══════════════ THE CURTAIN ══════════════
+     What a visitor looks at while three.js, the fonts and the first disc
+     are still arriving. Two of them: a record on a turntable, and the
+     procession from the hero given the whole screen. Both are inline SVG
+     animated in CSS, so the curtain paints without waiting for a module.
+     Switch with ?preload=vinyl, ?preload=walk or ?preload=off. -->
+    <div
+      id="preload"
+      role="status"
+      aria-label="Loading Tolulope Elijah&rsquo;s portfolio"
+    >
+      <div class="pl-inner">
+        <!-- ── a record, turning ── -->
+        <svg class="pl-art pl-vinyl" viewBox="0 0 260 218" aria-hidden="true">
+          <path
+            class="pl-plinth"
+            d="M18 56c72-3 152-2 226-1 3 42 2 88 1 134-76 3-154 2-228 1-2-45-1-89 1-134Z"
+          />
+          <g class="pl-platter">
+            <circle class="pl-disc" cx="104" cy="124" r="62" />
+            <circle class="pl-groove" cx="104" cy="124" r="53" />
+            <circle class="pl-groove" cx="104" cy="124" r="45" />
+            <circle class="pl-groove" cx="104" cy="124" r="37" />
+            <circle class="pl-groove" cx="104" cy="124" r="29" />
+            <!-- one radial scratch, so the turning is visible at all -->
+            <path class="pl-scratch" d="M104 66.5c.6 14 .8 28 .4 41" />
+            <circle class="pl-label" cx="104" cy="124" r="19" />
+            <circle class="pl-spindle" cx="104" cy="124" r="2.4" />
+          </g>
+          <!-- the arm, down and playing -->
+          <g class="pl-arm-rig">
+            <circle class="pl-pivot" cx="216" cy="74" r="9" />
+            <path class="pl-tonearm" d="M212 82c-16 12-34 24-56 33" />
+            <path class="pl-head" d="M156 115c3.6 1.4 5.8 2.9 7.4 4.7" />
+          </g>
+          <!-- notes, rising and gone -->
+          <g class="pl-notes">
+            <g transform="translate(150 96)">
+              <g class="pl-note n1">
+                <path d="M0 15.5V3l11-2.6V13" />
+                <ellipse cx="-2.8" cy="16" rx="3.6" ry="2.8" />
+                <ellipse cx="8.2" cy="13.6" rx="3.6" ry="2.8" />
+              </g>
+            </g>
+            <g transform="translate(182 88)">
+              <g class="pl-note n2">
+                <path d="M0 13V2l8-1.9V11" />
+                <ellipse cx="-2.4" cy="13.4" rx="3.1" ry="2.4" />
+              </g>
+            </g>
+            <g transform="translate(126 80)">
+              <g class="pl-note n3">
+                <path d="M0 12V1.8l7-1.7V10" />
+                <ellipse cx="-2.2" cy="12.4" rx="2.9" ry="2.2" />
+              </g>
+            </g>
+          </g>
+        </svg>
+
+        <!-- ── the procession, given the whole screen ── -->
+        <svg class="pl-art pl-walk" viewBox="12 30 376 150" aria-hidden="true">
+          <g class="pl-crowd">
+            <g
+              class="pl-figure"
+              style="--step: 0.78s; --delay: -0.31s"
+              transform="translate(24 92) scale(0.62)"
+            >
+              <g class="pl-bob">
+                <g class="pl-leg pl-leg-a">
+                  <path d="M20 56.2c-.9 6-1 11.5-.6 16.7" />
+                  <g class="pl-foot">
+                    <path
+                      d="M19.4 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4"
+                    />
+                  </g>
+                </g>
+                <g class="pl-leg pl-leg-b">
+                  <path d="M28.4 56.2c.9 6 1 11.5.6 16.7" />
+                  <g class="pl-foot">
+                    <path d="M29 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4" />
+                  </g>
+                </g>
+                <path
+                  class="pl-coat"
+                  d="M17.4 23.6C15.6 32 14.6 44.4 15.2 56.8c4.2 1.9 13.6 1.9 17.8 0 .7-12.4-.3-24.8-2.1-33.2Z"
+                />
+                <path class="pl-seam" d="M20.6 27.4c-.7 8.7-.8 19.1-.4 27.5" />
+                <path class="pl-seam" d="M27.6 27.4c.7 8.7.8 19.1.4 27.5" />
+                <g class="pl-arm">
+                  <path d="M17.6 27.6c-3.5 6-4.7 12.3-4.1 17.9" />
+                </g>
+                <g class="pl-arm pl-arm-b">
+                  <path d="M30.4 27.6c3.5 6 4.7 12.3 4.1 17.9" />
+                </g>
+                <path
+                  class="pl-hood"
+                  d="M14.2 20.4C13.8 11.4 18.6 6 24 6c5.6 0 10.3 5.2 9.9 14.3-.1 2.4-2.2 3.5-9.9 3.5-7.6 0-9.7-1.2-9.8-3.4Z"
+                />
+              </g>
+            </g>
+            <g
+              class="pl-figure"
+              style="--step: 0.7s; --delay: -0.12s"
+              transform="translate(112 84) scale(0.74)"
+            >
+              <g class="pl-bob">
+                <g class="pl-leg pl-leg-a">
+                  <path d="M20 56.2c-.9 6-1 11.5-.6 16.7" />
+                  <g class="pl-foot">
+                    <path
+                      d="M19.4 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4"
+                    />
+                  </g>
+                </g>
+                <g class="pl-leg pl-leg-b">
+                  <path d="M28.4 56.2c.9 6 1 11.5.6 16.7" />
+                  <g class="pl-foot">
+                    <path d="M29 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4" />
+                  </g>
+                </g>
+                <path
+                  class="pl-coat"
+                  d="M17.4 23.6C15.6 32 14.6 44.4 15.2 56.8c4.2 1.9 13.6 1.9 17.8 0 .7-12.4-.3-24.8-2.1-33.2Z"
+                />
+                <path class="pl-seam" d="M20.6 27.4c-.7 8.7-.8 19.1-.4 27.5" />
+                <path class="pl-seam" d="M27.6 27.4c.7 8.7.8 19.1.4 27.5" />
+                <g class="pl-arm">
+                  <path d="M17.6 27.6c-3.5 6-4.7 12.3-4.1 17.9" />
+                </g>
+                <g class="pl-arm pl-arm-b">
+                  <path d="M30.4 27.6c3.5 6 4.7 12.3 4.1 17.9" />
+                </g>
+                <path
+                  class="pl-hood"
+                  d="M14.2 20.4C13.8 11.4 18.6 6 24 6c5.6 0 10.3 5.2 9.9 14.3-.1 2.4-2.2 3.5-9.9 3.5-7.6 0-9.7-1.2-9.8-3.4Z"
+                />
+              </g>
+            </g>
+            <g
+              class="pl-figure"
+              style="--step: 0.74s; --delay: -0s"
+              transform="translate(214 44) scale(1.18)"
+            >
+              <g class="pl-bob">
+                <g class="pl-leg pl-leg-a">
+                  <path d="M20 56.2c-.9 6-1 11.5-.6 16.7" />
+                  <g class="pl-foot">
+                    <path
+                      d="M19.4 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4"
+                    />
+                  </g>
+                </g>
+                <g class="pl-leg pl-leg-b">
+                  <path d="M28.4 56.2c.9 6 1 11.5.6 16.7" />
+                  <g class="pl-foot">
+                    <path d="M29 72.9c3.5.6 4.7 2.2 1.2 3-3 .7-5.5.2-5.3-1.4" />
+                  </g>
+                </g>
+                <path
+                  class="pl-coat"
+                  d="M17.4 23.6C15.6 32 14.6 44.4 15.2 56.8c4.2 1.9 13.6 1.9 17.8 0 .7-12.4-.3-24.8-2.1-33.2Z"
+                />
+                <path class="pl-seam" d="M20.6 27.4c-.7 8.7-.8 19.1-.4 27.5" />
+                <path class="pl-seam" d="M27.6 27.4c.7 8.7.8 19.1.4 27.5" />
+                <g class="pl-arm">
+                  <path d="M17.6 27.6c-3.5 6-4.7 12.3-4.1 17.9" />
+                </g>
+                <path class="pl-carry" d="M30.8 27.2c4.3-2.7 7.7-6.1 9.5-8.7" />
+                <g class="pl-stereo">
+                  <rect x="39" y="8.2" width="23" height="11.4" rx="3" />
+                  <path d="M44 8.2c2.6-2.7 7-2.7 9.6 0" />
+                  <circle cx="45.2" cy="13.9" r="2.5" />
+                  <circle cx="55.8" cy="13.9" r="2.5" />
+                  <path d="M50.5 11.5v4.8" />
+                </g>
+                <path
+                  class="pl-hood"
+                  d="M14.2 20.4C13.8 11.4 18.6 6 24 6c5.6 0 10.3 5.2 9.9 14.3-.1 2.4-2.2 3.5-9.9 3.5-7.6 0-9.7-1.2-9.8-3.4Z"
+                />
+              </g>
+            </g>
+          </g>
+          <path class="pl-ground" d="M2 171c62-4 128 2 190-1s140 3 206-1" />
+        </svg>
+
+        <p class="pl-name">Tolulope Elijah</p>
+        <p class="pl-sub">Lead UX designer &middot; Lagos</p>
+      </div>
+    </div>
+
     <div class="grain" aria-hidden="true"></div>
     <a class="skip-link" href="#work">Skip to the work</a>
 
@@ -717,6 +966,6 @@
       </p></noscript
     >
 
-    <script type="module" src="js/app.js?v=42"></script>
+    <script type="module" src="js/app.js?v=45"></script>
   </body>
 </html>
