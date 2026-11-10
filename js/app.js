@@ -6,7 +6,7 @@
      #/explore     explorations library
      #/p/<slug>    a project page
    ═══════════════════════════════════════════════════════════════════════════ */
-import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=45";
+import { COLLECTIONS, byCollection, bySlug } from "./data.js?v=48";
 import {
   whenFonts,
   discLabel,
@@ -17,8 +17,8 @@ import {
   heroCloud,
   heroBird,
   doodle,
-} from "./art.js?v=45";
-import { createCarousel } from "./discs.js?v=45";
+} from "./art.js?v=48";
+import { createCarousel } from "./discs.js?v=48";
 
 const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
@@ -1187,7 +1187,12 @@ function initHeroScene() {
     if (!running) return;
     raf = requestAnimationFrame(frame);
     const t = (now - t0) / 1000;
-    const v = reduce ? 0 : Math.floor(t * 7) % 3; /* the boil */
+    /* The boil: three drawings cycled a few times a second. The frame's
+       own timestamp can sit a hair before the performance.now() taken when
+       this was set up, which made t negative, and JavaScript's % keeps the
+       sign — so the first frame reached for scenery[-1] and drawImage threw
+       on undefined. Wrapped so the index can only ever be 0, 1 or 2. */
+    const v = reduce ? 0 : ((Math.floor(t * 7) % 3) + 3) % 3;
     ctx.clearRect(0, 0, W, H);
 
     ctx.drawImage(art.scenery[v], 0, 0);
