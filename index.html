@@ -32,26 +32,64 @@
             ? asked
             : "vinyl";
 
+        var HOLD = 2600; /* how long the curtain stays at the least */
         var born = Date.now();
         var gone = false;
+
+        /* The procession does not fade where it stands: it walks down into
+           the hero's own line and shrinks to the size of the figures
+           already walking there. They are the same drawing, so the eye
+           joins the two and the curtain becomes the first moment of the
+           page rather than a thing removed from in front of it. */
+        function handOver() {
+          try {
+            if (root.dataset.preload !== "walk") return;
+            if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+            var svg = document.querySelector("#preload .pl-walk");
+            var figures = document.querySelectorAll("#preload .pl-figure");
+            var lead = figures[figures.length - 1];
+            var heroLead = document.querySelector(".hero-walk .w-lead");
+            if (!svg || !lead || !heroLead) return;
+
+            var box = svg.getBoundingClientRect();
+            var from = lead.getBoundingClientRect();
+            var to = heroLead.getBoundingClientRect();
+            if (!from.width || !to.width) return;
+
+            var scale = to.width / from.width;
+            var dx = to.left + to.width / 2 - (from.left + from.width / 2);
+            var dy = to.bottom - from.bottom;
+            svg.style.transformOrigin =
+              from.left +
+              from.width / 2 -
+              box.left +
+              "px " +
+              (from.bottom - box.top) +
+              "px";
+            svg.style.transform =
+              "translate(" + dx + "px," + dy + "px) scale(" + scale + ")";
+          } catch (e) {}
+        }
+
         window.__preloadDone = function () {
           if (gone) return;
           gone = true;
           /* a curtain that flashes is worse than no curtain, so it stays
-             for a beat even when the site was ready immediately */
-          var wait = Math.max(0, 900 - (Date.now() - born));
+             for its full span even when the site was ready immediately */
+          var wait = Math.max(0, HOLD - (Date.now() - born));
           setTimeout(function () {
             var el = document.getElementById("preload");
             if (!el) return;
+            handOver();
             el.classList.add("gone");
             root.removeAttribute("data-loading");
             setTimeout(function () {
               el.remove();
-            }, 900);
+            }, 1400);
           }, wait);
         };
         /* whatever happens, it lifts */
-        setTimeout(window.__preloadDone, 7000);
+        setTimeout(window.__preloadDone, 9000);
         root.setAttribute("data-loading", "");
       })();
     </script>
@@ -79,7 +117,7 @@
         display: block;
       }
     </style>
-    <link rel="stylesheet" href="css/site.css?v=45" />
+    <link rel="stylesheet" href="css/site.css?v=48" />
 
     <script type="importmap">
       {
@@ -104,47 +142,105 @@
     >
       <div class="pl-inner">
         <!-- ── a record, turning ── -->
-        <svg class="pl-art pl-vinyl" viewBox="0 0 260 218" aria-hidden="true">
+        <svg class="pl-art pl-vinyl" viewBox="0 0 300 234" aria-hidden="true">
+          <!-- the table it sits on -->
+          <g class="pl-table">
+            <path d="M6 196c72-5 148-3 222-4 22 0 44 1 66 2" />
+            <path d="M14 200c2 7 3 14 3 21" />
+            <path d="M40 199c2 7 3 13 3 20" />
+            <path d="M66 198c2 6 3 13 3 19" />
+            <path d="M262 198c2 6 3 13 3 19" />
+            <path d="M286 197c2 7 3 13 3 20" />
+          </g>
+          <!-- a sleeve leaning against it -->
+          <g class="pl-sleeve">
+            <path
+              d="M26 186c3-20 6-39 10-58 11 2 22 4 34 6-3 19-7 38-10 57-11-2-23-3-34-5Z"
+            />
+            <path d="M34 132c11 2 22 4 33 6" />
+          </g>
+          <!-- the deck: a flat box seen from three quarters -->
           <path
-            class="pl-plinth"
-            d="M18 56c72-3 152-2 226-1 3 42 2 88 1 134-76 3-154 2-228 1-2-45-1-89 1-134Z"
+            class="pl-plinth-top"
+            d="M62 122c60-4 120-8 178-12 8 12 16 24 22 36-62 5-124 10-186 14-5-13-10-25-14-38Z"
           />
-          <g class="pl-platter">
-            <circle class="pl-disc" cx="104" cy="124" r="62" />
-            <circle class="pl-groove" cx="104" cy="124" r="53" />
-            <circle class="pl-groove" cx="104" cy="124" r="45" />
-            <circle class="pl-groove" cx="104" cy="124" r="37" />
-            <circle class="pl-groove" cx="104" cy="124" r="29" />
-            <!-- one radial scratch, so the turning is visible at all -->
-            <path class="pl-scratch" d="M104 66.5c.6 14 .8 28 .4 41" />
-            <circle class="pl-label" cx="104" cy="124" r="19" />
-            <circle class="pl-spindle" cx="104" cy="124" r="2.4" />
+          <path
+            class="pl-plinth-side"
+            d="M76.5 160.5c-.3 4.5-.4 9-.2 13.4 62-5 124-9.5 186-14.2.3-4.4.4-8.8.2-13.2"
+          />
+          <!-- the shadow it throws across the table -->
+          <g class="pl-shade">
+            <path d="M84 178c8 4 16 7 24 9" />
+            <path d="M108 176c8 4 16 7 24 9" />
+            <path d="M132 174c8 4 16 7 24 9" />
+            <path d="M156 172c8 4 16 7 24 9" />
+            <path d="M180 170c8 4 16 7 24 9" />
+            <path d="M204 168c8 4 16 7 24 9" />
+          </g>
+          <!-- The record. Squashed by its parent so a plain rotation inside
+               reads as a disc turning in perspective rather than an ellipse
+               wobbling; the strokes are told not to squash with it. -->
+          <g transform="translate(150 137) scale(1 0.38)">
+            <g class="pl-platter">
+              <circle
+                class="pl-disc"
+                r="56"
+                vector-effect="non-scaling-stroke"
+              />
+              <circle
+                class="pl-groove"
+                r="47"
+                vector-effect="non-scaling-stroke"
+              />
+              <circle
+                class="pl-groove"
+                r="39"
+                vector-effect="non-scaling-stroke"
+              />
+              <circle
+                class="pl-groove"
+                r="31"
+                vector-effect="non-scaling-stroke"
+              />
+              <path
+                class="pl-scratch"
+                d="M0-55c.6 13 .8 26 .4 38"
+                vector-effect="non-scaling-stroke"
+              />
+              <circle class="pl-label" r="17" />
+              <circle
+                class="pl-spindle"
+                r="2.6"
+                vector-effect="non-scaling-stroke"
+              />
+            </g>
           </g>
           <!-- the arm, down and playing -->
           <g class="pl-arm-rig">
-            <circle class="pl-pivot" cx="216" cy="74" r="9" />
-            <path class="pl-tonearm" d="M212 82c-16 12-34 24-56 33" />
-            <path class="pl-head" d="M156 115c3.6 1.4 5.8 2.9 7.4 4.7" />
+            <circle class="pl-pivot" cx="238" cy="120" r="7" />
+            <path class="pl-weight" d="M243 115c5-2 9-3 12-3" />
+            <path class="pl-tonearm" d="M234 124c-17 6-38 12-58 17" />
+            <path class="pl-head" d="M176 141c1.4 2.6 2 5 2 7.4" />
           </g>
           <!-- notes, rising and gone -->
           <g class="pl-notes">
-            <g transform="translate(150 96)">
+            <g transform="translate(186 118)">
               <g class="pl-note n1">
-                <path d="M0 15.5V3l11-2.6V13" />
-                <ellipse cx="-2.8" cy="16" rx="3.6" ry="2.8" />
-                <ellipse cx="8.2" cy="13.6" rx="3.6" ry="2.8" />
-              </g>
-            </g>
-            <g transform="translate(182 88)">
-              <g class="pl-note n2">
-                <path d="M0 13V2l8-1.9V11" />
+                <path d="M0 13V2.4l9.4-2.2V11" />
                 <ellipse cx="-2.4" cy="13.4" rx="3.1" ry="2.4" />
+                <ellipse cx="7" cy="11.4" rx="3.1" ry="2.4" />
               </g>
             </g>
-            <g transform="translate(126 80)">
+            <g transform="translate(214 110)">
+              <g class="pl-note n2">
+                <path d="M0 11V1.8l7-1.6V9.4" />
+                <ellipse cx="-2.1" cy="11.4" rx="2.7" ry="2.1" />
+              </g>
+            </g>
+            <g transform="translate(162 104)">
               <g class="pl-note n3">
-                <path d="M0 12V1.8l7-1.7V10" />
-                <ellipse cx="-2.2" cy="12.4" rx="2.9" ry="2.2" />
+                <path d="M0 10V1.5l6-1.4V8.4" />
+                <ellipse cx="-1.9" cy="10.4" rx="2.5" ry="1.9" />
               </g>
             </g>
           </g>
@@ -966,6 +1062,6 @@
       </p></noscript
     >
 
-    <script type="module" src="js/app.js?v=45"></script>
+    <script type="module" src="js/app.js?v=48"></script>
   </body>
 </html>

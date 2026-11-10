@@ -2079,16 +2079,34 @@ body[data-view="project"] .loop {
    and both are drawn with the same pen as the rest of the site. */
 #preload {
   color: var(--ink);
+  /* the paper goes first and the art last, so the walkers are still there
+     to be handed over to the hero as the page comes through behind them */
   transition:
-    opacity 0.7s var(--ease),
-    transform 0.9s var(--ease),
-    visibility 0.7s;
+    background-color 0.75s var(--ease),
+    opacity 0.45s var(--ease) 0.75s,
+    visibility 0.45s linear 0.75s;
 }
 #preload.gone {
+  background-color: rgba(242, 242, 242, 0);
   opacity: 0;
   visibility: hidden;
-  transform: scale(1.03);
   pointer-events: none;
+}
+#preload.gone .pl-name,
+#preload.gone .pl-sub {
+  opacity: 0;
+  transition: opacity 0.4s var(--ease);
+}
+/* the procession walks down into the hero's own line rather than fading
+   where it stands; the figures are the same drawing, so the eye joins them */
+.pl-walk {
+  transition: transform 1.05s var(--ease);
+}
+.pl-vinyl {
+  transition: transform 0.8s var(--ease);
+}
+#preload.gone .pl-vinyl {
+  transform: scale(0.94);
 }
 .pl-inner {
   display: grid;
@@ -2103,7 +2121,7 @@ body[data-view="project"] .loop {
   margin-bottom: 1.4em;
 }
 .pl-vinyl {
-  width: min(34em, 80vw);
+  width: min(25em, 62vw);
 }
 /* the procession has the whole screen to itself here, so it takes it */
 .pl-walk {
@@ -2122,31 +2140,42 @@ body[data-view="project"] .loop {
   opacity: 0.55;
 }
 
-/* ── the record ─────────────────────────────────────────────────────────── */
+/* ── the record ─────────────────────────────────────────────────────────
+   Drawn from three quarters, sitting on a table, rather than flat on. */
 .pl-vinyl path,
 .pl-vinyl circle,
 .pl-vinyl ellipse {
   fill: none;
   stroke: currentColor;
-  stroke-width: 2.2;
+  stroke-width: 2.1;
   stroke-linecap: round;
   stroke-linejoin: round;
 }
-.pl-plinth {
-  opacity: 0.45;
+.pl-table,
+.pl-shade {
+  opacity: 0.28;
+  stroke-width: 1.5;
 }
+.pl-sleeve {
+  opacity: 0.4;
+}
+.pl-plinth-top,
+.pl-plinth-side {
+  opacity: 0.6;
+}
+/* the squash lives on the parent group, so this is a plain rotation */
 .pl-platter {
-  transform-origin: 104px 124px;
-  animation: pl-spin 2.4s linear infinite;
+  transform-origin: 0 0;
+  animation: pl-spin 2.6s linear infinite;
 }
 .pl-groove {
-  opacity: 0.32;
-  stroke-width: 1.4;
+  opacity: 0.3;
+  stroke-width: 1.3;
 }
 /* concentric circles give nothing away about turning, so one scratch does */
 .pl-scratch {
-  opacity: 0.4;
-  stroke-width: 1.4;
+  opacity: 0.42;
+  stroke-width: 1.3;
 }
 .pl-vinyl .pl-label {
   /* its own colour, not --accent: the app sets that from the disc in front
@@ -2157,21 +2186,22 @@ body[data-view="project"] .loop {
 }
 .pl-vinyl .pl-spindle {
   fill: var(--paper);
-  stroke: none;
+  stroke: currentColor;
 }
-.pl-pivot {
-  opacity: 0.5;
+.pl-pivot,
+.pl-weight {
+  opacity: 0.6;
 }
 .pl-tonearm {
-  stroke-width: 2.6;
+  stroke-width: 2.4;
 }
 /* the arm lifts off the record as the curtain goes up */
 .pl-arm-rig {
-  transform-origin: 216px 74px;
+  transform-origin: 238px 120px;
   transition: transform 0.6s var(--ease);
 }
 #preload.gone .pl-arm-rig {
-  transform: rotate(-16deg);
+  transform: rotate(-14deg);
 }
 
 .pl-vinyl .pl-note ellipse {
@@ -2202,14 +2232,14 @@ body[data-view="project"] .loop {
     transform: translateY(6px) rotate(-6deg) scale(0.7);
   }
   18% {
-    opacity: 0.85;
+    opacity: 0.8;
   }
   70% {
-    opacity: 0.5;
+    opacity: 0.45;
   }
   100% {
     opacity: 0;
-    transform: translateY(-62px) rotate(10deg) scale(1.05);
+    transform: translateY(-54px) rotate(10deg) scale(1.02);
   }
 }
 
